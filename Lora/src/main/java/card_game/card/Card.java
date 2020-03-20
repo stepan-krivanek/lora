@@ -52,5 +52,13 @@ public class Card implements Comparable<Card>{
     public Rank getRank() {
         return rank;
     }
+
+    public Image getFrontImage() {
+        return frontImage;
+    }
+
+    public Image getBackImage() {
+        return backImage;
+    }
     
 }
