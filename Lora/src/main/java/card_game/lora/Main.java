@@ -6,18 +6,9 @@
 package card_game.lora;
 
 import javafx.application.Application;
-import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -33,17 +24,12 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception {
         setStage(stage, "Lora");
         
-        Rectangle2D bounds = Screen.getPrimary().getBounds();
-        double width = bounds.getWidth();
-        double height = bounds.getHeight();
-        
         StackPane root = new StackPane();
-        GameView game = new GameView(stage);
+        GameView game = new GameView();
         GameMenu menu = new GameMenu(game, this, stage);
-
-        root.setBackground(loadBackground(width, height));
-        root.getChildren().addAll(menu);
-        root.setAlignment(menu, Pos.CENTER);
+        
+        root.getChildren().addAll(menu, game);
+        game.setVisible(false);
         
         Scene mainScene = new Scene(root);
         
@@ -62,27 +48,6 @@ public class Main extends Application {
     
     private void save(){
         //TO BE DONE
-    }
-    
-    private Background loadBackground(double width, double height){
-        Image image = new Image(
-                "/images/the_card_players.jpg",
-                width,
-                height,
-                false,
-                true,
-                true
-        );
-        
-        BackgroundImage bcgrImage = new BackgroundImage(
-                image,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.CENTER,
-                new BackgroundSize(100, 100, true, true, true, true)
-        );
-        
-        return new Background(bcgrImage);
     }
     
     private void setStage(Stage stage, String title){

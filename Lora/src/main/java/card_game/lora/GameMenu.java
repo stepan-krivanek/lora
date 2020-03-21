@@ -6,10 +6,13 @@
 package card_game.lora;
 
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 /**
@@ -18,17 +21,28 @@ import javafx.stage.Stage;
  */
 public class GameMenu extends Parent{
     
+    private final int SPACING = 20;
+    private final String bcgrPath = "/images/the_card_players.jpg";
+    private final Rectangle2D bounds = Screen.getPrimary().getBounds();
+    private final double width = bounds.getWidth();
+    private final double height = bounds.getHeight();
     private Button startButton;
     private Button exitButton;
 
     public GameMenu(GameView game, Main program, Stage stage){
         StackPane menu = new StackPane();
+        Background bcgr = GameUtils.loadBackground(bcgrPath, width, height);
+        menu.setBackground(bcgr);
+        menu.setPrefHeight(height);
+        menu.setPrefWidth(width);
+        
         VBox centerVBox = new VBox();
-        centerVBox.setSpacing(20);
+        centerVBox.setAlignment(Pos.CENTER);
+        centerVBox.setSpacing(SPACING);
         
         //Start Button
         startButton = new Button("START");
-        startButton.setOnAction(e -> game.playLora());
+        startButton.setOnAction(e -> game.playLora(this));
         
         //Exit Button
         exitButton = new Button("EXIT");
@@ -38,6 +52,6 @@ public class GameMenu extends Parent{
         menu.getChildren().add(centerVBox);
         menu.setAlignment(centerVBox, Pos.CENTER);
         
-        getChildren().addAll(menu);
+        getChildren().add(menu);
     }
 }
