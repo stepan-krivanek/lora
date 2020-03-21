@@ -21,6 +21,9 @@ import javafx.stage.StageStyle;
  */
 public class ExitAlertBox {
     
+    private static final int SPACING = 10;
+    private static final int BOX_WIDTH = 300;
+    private static final int BOX_HEIGHT = 120;
     private static boolean toBeClosed = true;
     
     private ExitAlertBox(){}
@@ -30,8 +33,9 @@ public class ExitAlertBox {
         exitStage.setTitle("Exit");
         exitStage.initModality(Modality.APPLICATION_MODAL);
         exitStage.initStyle(StageStyle.UTILITY);
-        exitStage.setMinWidth(300);
-        exitStage.setMinHeight(120);
+        exitStage.setWidth(BOX_WIDTH);
+        exitStage.setHeight(BOX_HEIGHT);
+        exitStage.setResizable(false);
         exitStage.setOnCloseRequest(e -> {
             toBeClosed = false;
             exitStage.close();
@@ -65,12 +69,12 @@ public class ExitAlertBox {
         
         HBox hBox = new HBox();
         hBox.getChildren().addAll(save, noSave, cancel);
-        hBox.setSpacing(10);
+        hBox.setSpacing(SPACING);
         hBox.setAlignment(Pos.CENTER);
         
         VBox vBox = new VBox();
         vBox.getChildren().addAll(label, hBox);
-        vBox.setSpacing(10);
+        vBox.setSpacing(SPACING);
         vBox.setAlignment(Pos.CENTER);
         
         Scene scene = new Scene(vBox);

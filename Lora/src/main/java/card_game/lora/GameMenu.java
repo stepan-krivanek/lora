@@ -24,6 +24,7 @@ public class GameMenu extends Parent{
     public GameMenu(GameView game, Main program, Stage stage){
         StackPane menu = new StackPane();
         VBox centerVBox = new VBox();
+        centerVBox.setSpacing(20);
         
         //Start Button
         startButton = new Button("START");
