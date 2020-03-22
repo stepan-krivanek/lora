@@ -25,11 +25,11 @@ public class Main extends Application {
         setStage(stage, "Lora");
         
         StackPane root = new StackPane();
-        GameView game = new GameView();
-        GameMenu menu = new GameMenu(game, this, stage);
+        GameView gameView = new GameView();
+        GameMenu menu = new GameMenu(gameView, this, stage);
         
-        root.getChildren().addAll(menu, game);
-        game.setVisible(false);
+        root.getChildren().addAll(menu, gameView);
+        gameView.setVisible(false);
         
         Scene mainScene = new Scene(root);
         

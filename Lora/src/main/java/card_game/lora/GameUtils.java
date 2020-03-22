@@ -5,19 +5,24 @@
  */
 package card_game.lora;
 
-import javafx.scene.effect.PerspectiveTransform;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
+import javafx.stage.Screen;
 
 /**
  *
  * @author stepa
  */
 public class GameUtils {
+    
+    private static final Rectangle2D BOUNDS = Screen.getPrimary().getBounds();
+    private static final double SCREEN_WIDTH = BOUNDS.getWidth();
+    private static final double SCREEN_HEIGHT = BOUNDS.getHeight();
     
     private GameUtils(){}
     
@@ -44,4 +49,11 @@ public class GameUtils {
         return new Background(bcgrImage);
     }
     
+    public static double getScreenWidth(){
+        return SCREEN_WIDTH;
+    }
+    
+    public static double getScreenHeight(){
+        return SCREEN_HEIGHT;
+    }
 }

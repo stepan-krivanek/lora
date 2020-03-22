@@ -14,11 +14,9 @@ import java.util.Random;
  *
  * @author stepan
  */
-public class Deck {
+public class Deck extends ArrayList<Card>{
     
     private final int MAX_SIZE;
-    private ArrayList<Card> deck = new ArrayList();
-    private int numOfCards = 0;
     
     public Deck(int maxSize){
         MAX_SIZE = maxSize;
@@ -28,43 +26,71 @@ public class Deck {
         MAX_SIZE = maxSize;
         
         if (fill == true){
-            fillDeck();
+            this.fill();
         }
     }
     
-    public boolean fillDeck(){
+    public boolean addAll(Deck deck2){
+        if (deck2.size() > MAX_SIZE - this.size()){
+            return false;
+        }
+        
+        for (int i = 0; i < deck2.size(); i++){
+            this.addTopCard(deck2.get(i));
+        }
+        return true;
+    }
+    
+    public boolean addAll(Deck deck2, boolean clear){
         boolean ret = false;
-        if (isEmpty() && MAX_SIZE == 32){
-            for (Suit suit : Suit.values()){
-                    for (Rank rank : Rank.values()){
-                        deck.add(new Card(suit, rank));
-                        numOfCards++;
-                    }
-                }
-            Collections.shuffle(deck);
+        if (this.addAll(deck2) == true){
+            if (clear == true){
+                deck2.clear();
+            }
             ret = true;
         }
         return ret;
     }
     
-    public Card getTopCard(){
+    public boolean fill(){
+        boolean ret = false;
+        if (isEmpty() && MAX_SIZE == 32){
+            for (Suit suit : Suit.values()){
+                    for (Rank rank : Rank.values()){
+                        add(new Card(suit, rank));
+                    }
+                }
+            Collections.shuffle(this);
+            ret = true;
+        }
+        return ret;
+    }
+    
+    public Card removeTopCard(){
         if (!isEmpty()){
-            return deck.remove(--numOfCards);
+            return remove(this.size() - 1);
         }
         return null;
     }
     
     public boolean addTopCard(Card card){
-        if (!isFull()){
-            deck.add(card);
-            numOfCards++;
+        if (!this.isFull()){
+            add(card);
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean addBotCard(Card card){
+        if (!this.isFull()){
+            add(0, card);
             return true;
         }
         return false;
     }
     
     public void shuffle(){
-        int averageShuffle = numOfCards / 8;
+        int averageShuffle = this.size() / 8;
         int numOfRounds = (new Random().nextInt(averageShuffle)) + 3;
         
         while (numOfRounds-- > 0){
@@ -73,31 +99,28 @@ public class Deck {
 
             splits[0] = 0;
             for (int i = 1; i < numOfOverlays; i++){
-                splits[i] = new Random().nextInt(numOfCards);
+                splits[i] = new Random().nextInt(this.size());
             }
             Arrays.sort(splits);
 
-            ArrayList<Card> shuffledDeck = new ArrayList();
-            int deckTop = deck.size();
+            Deck shuffledDeck = new Deck(this.size());
+            int deckTop = this.size();
             for (int i = numOfOverlays; i > 0; i--){       
                 for (int j = splits[i-1]; j < deckTop; j++){
-                    shuffledDeck.add(deck.get(j));
+                    shuffledDeck.add(get(j));
                 }
                 deckTop = splits[i-1];
             }
-            deck = shuffledDeck;
+            this.addAll(shuffledDeck, true);
+        }
+        
+        int halfSwap = new Random().nextInt(this.size());
+        for (int i = 0; i < halfSwap; i++){
+            this.addBotCard(remove(this.size() - 1));
         }
     }
     
-    public int getSize(){
-        return deck.size();
-    }
-    
-    public boolean isEmpty(){
-        return deck.isEmpty();
-    }
-    
     public boolean isFull(){
-        return deck.size() == MAX_SIZE;
+        return this.size() == MAX_SIZE;
     }
 }

@@ -6,12 +6,13 @@
 package card_game.card;
 
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 /**
  *
  * @author stepan
  */
-public class Card implements Comparable<Card>{
+public class Card extends ImageView implements Comparable<Card>{
     
     private final Suit suit;
     private final Rank rank;
@@ -21,8 +22,9 @@ public class Card implements Comparable<Card>{
     public Card(Suit suit, Rank rank){
         this.suit = suit;
         this.rank = rank;
-        this.frontImage = CardUtils.getFrontImage(this);
-        this.backImage = CardUtils.getBackImage();
+        frontImage = CardUtils.getFrontImage(this);
+        backImage = CardUtils.getBackImage();
+        showFront();
     }
 
     /**
@@ -44,6 +46,14 @@ public class Card implements Comparable<Card>{
         }
         return thisValue < otherValue ? -1 : 1;
     }
+    
+    public void showFront(){
+        setImage(frontImage);
+    }
+    
+    public void showBack(){
+        setImage(backImage);
+    }
 
     public Suit getSuit() {
         return suit;
@@ -52,13 +62,4 @@ public class Card implements Comparable<Card>{
     public Rank getRank() {
         return rank;
     }
-
-    public Image getFrontImage() {
-        return frontImage;
-    }
-
-    public Image getBackImage() {
-        return backImage;
-    }
-    
 }
