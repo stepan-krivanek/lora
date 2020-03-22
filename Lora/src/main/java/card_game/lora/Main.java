@@ -19,20 +19,20 @@ import javafx.stage.StageStyle;
 public class Main extends Application {
 
     private boolean toBeSaved = true;
+    private StackPane root;
+    private GameMenu mainMenu;
+    private Scene mainScene;
     
     @Override
     public void start(Stage stage) throws Exception {
+        root = new StackPane();
         setStage(stage, "Lora");
         
-        StackPane root = new StackPane();
-        GameView gameView = new GameView();
-        GameMenu menu = new GameMenu(gameView, this, stage);
+        mainMenu = new GameMenu(this, stage);
         
-        root.getChildren().addAll(menu, gameView);
-        gameView.setVisible(false);
+        root.getChildren().add(mainMenu);
         
-        Scene mainScene = new Scene(root);
-        
+        mainScene = new Scene(root);
         stage.setScene(mainScene);
         stage.show();
     }
@@ -44,6 +44,18 @@ public class Main extends Application {
             }
             stage.close();
         }
+    }
+    
+    public Scene getScene(){
+        return mainScene;
+    }
+    
+    public GameMenu getMainMenu(){
+        return mainMenu;
+    }
+    
+    public StackPane getRoot(){
+        return root;
     }
     
     private void save(){

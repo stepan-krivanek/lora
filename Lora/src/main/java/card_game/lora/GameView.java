@@ -18,6 +18,7 @@ import javafx.scene.control.Button;
 import javafx.scene.effect.PerspectiveTransform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -30,37 +31,34 @@ import javafx.stage.Screen;
  *
  * @author stepan
  */
-public class GameView extends Parent{
+public class GameView extends StackPane{
     
     private final double width = GameUtils.getScreenWidth();
     private final double height = GameUtils.getScreenHeight();
-    private Button returnButton = new Button("Back");
-    private StackPane gameView;
     
-    public GameView(){
-        gameView = new StackPane();
+    public GameView(Main program){
+        program.getScene().setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE){
+                program.getMainMenu().setVisible(true);
+                this.setVisible(false);
+                program.getRoot().getChildren().remove(this);
+            }
+        });
+        
         //Background bcgr = GameUtils.loadBackground(path, width, height);
         Background bcgr = new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY));
-        gameView.setBackground(bcgr);
-        gameView.setPrefHeight(height);
-        gameView.setPrefWidth(width);
-        
+        this.setBackground(bcgr);
+        this.setPrefHeight(height);
+        this.setPrefWidth(width);
+
         Image table = new Image("/images/table2.png", width, height, false, true);
         ImageView imageView = new ImageView(table);
         imageView.setEffect(perspection(width, height));
         
-        gameView.getChildren().addAll(imageView);
-        
-        StackPane root = new StackPane(gameView, returnButton);
-        root.setAlignment(returnButton, Pos.TOP_RIGHT);
-        getChildren().add(root);
+        this.getChildren().addAll(imageView);
     }
     
-    public void playLora(GameMenu menu){
-        setReturnButtonAction(menu);
-        this.setVisible(true);
-        menu.setVisible(false);
-        
+    public void playLora(){
         Game game = new Game(4, 32);
         
         playTens(game);
@@ -71,6 +69,8 @@ public class GameView extends Parent{
     private void playTens(Game game){
         cardDealing(game);
         
+        final double CARD_WIDTH = width / 10;
+        final double CARD_HEIGHT = height / 5;
         int numOfRows = 4;
         int numOfCols = 8;
         
@@ -87,8 +87,8 @@ public class GameView extends Parent{
             for (int row = 0; row < numOfRows; row++){
                 Card card = new Card(suits[row], ranks[col]);
                 card.setOpacity(0.2);
-                card.setFitWidth(width / 10);
-                card.setFitHeight(height / 5);
+                card.setFitWidth(CARD_WIDTH);
+                card.setFitHeight(CARD_HEIGHT);
                 card.setPreserveRatio(true);
                 GridPane.setConstraints(card, col, row);
                 GridPane.setMargin(card, new Insets(5, 10, 5 ,10));
@@ -104,14 +104,7 @@ public class GameView extends Parent{
         );
         primaryHand.setAlignment(Pos.BOTTOM_CENTER);
         
-        gameView.getChildren().addAll(cards, primaryHand);
-    }
-    
-    private void setReturnButtonAction(GameMenu menu){
-        returnButton.setOnAction(e -> {
-            menu.setVisible(true);
-            this.setVisible(false);
-         });
+        this.getChildren().addAll(cards, primaryHand);
     }
     
     private void cardDealing(Game game){

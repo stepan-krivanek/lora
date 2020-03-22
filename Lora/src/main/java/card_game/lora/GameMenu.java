@@ -29,7 +29,7 @@ public class GameMenu extends Parent{
     private Button startButton;
     private Button exitButton;
 
-    public GameMenu(GameView game, Main program, Stage stage){
+    public GameMenu(Main program, Stage stage){
         StackPane menu = new StackPane();
         Background bcgr = GameUtils.loadBackground(bcgrPath, width, height);
         menu.setBackground(bcgr);
@@ -42,7 +42,12 @@ public class GameMenu extends Parent{
         
         //Start Button
         startButton = new Button("START");
-        startButton.setOnAction(e -> game.playLora(this));
+        startButton.setOnAction(e -> {
+            GameView gameView = new GameView(program);
+            program.getRoot().getChildren().add(gameView);
+            this.setVisible(false);
+            gameView.playLora();
+        });
         
         //Exit Button
         exitButton = new Button("EXIT");
