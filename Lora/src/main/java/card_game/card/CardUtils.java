@@ -6,7 +6,10 @@
 package card_game.card;
 
 import card_game.lora.GameUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import javafx.scene.image.Image;
 
 /**
@@ -16,13 +19,15 @@ import javafx.scene.image.Image;
 public class CardUtils {
     
     private static final double CARD_WIDTH = GameUtils.getScreenWidth() / 6;
-    private static final Suit[] SUITS = new Suit[]{
-        Suit.HEART, Suit.LEAF, Suit.BELL, Suit.ACCORN
-    };
-    private static final Rank[] RANKS = new Rank[]{
-        Rank.SEVEN, Rank.EIGHT, Rank.NINE, Rank.TEN,
-        Rank.INFERIOR, Rank.SUPERIOR, Rank.KING, Rank.ACE
-    };
+    private static final ArrayList<Suit> SUITS = new ArrayList(
+        Arrays.asList(Suit.HEART, Suit.LEAF, Suit.BELL, Suit.ACCORN)
+    );
+    private static final ArrayList<Rank> RANKS = new ArrayList(
+        Arrays.asList(
+            Rank.SEVEN, Rank.EIGHT, Rank.NINE, Rank.TEN,
+            Rank.INFERIOR, Rank.SUPERIOR, Rank.KING, Rank.ACE
+        )
+    );
     private static boolean imagesLoaded = false;
     private static boolean valuesSet = false;
     private static final Image BACK_IMAGE = loadCardImage(
@@ -34,11 +39,11 @@ public class CardUtils {
     
     private CardUtils(){}
     
-    public static Suit[] getOrderedSuits(){
+    public static ArrayList getOrderedSuits(){
         return SUITS;
     }
     
-    public static Rank[] getOrderedRanks(){
+    public static ArrayList getOrderedRanks(){
         return RANKS;
     }
     

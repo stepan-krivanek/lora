@@ -5,7 +5,9 @@
  */
 package card_game.lora;
 
+import card_game.card.Card;
 import card_game.card.Deck;
+import javafx.scene.input.KeyCode;
 
 /**
  *
@@ -13,26 +15,75 @@ import card_game.card.Deck;
  */
 public class Game {
     
-    private final int MAX_DECK_SIZE;
-    private final Deck mainDeck;
+    private final int DECK_SIZE = 32;
+    private final int NUM_OF_PLAYERS = 4;
+    private final Deck mainDeck = new Deck(DECK_SIZE, true);
+    private final Player[] players = new Player[NUM_OF_PLAYERS];
+    private final GameView gameView;
     //private NotePad
-    private final Player[] players;
-    private int firstPlayer = 0;
+    private Player firstPlayer;
+    private Player playingOne;
     
-    public Game(int numOfPlayers, int maxDeckSize){
-        if ((numOfPlayers == 0) || (maxDeckSize % numOfPlayers != 0)){
-            throw new ArithmeticException(
-                    "Deck size must be divisible by the number of players!"
-            );
+    public Game(boolean multiplayer, Main program){
+        gameView = new GameView();
+        
+        program.getScene().setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE){
+                program.getMainMenu().setVisible(true);
+                gameView.setVisible(false);
+                program.getRoot().getChildren().remove(gameView);
+            }
+        });
+        
+        players[0] = new Player(this, 0, DECK_SIZE / NUM_OF_PLAYERS);
+        for (int i = 1; i < NUM_OF_PLAYERS; i++){
+            players[i] = new Bot(this, i, DECK_SIZE / NUM_OF_PLAYERS);
         }
         
-        MAX_DECK_SIZE = maxDeckSize;
-        mainDeck = new Deck(MAX_DECK_SIZE, true);
+        firstPlayer = players[0];
+    }
+    
+    public void start(){
+        cardDealing();
+        playTens();
+    }
+    
+    private void playTens(){
+        gameView.showTens(players[0].getHandView());
+        playingOne = firstPlayer;
+        playingOne.play();
+    }
+    
+    public void playNext(Card card){
+        gameView.showCard(card);
+        playingOne = getNextPlayer(playingOne);
+        playingOne.play();
+    }
+    
+    private void cardDealing(){
+        gameView.cardDealing();
+        mainDeck.shuffle();
         
-        players = new Player[numOfPlayers];
-        for (int i = 0; i < numOfPlayers; i++){
-            players[i] = new Player(i, MAX_DECK_SIZE / numOfPlayers);
+        final int cardsToDeal = 2;
+        Player player = firstPlayer;
+        Card card;
+        
+        while (mainDeck.isEmpty() == false){
+            for (int i = 0; i < cardsToDeal; i++){
+                card = mainDeck.removeTopCard();
+                player.getHand().add(card);
+            }
+            
+            player = getNextPlayer(player);
         }
+        
+        players[0].setHandView(
+            new HandView(players[0], gameView.getWidth(), gameView.getHeight())
+        );
+    }
+    
+    public GameView getGameView(){
+        return gameView;
     }
     
     public Player getPlayer(int index){
@@ -43,7 +94,7 @@ public class Game {
         return mainDeck;
     }
     
-    public Player nextPlayer(Player player){
+    public Player getNextPlayer(Player player){
         int index = player.getId() + 1;
         
         if (index >= players.length){
@@ -51,9 +102,4 @@ public class Game {
         }
         return  players[index];
     }
-    
-    public Player getFirstPlayer(){
-        return players[firstPlayer];
-    }
-    
 }

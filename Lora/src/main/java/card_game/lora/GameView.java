@@ -7,25 +7,20 @@ package card_game.lora;
 
 import card_game.card.Card;
 import card_game.card.CardUtils;
-import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.card.Suit;
+import java.util.ArrayList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Parent;
-import javafx.scene.control.Button;
 import javafx.scene.effect.PerspectiveTransform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Screen;
 
 /**
  *
@@ -33,59 +28,42 @@ import javafx.stage.Screen;
  */
 public class GameView extends StackPane{
     
-    private final double width = GameUtils.getScreenWidth();
-    private final double height = GameUtils.getScreenHeight();
+    private final double WIDTH = GameUtils.getScreenWidth();
+    private final double HEIGHT = GameUtils.getScreenHeight();
+    private GridPane cards;
     
-    public GameView(Main program){
-        program.getScene().setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ESCAPE){
-                program.getMainMenu().setVisible(true);
-                this.setVisible(false);
-                program.getRoot().getChildren().remove(this);
-            }
-        });
-        
-        //Background bcgr = GameUtils.loadBackground(path, width, height);
+    public GameView(){
+        //Background bcgr = GameUtils.loadBackground(path, WIDTH, HEIGHT);
         Background bcgr = new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY));
         this.setBackground(bcgr);
-        this.setPrefHeight(height);
-        this.setPrefWidth(width);
+        this.setHeight(HEIGHT);
+        this.setWidth(WIDTH);
 
-        Image table = new Image("/images/table2.png", width, height, false, true);
+        Image table = new Image("/images/table2.png", WIDTH, HEIGHT, false, true);
         ImageView imageView = new ImageView(table);
-        imageView.setEffect(perspection(width, height));
+        imageView.setEffect(perspection(WIDTH, HEIGHT));
         
         this.getChildren().addAll(imageView);
     }
     
-    public void playLora(){
-        Game game = new Game(4, 32);
+    public void showTens(HandView primaryHand){
+        final double CARD_WIDTH = WIDTH / 10;
+        final double CARD_HEIGHT = HEIGHT / 5;
+        final int NUM_OF_ROWS = 4;
+        final int NUM_OF_COLS = 8;
         
-        playTens(game);
-        
-        
-    }
-    
-    private void playTens(Game game){
-        cardDealing(game);
-        
-        final double CARD_WIDTH = width / 10;
-        final double CARD_HEIGHT = height / 5;
-        int numOfRows = 4;
-        int numOfCols = 8;
-        
-        GridPane cards = new GridPane();
+        cards = new GridPane();
         cards.setAlignment(Pos.CENTER);
-        cards.setPrefWidth(width);
-        cards.setPrefHeight(height);
-        cards.setHgap(numOfCols);
-        cards.setVgap(numOfRows);
+        cards.setPrefWidth(WIDTH);
+        cards.setPrefHeight(HEIGHT);
+        cards.setHgap(NUM_OF_COLS);
+        cards.setVgap(NUM_OF_ROWS);
 
-        Suit[] suits = CardUtils.getOrderedSuits();
-        Rank[] ranks = CardUtils.getOrderedRanks();
-        for (int col = 0; col < numOfCols; col++){
-            for (int row = 0; row < numOfRows; row++){
-                Card card = new Card(suits[row], ranks[col]);
+        ArrayList<Suit> suits = CardUtils.getOrderedSuits();
+        ArrayList<Rank> ranks = CardUtils.getOrderedRanks();
+        for (int col = 0; col < NUM_OF_COLS; col++){
+            for (int row = 0; row < NUM_OF_ROWS; row++){
+                Card card = new Card(suits.get(row), ranks.get(col));
                 card.setOpacity(0.2);
                 card.setFitWidth(CARD_WIDTH);
                 card.setFitHeight(CARD_HEIGHT);
@@ -95,33 +73,24 @@ public class GameView extends StackPane{
                 cards.getChildren().add(card);
             }
         }
-        cards.setEffect(perspection(width, height));
+        cards.setEffect(perspection(WIDTH, HEIGHT));
         
-        HandView primaryHand = new HandView(
-                game.getPlayer(0).getHand(),
-                width,
-                height
-        );
         primaryHand.setAlignment(Pos.BOTTOM_CENTER);
-        
+        primaryHand.setPrefSize(WIDTH, HEIGHT);
         this.getChildren().addAll(cards, primaryHand);
     }
     
-    private void cardDealing(Game game){
-        game.getMainDeck().shuffle();
+    public void showCard(Card card){
+        ArrayList<Suit> suits = CardUtils.getOrderedSuits();
+        ArrayList<Rank> ranks = CardUtils.getOrderedRanks();
+        int suitIndex = suits.indexOf(card.getSuit());
+        int rankIndex = ranks.indexOf(card.getRank());
+        int cardIndex = suitIndex + rankIndex * suits.size();
+        cards.getChildren().get(cardIndex).setOpacity(1);
+    }
+    
+    public void cardDealing(){
         
-        final int cardsToDeal = 2;
-        Player player = game.getFirstPlayer();
-        Deck mainDeck = game.getMainDeck();
-        Card card;
-        while (game.getMainDeck().isEmpty() == false){
-            for (int i = 0; i < cardsToDeal; i++){
-                card = mainDeck.removeTopCard();
-                player.getHand().addTopCard(card);
-            }
-            
-            player = game.nextPlayer(player);
-        }
     }
     
     private PerspectiveTransform perspection(double width, double height){
@@ -137,5 +106,4 @@ public class GameView extends StackPane{
         
         return perspection;
     }
-
 }

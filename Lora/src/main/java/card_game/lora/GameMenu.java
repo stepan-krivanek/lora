@@ -43,10 +43,10 @@ public class GameMenu extends Parent{
         //Start Button
         startButton = new Button("START");
         startButton.setOnAction(e -> {
-            GameView gameView = new GameView(program);
-            program.getRoot().getChildren().add(gameView);
+            Game game = new Game(false, program);
+            program.getRoot().getChildren().add(game.getGameView());
             this.setVisible(false);
-            gameView.playLora();
+            game.start();
         });
         
         //Exit Button
