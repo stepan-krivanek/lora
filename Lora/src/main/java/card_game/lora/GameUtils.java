@@ -5,6 +5,9 @@
  */
 package card_game.lora;
 
+import card_game.card.Rank;
+import card_game.card.Suit;
+import java.util.HashMap;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
@@ -23,6 +26,26 @@ public class GameUtils {
     private static final Rectangle2D BOUNDS = Screen.getPrimary().getBounds();
     private static final double SCREEN_WIDTH = BOUNDS.getWidth();
     private static final double SCREEN_HEIGHT = BOUNDS.getHeight();
+    private static final HashMap<Rank, Integer> rankValues = new HashMap(){
+        {
+            put(Rank.SEVEN, 0);
+            put(Rank.EIGHT, 1);
+            put(Rank.NINE, 2);
+            put(Rank.TEN, 3);
+            put(Rank.INFERIOR, 4);
+            put(Rank.SUPERIOR, 5);
+            put(Rank.KING, 6);
+            put(Rank.ACE, 7);
+        }
+    };
+    private static final HashMap<Suit, Integer> suitValues = new HashMap(){
+        {
+            put(Suit.HEART, 0);
+            put(Suit.LEAF, 1);
+            put(Suit.BELL, 2);
+            put(Suit.ACCORN, 3);
+        }
+    };
     
     private GameUtils(){}
     
@@ -55,5 +78,13 @@ public class GameUtils {
     
     public static double getScreenHeight(){
         return SCREEN_HEIGHT;
+    }
+    
+    public static int getRankValue(Rank rank){
+        return rankValues.get(rank);
+    }
+    
+    public static int getSuitValue(Suit suit){
+        return suitValues.get(suit);
     }
 }

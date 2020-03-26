@@ -14,26 +14,35 @@ import card_game.card.Deck;
  */
 public class Player {
 
+    private final Deck hand = new Deck(8);
     private final int id;
-    private final Deck hand;
     private boolean isPlaying = false;
     private HandView handView;
-    private Game game;
+    protected Game game;
     
-    public Player(Game game, int id, int handSize) {
+    public Player(Game game, int id) {
         this.game = game;
         this.id = id;
-        hand = new Deck(handSize);
     }
     
     public void play(){
         isPlaying = true;
     }
     
-    public void playCard(Card card){
-        isPlaying = false;
-        hand.remove(card);
-        game.playNext(card);
+    public boolean playCard(Card card){
+        if (card == null){
+            isPlaying = false;
+            game.playNext(card);
+            return false;
+        }
+        
+        if (game.checkRules(card) == true){
+            hand.remove(card);
+            game.playNext(card);
+            return true;
+        }
+        
+        return false;
     }
     
     public Deck getHand(){

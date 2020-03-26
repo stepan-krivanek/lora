@@ -9,7 +9,6 @@ import card_game.lora.GameUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import javafx.scene.image.Image;
 
 /**
@@ -19,40 +18,14 @@ import javafx.scene.image.Image;
 public class CardUtils {
     
     private static final double CARD_WIDTH = GameUtils.getScreenWidth() / 6;
-    private static final ArrayList<Suit> SUITS = new ArrayList(
-        Arrays.asList(Suit.HEART, Suit.LEAF, Suit.BELL, Suit.ACCORN)
-    );
-    private static final ArrayList<Rank> RANKS = new ArrayList(
-        Arrays.asList(
-            Rank.SEVEN, Rank.EIGHT, Rank.NINE, Rank.TEN,
-            Rank.INFERIOR, Rank.SUPERIOR, Rank.KING, Rank.ACE
-        )
-    );
     private static boolean imagesLoaded = false;
-    private static boolean valuesSet = false;
     private static final Image BACK_IMAGE = loadCardImage(
             "/images/card_bcgr.png"
     );
-    private static final HashMap<Rank, Integer> LORA_VALUES = new HashMap();
     private static final HashMap<Suit, HashMap<Rank, Image>> FRONT_IMAGES =
             new HashMap();
     
     private CardUtils(){}
-    
-    public static ArrayList getOrderedSuits(){
-        return SUITS;
-    }
-    
-    public static ArrayList getOrderedRanks(){
-        return RANKS;
-    }
-    
-    public static int getLoraCardValue(Card card){
-        if (!valuesSet){
-            setValues();
-        }
-        return LORA_VALUES.get(card.getRank());
-    }
     
     public static Image getFrontImage(Card card){
         if (!imagesLoaded){
@@ -70,24 +43,8 @@ public class CardUtils {
         imagesLoaded = true;
     }
     
-    private static void setValues(){
-        initLoraValues();
-        valuesSet = true;
-    }
-    
     private static Image loadCardImage(String path){
         return new Image(path, CARD_WIDTH, 0, true, true);
-    }
-
-    private static void initLoraValues() {
-        LORA_VALUES.put(Rank.SEVEN, 0);
-        LORA_VALUES.put(Rank.EIGHT, 1);
-        LORA_VALUES.put(Rank.NINE, 2);
-        LORA_VALUES.put(Rank.TEN, 3);
-        LORA_VALUES.put(Rank.INFERIOR, 4);
-        LORA_VALUES.put(Rank.SUPERIOR, 5);
-        LORA_VALUES.put(Rank.KING, 6);
-        LORA_VALUES.put(Rank.ACE, 7);
     }
 
     //TO BE REWORKED
@@ -109,8 +66,8 @@ public class CardUtils {
         hearts.put(Rank.NINE, loadCardImage("/images/green_king3.png"));
         hearts.put(Rank.TEN, loadCardImage("/images/green_king3.png"));
         hearts.put(Rank.INFERIOR, loadCardImage("/images/red_inferior.png"));
-        hearts.put(Rank.SUPERIOR, loadCardImage("/images/green_king3.png"));
-        hearts.put(Rank.KING, loadCardImage("/images/green_king3.png"));
+        hearts.put(Rank.SUPERIOR, loadCardImage("/images/red_superior.png"));
+        hearts.put(Rank.KING, loadCardImage("/images/red_king.png"));
         hearts.put(Rank.ACE, loadCardImage("/images/green_king3.png"));
         FRONT_IMAGES.put(Suit.HEART, hearts);
         
@@ -119,9 +76,9 @@ public class CardUtils {
         bells.put(Rank.EIGHT, loadCardImage("/images/green_king3.png"));
         bells.put(Rank.NINE, loadCardImage("/images/green_king3.png"));
         bells.put(Rank.TEN, loadCardImage("/images/green_king3.png"));
-        bells.put(Rank.INFERIOR, loadCardImage("/images/green_king3.png"));
-        bells.put(Rank.SUPERIOR, loadCardImage("/images/green_king3.png"));
-        bells.put(Rank.KING, loadCardImage("/images/green_king3.png"));
+        bells.put(Rank.INFERIOR, loadCardImage("/images/bell_inferior.png"));
+        bells.put(Rank.SUPERIOR, loadCardImage("/images/bell_superior.png"));
+        bells.put(Rank.KING, loadCardImage("/images/bell_king.png"));
         bells.put(Rank.ACE, loadCardImage("/images/green_king3.png"));
         FRONT_IMAGES.put(Suit.BELL, bells);
         
@@ -130,7 +87,7 @@ public class CardUtils {
         accorns.put(Rank.EIGHT, loadCardImage("/images/green_king3.png"));
         accorns.put(Rank.NINE, loadCardImage("/images/green_king3.png"));
         accorns.put(Rank.TEN, loadCardImage("/images/green_king3.png"));
-        accorns.put(Rank.INFERIOR, loadCardImage("/images/green_king3.png"));
+        accorns.put(Rank.INFERIOR, loadCardImage("/images/accorn_inferior.png"));
         accorns.put(Rank.SUPERIOR, loadCardImage("/images/green_king3.png"));
         accorns.put(Rank.KING, loadCardImage("/images/green_king3.png"));
         accorns.put(Rank.ACE, loadCardImage("/images/green_king3.png"));

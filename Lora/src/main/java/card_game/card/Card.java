@@ -12,7 +12,7 @@ import javafx.scene.image.ImageView;
  *
  * @author stepan
  */
-public class Card extends ImageView implements Comparable<Card>{
+public class Card extends ImageView{
     
     private final Suit suit;
     private final Rank rank;
@@ -25,26 +25,6 @@ public class Card extends ImageView implements Comparable<Card>{
         frontImage = CardUtils.getFrontImage(this);
         backImage = CardUtils.getBackImage();
         showFront();
-    }
-
-    /**
-     * Compares Card A to Card B according to their Lora values.<br>
-     * If value of A <b>equals</b> value of B, returns <b>0</b>.<br>
-     * If value of A is <b>lower</b> than value of B, returns <b>-1</b>.<br>
-     * If value of A is <b>greater</b> than value of B, returns <b>+1</b>.<br>
-     * 
-     * @param card
-     * @return 
-     */
-    @Override
-    public int compareTo(Card card) {
-        int thisValue = CardUtils.getLoraCardValue(this);
-        int otherValue = CardUtils.getLoraCardValue(card);
-        
-        if (thisValue == otherValue){
-            return 0;
-        }
-        return thisValue < otherValue ? -1 : 1;
     }
     
     public void showFront(){

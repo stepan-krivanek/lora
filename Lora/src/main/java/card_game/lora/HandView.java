@@ -10,7 +10,9 @@ import card_game.card.Deck;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -41,22 +43,36 @@ public class HandView extends GridPane{
             card.setFitHeight(CARD_HEIGHT);
             card.setPreserveRatio(true);
             
+            DropShadow borderGlow = new DropShadow();
+            borderGlow.setRadius(CARD_WIDTH / 2);
+            borderGlow.setSpread(0.2);
+            
             card.setOnMouseEntered(e -> {
                 double radians = card.getRotate() * toRadians;
                 card.setTranslateX(cardShift * Math.tan(radians));
                 card.setTranslateY(card.getTranslateY() - cardShift);
+                
+                borderGlow.setColor(Color.WHITE);
+                card.setEffect(borderGlow);
             });
             
             card.setOnMouseExited(e -> {
                 card.setTranslateX(0);
                 card.setTranslateY(card.getTranslateY() + cardShift);
+                
+                card.setEffect(null);
             });
             
             card.setOnMouseClicked(e -> {
                 if (player.isPlaying() == true){
-                    player.playCard(card);
-                    this.getChildren().remove(card);
-                    this.applyRotation();
+                    boolean correctPlay = player.playCard(card);
+                    
+                    if(correctPlay == true){
+                        this.getChildren().remove(card);
+                        this.applyRotation();
+                    } else {
+                        borderGlow.setColor(Color.RED);
+                    }
                 }
             });
             

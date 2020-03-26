@@ -120,6 +120,22 @@ public class Deck extends ArrayList<Card>{
         }
     }
     
+    public boolean contains(Card card){
+        boolean contains = false;
+        
+        for (int i = 0; i < size(); i++){
+            Card tmp = get(i);
+            if (tmp.getRank() == card.getRank()){
+                if (tmp.getSuit() == card.getSuit()){
+                    contains = true;
+                    break;
+                }
+            }
+        }
+        
+        return contains;
+    }
+    
     public boolean isFull(){
         return this.size() == MAX_SIZE;
     }
