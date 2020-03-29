@@ -14,16 +14,17 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.effect.PerspectiveTransform;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
@@ -35,6 +36,9 @@ public class GameView extends StackPane{
     
     private final double WIDTH = GameUtils.getScreenWidth();
     private final double HEIGHT = GameUtils.getScreenHeight();
+    final double CARD_WIDTH = WIDTH / 10;
+    final double CARD_HEIGHT = HEIGHT / 5;
+    private StackPane table = new StackPane();
     private final List<Suit> suits;
     private final List<Rank> ranks;
     private GridPane cards;
@@ -50,16 +54,21 @@ public class GameView extends StackPane{
         this.setHeight(HEIGHT);
         this.setWidth(WIDTH);
 
-        Image table = new Image("/images/table2.png", WIDTH, HEIGHT, false, true);
-        ImageView imageView = new ImageView(table);
-        imageView.setEffect(perspection(WIDTH, HEIGHT));
-        
-        this.getChildren().addAll(imageView);
+        Background tableBcgr = new Background(new BackgroundImage(
+                new Image("/images/table2.png", WIDTH/5, 0, true, true),
+                BackgroundRepeat.REPEAT,
+                BackgroundRepeat.REPEAT,
+                BackgroundPosition.CENTER,
+                BackgroundSize.DEFAULT
+        ));
+        table.setBackground(tableBcgr);
+        table.setPrefSize(WIDTH, HEIGHT);
+        table.setEffect(perspection(WIDTH, HEIGHT));
+        this.setAlignment(table, Pos.CENTER);
+        this.getChildren().add(table);
     }
     
-    public void showTens(Player player){
-        final double CARD_WIDTH = WIDTH / 10;
-        final double CARD_HEIGHT = HEIGHT / 5;
+    public void showTens(){
         final int NUM_OF_ROWS = 4;
         final int NUM_OF_COLS = 8;
         
@@ -82,8 +91,22 @@ public class GameView extends StackPane{
                 cards.getChildren().add(card);
             }
         }
-        cards.setEffect(perspection(WIDTH, HEIGHT));
         
+        table.getChildren().add(cards);
+    }
+    
+    public void showPassButton(Player player){
+        Button passButton = new Button("PASS");
+        
+        this.setAlignment(passButton, Pos.BOTTOM_RIGHT);
+        passButton.setOnAction(e -> {
+            player.playCard(null);
+        });
+        
+        this.getChildren().add(passButton);
+    }
+    
+    public void showHand(Player player){
         HandView primaryHand = player.getHandView();
         primaryHand.setAlignment(Pos.BOTTOM_CENTER);
         primaryHand.setPrefSize(WIDTH, HEIGHT);
@@ -101,30 +124,14 @@ public class GameView extends StackPane{
             primaryHand.setTranslateY(0);
         });
         
-        Button passButton = new Button("PASS");
-        this.setAlignment(passButton, Pos.BOTTOM_RIGHT);
-        passButton.setOnAction(e -> {
-            player.playCard(null);
-        });
-        
-        this.getChildren().addAll(cards, primaryHand, playZone, passButton);
+        this.getChildren().addAll(primaryHand, playZone);
     }
     
     public void showCard(Card card){
-        GameMode gameMode = game.getGameMode();
-        
-        if (gameMode == GameMode.TENS){
-            int suitIndex = suits.indexOf(card.getSuit());
-            int rankIndex = ranks.indexOf(card.getRank());
-            int cardIndex = suitIndex + rankIndex * suits.size();
-            cards.getChildren().get(cardIndex).setOpacity(1);
-        }
-        else if(gameMode == GameMode.QUARTS) {
-            
-        }
-        else {
-            
-        }
+        int suitIndex = suits.indexOf(card.getSuit());
+        int rankIndex = ranks.indexOf(card.getRank());
+        int cardIndex = suitIndex + rankIndex * suits.size();
+        cards.getChildren().get(cardIndex).setOpacity(1);
     }
     
     public void cardDealing(){
@@ -145,14 +152,14 @@ public class GameView extends StackPane{
     }
     
     private PerspectiveTransform perspection(double width, double height){
-        final double hSegment = width / 5;
-        final double vSegment = height / 3;
+        final double hSegment = width / 6;
+        final double vSegment = height / 5;
         
         PerspectiveTransform perspection = new PerspectiveTransform(
                 hSegment, vSegment,
                 width - hSegment, vSegment,
-                width + (hSegment / 2), height,
-                0 - (hSegment / 2), height
+                width + (width / 10), height,
+                0 - (width / 10), height
         );
         
         return perspection;

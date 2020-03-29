@@ -6,7 +6,6 @@
 package card_game.lora;
 
 import card_game.card.Rank;
-import card_game.card.Suit;
 import java.util.HashMap;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
@@ -36,14 +35,6 @@ public class GameUtils {
             put(Rank.SUPERIOR, 5);
             put(Rank.KING, 6);
             put(Rank.ACE, 7);
-        }
-    };
-    private static final HashMap<Suit, Integer> suitValues = new HashMap(){
-        {
-            put(Suit.HEART, 0);
-            put(Suit.LEAF, 1);
-            put(Suit.BELL, 2);
-            put(Suit.ACCORN, 3);
         }
     };
     
@@ -82,9 +73,5 @@ public class GameUtils {
     
     public static int getRankValue(Rank rank){
         return rankValues.get(rank);
-    }
-    
-    public static int getSuitValue(Suit suit){
-        return suitValues.get(suit);
     }
 }

@@ -29,16 +29,13 @@ public class Player {
         isPlaying = true;
     }
     
+    public void stopPlaying(){
+        isPlaying = false;
+    }
+    
     public boolean playCard(Card card){
-        if (card == null){
-            isPlaying = false;
-            game.playNext(card);
-            return false;
-        }
-        
-        if (game.checkRules(card) == true){
+        if (game.playCard(card)){
             hand.remove(card);
-            game.playNext(card);
             return true;
         }
         

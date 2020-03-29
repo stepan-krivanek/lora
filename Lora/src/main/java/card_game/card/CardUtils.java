@@ -6,8 +6,6 @@
 package card_game.card;
 
 import card_game.lora.GameUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import javafx.scene.image.Image;
 
@@ -83,13 +81,13 @@ public class CardUtils {
         FRONT_IMAGES.put(Suit.BELL, bells);
         
         final HashMap<Rank, Image> accorns = new HashMap();
-        accorns.put(Rank.SEVEN, loadCardImage("/images/green_king3.png"));
-        accorns.put(Rank.EIGHT, loadCardImage("/images/green_king3.png"));
-        accorns.put(Rank.NINE, loadCardImage("/images/green_king3.png"));
-        accorns.put(Rank.TEN, loadCardImage("/images/green_king3.png"));
+        accorns.put(Rank.SEVEN, loadCardImage("/images/accorn7.png"));
+        accorns.put(Rank.EIGHT, loadCardImage("/images/accorn8.png"));
+        accorns.put(Rank.NINE, loadCardImage("/images/accorn9.png"));
+        accorns.put(Rank.TEN, loadCardImage("/images/accorn10.png"));
         accorns.put(Rank.INFERIOR, loadCardImage("/images/accorn_inferior.png"));
-        accorns.put(Rank.SUPERIOR, loadCardImage("/images/green_king3.png"));
-        accorns.put(Rank.KING, loadCardImage("/images/green_king3.png"));
+        accorns.put(Rank.SUPERIOR, loadCardImage("/images/accorn_superior.png"));
+        accorns.put(Rank.KING, loadCardImage("/images/accorn_king.png"));
         accorns.put(Rank.ACE, loadCardImage("/images/green_king3.png"));
         FRONT_IMAGES.put(Suit.ACCORN, accorns);
     }

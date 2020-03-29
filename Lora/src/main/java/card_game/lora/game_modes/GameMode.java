@@ -3,12 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package card_game.lora;
+package card_game.lora.game_modes;
+
+import card_game.card.Card;
 
 /**
  *
  * @author stepa
  */
-public enum GameMode {
-    REDS, INFERIORS, FRLA, ALL, RED_KING, TENS, QUARTS;
+public interface GameMode {
+    
+    public void play();
+    
+    public boolean playCard(Card card);
+    
+    public int getId();
 }

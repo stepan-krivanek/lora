@@ -52,7 +52,7 @@ public class HandView extends GridPane{
                 card.setTranslateX(cardShift * Math.tan(radians));
                 card.setTranslateY(card.getTranslateY() - cardShift);
                 
-                borderGlow.setColor(Color.WHITE);
+                borderGlow.setColor(Color.WHEAT);
                 card.setEffect(borderGlow);
             });
             

@@ -13,6 +13,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javafx.scene.input.KeyCode;
+import card_game.lora.game_modes.GameMode;
+import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.Tens;
 
 /**
  *
@@ -22,16 +25,16 @@ public class Game {
      
     private final int DECK_SIZE = 32;
     private final int NUM_OF_PLAYERS = 4;
+    private final int NUM_OF_WAISTLINES = 4;
     private final Deck mainDeck = new Deck(DECK_SIZE, true);
     private final Player[] players = new Player[NUM_OF_PLAYERS];
     private final GameView gameView;
     private final List<Suit> suits;
     private final List<Rank> ranks;
-    //private NotePad
+    private final List<GameModes> gameModes;
     private GameMode gameMode;
     private Player firstPlayer;
-    private Player playingOne;
-    private Deck cardsPlayed;
+    private int waistline;
     
     public Game(boolean multiplayer, Main program){
         Rank[] rankArr = new Rank[Rank.values().length];
@@ -39,15 +42,12 @@ public class Game {
             rankArr[GameUtils.getRankValue(rank)] = rank;
         }
         ranks = Collections.unmodifiableList(Arrays.asList(rankArr));
-        
-        Suit[] suitArr = new Suit[Suit.values().length];
-        for (Suit suit : Suit.values()){
-            suitArr[GameUtils.getSuitValue(suit)] = suit;
-        }
-        suits = Collections.unmodifiableList(Arrays.asList(suitArr));
+        suits = Collections.unmodifiableList(Arrays.asList(Suit.values()));
+        gameModes = Collections.unmodifiableList(
+                Arrays.asList(GameModes.values())
+        );
         
         gameView = new GameView(this);
-        
         program.getScene().setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE){
                 program.getMainMenu().setVisible(true);
@@ -60,73 +60,72 @@ public class Game {
         for (int i = 1; i < NUM_OF_PLAYERS; i++){
             players[i] = new Bot(this, i);
         }
-        
         firstPlayer = players[0];
     }
     
     public void start(){
         cardDealing();
-        playTens();
+        gameMode = new Tens(this);
+        gameMode.play();
     }
     
-    public void playNext(Card card){
-        if (card != null){
-            cardsPlayed.add(card);
-            gameView.showCard(card);
-            checkWinner();
-        } else {
-            playingOne = getNextPlayer(playingOne);
-            playingOne.play();
-        }
+    public boolean playCard(Card card){
+        return gameMode.playCard(card);
     }
     
-    public boolean checkRules(Card card){
-        boolean ret = false;
+    private void nextGameMode(){
+        int index = gameMode.getId() + 1;
         
-        switch(gameMode){
-            case TENS:
-                if (card.getRank() == Rank.TEN){
-                    ret = true;
-                    break;
-                }
-                
-                Rank tmp;
-                int cardValue = ranks.indexOf(card.getRank());
-                
-                if (cardValue > ranks.indexOf(Rank.TEN)){
-                    tmp = ranks.get(cardValue - 1);
-                } else {
-                    tmp = ranks.get(cardValue + 1);
-                }
-                
-                if (cardsPlayed.contains(new Card(card.getSuit(), tmp))){
-                    ret = true;
-                }
+        if (index >= gameModes.size()){
+            nextWaistline();
+        }
+        
+        switch(gameModes.get(index)){
+            case REDS:
+                gameMode = new Tens(this);
                 break;
-        }
-        
-        return ret;
+                
+            case SUPERIORS:
+                gameMode = new Tens(this);
+                break;
+                
+            case FRLA:
+                gameMode = new Tens(this);
+                break;
+                
+            case ALL:
+                gameMode = new Tens(this);
+                break;
+                
+            case RED_KING:
+                gameMode = new Tens(this);
+                break;
+                
+            case TENS:
+                gameMode = new Tens(this);
+                break;
+                
+            case QUARTS:
+                gameMode = new Tens(this);
+                break;
+        } 
     }
     
-    private boolean checkWinner(){
-        boolean ret = false;
-        
-        for (int i = 0; i < players.length; i++){
-            if (players[i].getHand().size() == 0){
-                gameView.showWinner(players[i]);
-                ret = true;
-            }
+    private void nextWaistline(){
+        if (++waistline > NUM_OF_WAISTLINES){
+            waistline = 0;
+            endgame();
+        } else {
+            graduation(firstPlayer);
         }
-        
-        return ret;
     }
     
-    private void playTens(){
-        cardsPlayed = new Deck(DECK_SIZE);
-        gameMode = GameMode.TENS;
-        gameView.showTens(players[0]);
-        playingOne = firstPlayer;
-        playingOne.play();
+    private void graduation(Player player){
+        //gameMode = gameView.chooseGameMode(player);
+    }
+    
+    private void endgame(){
+        
     }
     
     private void cardDealing(){
@@ -149,6 +148,8 @@ public class Game {
         players[0].setHandView(
             new HandView(players[0], gameView.getWidth(), gameView.getHeight())
         );
+        gameView.showHand(players[0]);
+        gameView.showPassButton(players[0]);
     }
     
     public List<Suit> getOrderedSuits(){
@@ -159,20 +160,12 @@ public class Game {
         return ranks;
     }
     
-    public GameMode getGameMode(){
-        return gameMode;
-    }
-    
     public GameView getGameView(){
         return gameView;
     }
     
-    public Player getPlayer(int index){
-        return players[index];
-    }
-    
-    public Deck getMainDeck(){
-        return mainDeck;
+    public Player getFirstPlayer(){
+        return firstPlayer;
     }
     
     public Player getNextPlayer(Player player){
