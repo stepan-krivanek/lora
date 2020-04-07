@@ -13,9 +13,11 @@ import card_game.card.Card;
  */
 public interface GameMode {
     
-    public void play();
+    public void start();
     
-    public boolean playCard(Card card);
+    public void playCard(Card card);
+    
+    public boolean checkRules(Card card);
     
     public int getId();
 }

@@ -16,13 +16,13 @@ public class Player {
 
     private final Deck hand = new Deck(8);
     private final int id;
-    private boolean isPlaying = false;
+    private final Game game;
     private HandView handView;
-    protected Game game;
+    private boolean isPlaying = false;
     
     public Player(Game game, int id) {
         this.game = game;
-        this.id = id;
+        this.id = id;      
     }
     
     public void play(){
@@ -34,8 +34,9 @@ public class Player {
     }
     
     public boolean playCard(Card card){
-        if (game.playCard(card)){
+        if (game.checkRules(card)){
             hand.remove(card);
+            game.playCard(card);
             return true;
         }
         

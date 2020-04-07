@@ -13,34 +13,48 @@ import java.util.Random;
  */
 public class Bot extends Player{
     
+    private boolean isPlaying = false;
+    
     public Bot(Game game, int id) {
         super(game, id);
     }
     
     @Override
     public void play(){
+        isPlaying = true;
         int cardsToPlay = new Random().nextInt(2) + 1;
-        
+
         for (int i = 0; i < cardsToPlay; i++){
             if (playCard() == false){
                 break;
             }
         }
         
-        playCard(null);
+        if (isPlaying){
+            isPlaying = false;
+            playCard(null);
+        }
     }
     
-    public boolean playCard(){
-        boolean correct = false;
-                
-        for (int i = 0; i < getHand().size(); i++){
+    @Override
+    public void stopPlaying(){
+        isPlaying = false;
+    }
+    
+    public boolean playCard(){                
+        int size = getHand().size();
+        
+        for (int i = 0; i < size; i++){
+            if (isPlaying == false){
+                return false;
+            }
+            
             if (playCard(getHand().get(i)) == true){
-                correct = true;
-                break;
+                return true;
             }
         }
         
-        return correct;
+        return false;
     }
     
 }

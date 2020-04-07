@@ -25,16 +25,16 @@ public class Game {
      
     private final int DECK_SIZE = 32;
     private final int NUM_OF_PLAYERS = 4;
-    private final int NUM_OF_WAISTLINES = 4;
+    private final int NUM_OF_ROUNDS = 4;
     private final Deck mainDeck = new Deck(DECK_SIZE, true);
     private final Player[] players = new Player[NUM_OF_PLAYERS];
-    private final GameView gameView;
+    private final GameView gameView = new GameView(this);
     private final List<Suit> suits;
     private final List<Rank> ranks;
     private final List<GameModes> gameModes;
     private GameMode gameMode;
-    private Player firstPlayer;
-    private int waistline;
+    private Player forehand;
+    private int round;
     
     public Game(boolean multiplayer, Main program){
         Rank[] rankArr = new Rank[Rank.values().length];
@@ -47,7 +47,6 @@ public class Game {
                 Arrays.asList(GameModes.values())
         );
         
-        gameView = new GameView(this);
         program.getScene().setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE){
                 program.getMainMenu().setVisible(true);
@@ -60,26 +59,42 @@ public class Game {
         for (int i = 1; i < NUM_OF_PLAYERS; i++){
             players[i] = new Bot(this, i);
         }
-        firstPlayer = players[0];
+        forehand = players[0];
     }
     
     public void start(){
         cardDealing();
         gameMode = new Tens(this);
-        gameMode.play();
+        gameMode.start();
     }
     
-    public boolean playCard(Card card){
-        return gameMode.playCard(card);
+    public void playCard(Card card){
+        gameMode.playCard(card);
     }
     
-    private void nextGameMode(){
+    public boolean checkRules(Card card){
+        return gameMode.checkRules(card);
+    }
+    
+    public void nextGameMode(Deck deck){
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            players[i].stopPlaying();
+        }
+        
+        mainDeck.addAll(deck);
         int index = gameMode.getId() + 1;
         
         if (index >= gameModes.size()){
-            nextWaistline();
+            nextRound();
+            System.out.println("Next round not implemented yet.");
+        } else {
+            cardDealing();
+            setGameMode(index);
+            gameMode.start();
         }
-        
+    }
+    
+    private void setGameMode(int index){
         switch(gameModes.get(index)){
             case REDS:
                 gameMode = new Tens(this);
@@ -111,12 +126,12 @@ public class Game {
         } 
     }
     
-    private void nextWaistline(){
-        if (++waistline > NUM_OF_WAISTLINES){
-            waistline = 0;
+    private void nextRound(){
+        if (++round > NUM_OF_ROUNDS){
+            round = 0;
             endgame();
         } else {
-            graduation(firstPlayer);
+            graduation(forehand);
         }
     }
     
@@ -125,20 +140,19 @@ public class Game {
     }
     
     private void endgame(){
-        
+        gameView.showWinner(forehand);
     }
     
     private void cardDealing(){
-        gameView.cardDealing();
         mainDeck.shuffle();
+        gameView.cardDealing();
         
         final int cardsToDeal = 2;
-        Player player = firstPlayer;
-        Card card;
+        Player player = forehand;
         
-        while (mainDeck.isEmpty() == false){
+        while (!mainDeck.isEmpty()){
             for (int i = 0; i < cardsToDeal; i++){
-                card = mainDeck.removeTopCard();
+                Card card = mainDeck.removeTopCard();
                 player.getHand().add(card);
             }
             
@@ -152,11 +166,11 @@ public class Game {
         gameView.showPassButton(players[0]);
     }
     
-    public List<Suit> getOrderedSuits(){
+    public List<Suit> getSuits(){
         return suits;
     }
     
-    public List<Rank> getOrderedRanks(){
+    public List<Rank> getRanks(){
         return ranks;
     }
     
@@ -164,8 +178,12 @@ public class Game {
         return gameView;
     }
     
-    public Player getFirstPlayer(){
-        return firstPlayer;
+    public Player getForehand(){
+        return forehand;
+    }
+    
+    public int getNumOfPlayers(){
+        return NUM_OF_PLAYERS;
     }
     
     public Player getNextPlayer(Player player){

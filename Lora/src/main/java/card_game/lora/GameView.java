@@ -21,7 +21,6 @@ import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -36,18 +35,13 @@ public class GameView extends StackPane{
     
     private final double WIDTH = GameUtils.getScreenWidth();
     private final double HEIGHT = GameUtils.getScreenHeight();
-    final double CARD_WIDTH = WIDTH / 10;
-    final double CARD_HEIGHT = HEIGHT / 5;
-    private StackPane table = new StackPane();
-    private final List<Suit> suits;
-    private final List<Rank> ranks;
-    private GridPane cards;
-    private Game game;
+    private final double CARD_WIDTH = WIDTH / 10;
+    private final double CARD_HEIGHT = HEIGHT / 5;
+    private final StackPane table = new StackPane();
+    private HandView primaryHand;
+    private Rectangle playZone;
     
     public GameView(Game game){
-        this.game = game;
-        suits = game.getOrderedSuits();
-        ranks = game.getOrderedRanks();
         //Background bcgr = GameUtils.loadBackground(path, WIDTH, HEIGHT);
         Background bcgr = new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY));
         this.setBackground(bcgr);
@@ -55,7 +49,7 @@ public class GameView extends StackPane{
         this.setWidth(WIDTH);
 
         Background tableBcgr = new Background(new BackgroundImage(
-                new Image("/images/table2.png", WIDTH/5, 0, true, true),
+                new Image("/images/table.png", WIDTH / 5, 0, true, true),
                 BackgroundRepeat.REPEAT,
                 BackgroundRepeat.REPEAT,
                 BackgroundPosition.CENTER,
@@ -66,33 +60,6 @@ public class GameView extends StackPane{
         table.setEffect(perspection(WIDTH, HEIGHT));
         this.setAlignment(table, Pos.CENTER);
         this.getChildren().add(table);
-    }
-    
-    public void showTens(){
-        final int NUM_OF_ROWS = 4;
-        final int NUM_OF_COLS = 8;
-        
-        cards = new GridPane();
-        cards.setAlignment(Pos.CENTER);
-        cards.setPrefWidth(WIDTH);
-        cards.setPrefHeight(HEIGHT);
-        cards.setHgap(NUM_OF_COLS);
-        cards.setVgap(NUM_OF_ROWS);
-
-        for (int col = 0; col < NUM_OF_COLS; col++){
-            for (int row = 0; row < NUM_OF_ROWS; row++){
-                Card card = new Card(suits.get(row), ranks.get(col));
-                card.setOpacity(0.2);
-                card.setFitWidth(CARD_WIDTH);
-                card.setFitHeight(CARD_HEIGHT);
-                card.setPreserveRatio(true);
-                GridPane.setConstraints(card, col, row);
-                GridPane.setMargin(card, new Insets(5, 10, 5 ,10));
-                cards.getChildren().add(card);
-            }
-        }
-        
-        table.getChildren().add(cards);
     }
     
     public void showPassButton(Player player){
@@ -107,11 +74,10 @@ public class GameView extends StackPane{
     }
     
     public void showHand(Player player){
-        HandView primaryHand = player.getHandView();
-        primaryHand.setAlignment(Pos.BOTTOM_CENTER);
-        primaryHand.setPrefSize(WIDTH, HEIGHT);
+        this.getChildren().removeAll(primaryHand, playZone);
+        primaryHand = player.getHandView();
         
-        Rectangle playZone = new Rectangle(WIDTH, HEIGHT * 2 / 3);
+        playZone = new Rectangle(WIDTH, HEIGHT * 2 / 3);
         this.setAlignment(playZone, Pos.TOP_CENTER);
         playZone.setOpacity(0);
         
@@ -125,13 +91,6 @@ public class GameView extends StackPane{
         });
         
         this.getChildren().addAll(primaryHand, playZone);
-    }
-    
-    public void showCard(Card card){
-        int suitIndex = suits.indexOf(card.getSuit());
-        int rankIndex = ranks.indexOf(card.getRank());
-        int cardIndex = suitIndex + rankIndex * suits.size();
-        cards.getChildren().get(cardIndex).setOpacity(1);
     }
     
     public void cardDealing(){
@@ -163,5 +122,9 @@ public class GameView extends StackPane{
         );
         
         return perspection;
+    }
+    
+    public StackPane getTable(){
+        return table;
     }
 }

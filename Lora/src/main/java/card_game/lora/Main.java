@@ -64,7 +64,7 @@ public class Main extends Application {
     
     private void setStage(Stage stage, String title){
         stage.setTitle(title);
-        stage.setFullScreen(true);
+        stage.setFullScreen(false);
         stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         stage.initStyle(StageStyle.UTILITY);
         stage.setOnCloseRequest(e -> {
