@@ -9,10 +9,12 @@ import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.lora.Game;
+import card_game.lora.GameView;
 import card_game.lora.Player;
 import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
 /**
@@ -43,15 +45,44 @@ public class Tens implements GameMode{
     
     @Override
     public void playCard(Card card){
-        if (card == null){
-            player.stopPlaying();
-            player = game.getNextPlayer(player);
-            player.play();
-        } else if (checkRules(card)){
-            cardsPlayed.add(card);
-            showCard(card);
-            checkWinner();
+        if (checkRules(card)){
+            if (card == null){
+                player.stopPlaying();
+                player = game.getNextPlayer(player);
+                player.play();
+            } else if (checkRules(card)){
+                cardsPlayed.add(card);
+                showCard(card);
+                checkWinner();
+            }
         }
+    }
+    
+    @Override
+    public boolean checkRules(Card card){
+        if (card == null){
+            return true;
+        }
+        
+        if (card.getRank() == Rank.TEN){
+            return true;
+        }
+
+        List<Rank> ranks = game.getRanks();
+        int cardValue = ranks.indexOf(card.getRank());
+
+        Rank tmp;
+        if (cardValue > ranks.indexOf(Rank.TEN)){
+            tmp = ranks.get(cardValue - 1);
+        } else {
+            tmp = ranks.get(cardValue + 1);
+        }
+
+        if (cardsPlayed.contains(new Card(card.getSuit(), tmp))){
+            return true;
+        }
+        
+        return false;
     }
     
     private void end(){
@@ -89,38 +120,12 @@ public class Tens implements GameMode{
         }
     }
     
-    @Override
-    public boolean checkRules(Card card){
-        if (card == null){
-            return true;
-        }
-        
-        if (card.getRank() == Rank.TEN){
-            return true;
-        }
-
-        Rank tmp;
-        List<Rank> ranks = game.getRanks();
-        int cardValue = ranks.indexOf(card.getRank());
-
-        if (cardValue > ranks.indexOf(Rank.TEN)){
-            tmp = ranks.get(cardValue - 1);
-        } else {
-            tmp = ranks.get(cardValue + 1);
-        }
-
-        if (cardsPlayed.contains(new Card(card.getSuit(), tmp))){
-            return true;
-        }
-        
-        return false;
-    }
-    
-    private void show(){        
-        double width = game.getGameView().getWidth();
-        double height = game.getGameView().getHeight();
-        double cardWidth = width / 10;
-        double cardHeight = height / 5;
+    private void show(){  
+        GameView gameView = game.getGameView();
+        double width = gameView.getWidth();
+        double height = gameView.getHeight();
+        double cardWidth = gameView.getCardWidth();
+        double cardHeight = gameView.getCardHeight();
         
         cards = new GridPane();
         cards.setAlignment(Pos.CENTER);
@@ -135,16 +140,18 @@ public class Tens implements GameMode{
                         game.getSuits().get(row),
                         game.getRanks().get(col)
                 );
-                card.setOpacity(0.2);
                 
-                card.setFitWidth(cardWidth);
-                card.setFitHeight(cardHeight);
-                card.setPreserveRatio(true);
+                ImageView cardView = new ImageView(card.getFront());
+                cardView.setOpacity(0.2);
                 
-                GridPane.setConstraints(card, col, row);
-                GridPane.setMargin(card, new Insets(5, 10, 5 ,10));
+                cardView.setFitWidth(cardWidth);
+                cardView.setFitHeight(cardHeight);
+                cardView.setPreserveRatio(true);
                 
-                cards.getChildren().add(card);
+                GridPane.setConstraints(cardView, col, row);
+                GridPane.setMargin(cardView, new Insets(5, 10, 5 ,10));
+                
+                cards.getChildren().add(cardView);
             }
         }
         

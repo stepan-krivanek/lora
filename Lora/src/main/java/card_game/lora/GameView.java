@@ -5,10 +5,6 @@
  */
 package card_game.lora;
 
-import card_game.card.Card;
-import card_game.card.Rank;
-import card_game.card.Suit;
-import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -126,5 +122,13 @@ public class GameView extends StackPane{
     
     public StackPane getTable(){
         return table;
+    }
+    
+    public double getCardWidth(){
+        return CARD_WIDTH;
+    }
+    
+    public double getCardHeight(){
+        return CARD_HEIGHT;
     }
 }

@@ -11,6 +11,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
@@ -39,36 +40,37 @@ public class HandView extends GridPane{
         double overlay = CARD_WIDTH / 2;
         for (int i = 0; i < deck.size(); i++){
             Card card = deck.get(i);
-            card.setFitWidth(CARD_WIDTH);
-            card.setFitHeight(CARD_HEIGHT);
-            card.setPreserveRatio(true);
+            ImageView cardView = new ImageView(card.getFront());
+            cardView.setFitWidth(CARD_WIDTH);
+            cardView.setFitHeight(CARD_HEIGHT);
+            cardView.setPreserveRatio(true);
             
             DropShadow borderGlow = new DropShadow();
             borderGlow.setRadius(CARD_WIDTH / 2);
             borderGlow.setSpread(0.2);
             
-            card.setOnMouseEntered(e -> {
-                double radians = card.getRotate() * toRadians;
-                card.setTranslateX(cardShift * Math.tan(radians));
-                card.setTranslateY(card.getTranslateY() - cardShift);
+            cardView.setOnMouseEntered(e -> {
+                double radians = cardView.getRotate() * toRadians;
+                cardView.setTranslateX(cardShift * Math.tan(radians));
+                cardView.setTranslateY(cardView.getTranslateY() - cardShift);
                 
                 borderGlow.setColor(Color.WHEAT);
-                card.setEffect(borderGlow);
+                cardView.setEffect(borderGlow);
             });
             
-            card.setOnMouseExited(e -> {
-                card.setTranslateX(0);
-                card.setTranslateY(card.getTranslateY() + cardShift);
+            cardView.setOnMouseExited(e -> {
+                cardView.setTranslateX(0);
+                cardView.setTranslateY(cardView.getTranslateY() + cardShift);
                 
-                card.setEffect(null);
+                cardView.setEffect(null);
             });
             
-            card.setOnMouseClicked(e -> {
+            cardView.setOnMouseClicked(e -> {
                 if (player.isPlaying() == true){
                     boolean correctPlay = player.playCard(card);
                     
                     if(correctPlay == true){
-                        this.getChildren().remove(card);
+                        this.getChildren().remove(cardView);
                         this.applyRotation();
                     } else {
                         borderGlow.setColor(Color.RED);
@@ -76,9 +78,9 @@ public class HandView extends GridPane{
                 }
             });
             
-            GridPane.setConstraints(card, i, 0);
-            GridPane.setMargin(card, new Insets(0, -overlay, 0, 0));
-            this.getChildren().add(card);
+            GridPane.setConstraints(cardView, i, 0);
+            GridPane.setMargin(cardView, new Insets(0, -overlay, 0, 0));
+            this.getChildren().add(cardView);
         }
         
         this.applyRotation();

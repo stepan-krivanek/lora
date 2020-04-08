@@ -6,13 +6,12 @@
 package card_game.card;
 
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 
 /**
  *
  * @author stepan
  */
-public class Card extends ImageView{
+public class Card {
     
     private final Suit suit;
     private final Rank rank;
@@ -24,15 +23,14 @@ public class Card extends ImageView{
         this.rank = rank;
         frontImage = CardUtils.getFrontImage(this);
         backImage = CardUtils.getBackImage();
-        showFront();
     }
     
-    public void showFront(){
-        setImage(frontImage);
+    public Image getFront(){
+        return frontImage;
     }
     
-    public void showBack(){
-        setImage(backImage);
+    public Image getBack(){
+        return backImage;
     }
 
     public Suit getSuit() {

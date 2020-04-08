@@ -136,6 +136,19 @@ public class Deck extends ArrayList<Card>{
         return contains;
     }
     
+    public boolean contains(Suit suit){
+        boolean contains = false;
+        
+        for (int i = 0; i < size(); i++){
+            if (get(i).getSuit() == suit){
+                contains = true;
+                break;
+            }
+        }
+        
+        return contains;
+    }
+    
     public boolean isFull(){
         return this.size() == MAX_SIZE;
     }

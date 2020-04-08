@@ -15,6 +15,7 @@ import card_game.card.Deck;
 public class Player {
 
     private final Deck hand = new Deck(8);
+    private final Deck table = new Deck(32);
     private final int id;
     private final Game game;
     private HandView handView;
@@ -41,6 +42,10 @@ public class Player {
         }
         
         return false;
+    }
+    
+    public Deck getTable(){
+        return table;
     }
     
     public Deck getHand(){

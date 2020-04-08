@@ -7,6 +7,8 @@ package card_game.lora;
 
 import card_game.card.Rank;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
+import javafx.concurrent.Task;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
@@ -61,6 +63,26 @@ public class GameUtils {
         );
         
         return new Background(bcgrImage);
+    }
+    
+    public static void wait(int ms, Callable function){
+        Task<Void> wait = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                Thread.sleep(ms);
+                return null;
+            }
+        };
+        
+        wait.setOnSucceeded(e -> {
+            try {
+                function.call();
+            } catch (Exception exception){
+                System.out.println(exception);
+            }
+        });
+        
+        new Thread(wait).start();
     }
     
     public static double getScreenWidth(){

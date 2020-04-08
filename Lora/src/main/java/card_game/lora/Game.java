@@ -15,6 +15,7 @@ import java.util.List;
 import javafx.scene.input.KeyCode;
 import card_game.lora.game_modes.GameMode;
 import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.Reds;
 import card_game.lora.game_modes.Tens;
 
 /**
@@ -64,7 +65,7 @@ public class Game {
     
     public void start(){
         cardDealing();
-        gameMode = new Tens(this);
+        setGameMode(0);
         gameMode.start();
     }
     
@@ -97,7 +98,7 @@ public class Game {
     private void setGameMode(int index){
         switch(gameModes.get(index)){
             case REDS:
-                gameMode = new Tens(this);
+                gameMode = new Reds(this);
                 break;
                 
             case SUPERIORS:
@@ -184,6 +185,11 @@ public class Game {
     
     public int getNumOfPlayers(){
         return NUM_OF_PLAYERS;
+    }
+    
+    public Player getPlayer(int index){
+        index = index % NUM_OF_PLAYERS;
+        return players[index];
     }
     
     public Player getNextPlayer(Player player){

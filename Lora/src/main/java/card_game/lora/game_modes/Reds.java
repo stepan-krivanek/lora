@@ -7,43 +7,71 @@ package card_game.lora.game_modes;
 
 import card_game.card.Card;
 import card_game.card.Deck;
+import card_game.card.Suit;
 import card_game.lora.Game;
-import card_game.lora.Player;
 
 /**
  *
  * @author stepa
  */
-public class Reds implements GameMode{
+public class Reds extends Minigame implements GameMode{
 
-    private final int DECK_SIZE = 32;
+    private final int NUM_OF_PLAYERS;
     private final int id = GameModes.REDS.ordinal();
-    private final Deck cardsPlayed = new Deck(DECK_SIZE);
-    private final Game game;
-    private Player player;
+    private int cardsPlayed = 0;
     
     public Reds(Game game){
-        this.game = game;
+        super(game);
+        NUM_OF_PLAYERS = game.getNumOfPlayers();
     }
     
     @Override
     public void start() {
-        
+        super.start();
     }
 
     @Override
     public void playCard(Card card) {
-        
+        if (checkRules(card)){
+            cardsPlayed += 1;
+            super.playCard(card);
+        }
     }
 
     @Override
     public boolean checkRules(Card card) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (card == null){
+            return false;
+        }
+        
+        if (cardsPlayed % NUM_OF_PLAYERS == 0){
+            if (card.getSuit() == Suit.HEART){
+                if (!hasOnlyReds()){
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        return super.checkRules(card.getSuit());
+    }
+    
+    private boolean hasOnlyReds(){
+        boolean onlyReds = true;
+        
+        Deck hand = super.getCurrentPlayer().getHand();
+        for (int i = 0; i < hand.size(); i++){
+            if (hand.get(i).getSuit() != Suit.HEART){
+                onlyReds = false;
+                break;
+            }
+        }
+        
+        return onlyReds;
     }
 
     @Override
     public int getId() {
         return id;
-    }
-    
+    }  
 }

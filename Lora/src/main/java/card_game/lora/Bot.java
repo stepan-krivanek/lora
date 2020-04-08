@@ -22,18 +22,8 @@ public class Bot extends Player{
     @Override
     public void play(){
         isPlaying = true;
-        int cardsToPlay = new Random().nextInt(2) + 1;
-
-        for (int i = 0; i < cardsToPlay; i++){
-            if (playCard() == false){
-                break;
-            }
-        }
-        
-        if (isPlaying){
-            isPlaying = false;
-            playCard(null);
-        }
+        playCard();
+        isPlaying = false;
     }
     
     @Override
