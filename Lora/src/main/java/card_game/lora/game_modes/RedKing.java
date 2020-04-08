@@ -6,15 +6,18 @@
 package card_game.lora.game_modes;
 
 import card_game.card.Card;
+import card_game.card.Rank;
+import card_game.card.Suit;
 import card_game.lora.Game;
 
 /**
  *
  * @author stepa
  */
-public class RedKing extends Minigame implements GameMode{
+public class RedKing extends Reds implements GameMode{
     
     private final int id = GameModes.RED_KING.ordinal();
+    private int cardsPlayed = 0;
     
     public RedKing(Game game){
         super(game);
@@ -28,6 +31,7 @@ public class RedKing extends Minigame implements GameMode{
     @Override
     public void playCard(Card card) {
         if (checkRules(card)){
+            cardsPlayed += 1;
             super.playCard(card);
         }
     }
@@ -38,7 +42,14 @@ public class RedKing extends Minigame implements GameMode{
             return false;
         }
         
-        return super.checkRules(card.getSuit());
+        if (cardsPlayed < 4 && 
+            card.getRank() == Rank.KING &&
+            card.getSuit() == Suit.HEART
+        ){    
+            return false;
+        }
+        
+        return super.checkRules(card);
     }
 
     @Override

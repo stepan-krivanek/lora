@@ -9,13 +9,18 @@ import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.card.Suit;
+import card_game.lora.game_modes.All;
+import card_game.lora.game_modes.FrLa;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javafx.scene.input.KeyCode;
 import card_game.lora.game_modes.GameMode;
 import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.Quarts;
+import card_game.lora.game_modes.RedKing;
 import card_game.lora.game_modes.Reds;
+import card_game.lora.game_modes.Superiors;
 import card_game.lora.game_modes.Tens;
 
 /**
@@ -102,19 +107,19 @@ public class Game {
                 break;
                 
             case SUPERIORS:
-                gameMode = new Tens(this);
+                gameMode = new Superiors(this);
                 break;
                 
             case FRLA:
-                gameMode = new Tens(this);
+                gameMode = new FrLa(this);
                 break;
                 
             case ALL:
-                gameMode = new Tens(this);
+                gameMode = new All(this);
                 break;
                 
             case RED_KING:
-                gameMode = new Tens(this);
+                gameMode = new RedKing(this);
                 break;
                 
             case TENS:
@@ -122,7 +127,7 @@ public class Game {
                 break;
                 
             case QUARTS:
-                gameMode = new Tens(this);
+                gameMode = new Quarts(this);
                 break;
         } 
     }

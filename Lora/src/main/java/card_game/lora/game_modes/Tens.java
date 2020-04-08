@@ -14,6 +14,7 @@ import card_game.lora.Player;
 import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
@@ -28,6 +29,7 @@ public class Tens implements GameMode{
     private final int DECK_SIZE = 32;
     private final int id = GameModes.TENS.ordinal();
     private final Deck cardsPlayed = new Deck(DECK_SIZE);
+    private final Button passButton = new Button("PASS");
     private final Game game;
     private Player player;
     private GridPane cards;
@@ -87,6 +89,7 @@ public class Tens implements GameMode{
     
     private void end(){
         game.getGameView().getTable().getChildren().remove(cards);
+        game.getGameView().getChildren().remove(passButton);
         Deck mainDeck = new Deck(DECK_SIZE);
         
         for (int row = 0; row < NUM_OF_ROWS; row++){
@@ -122,15 +125,11 @@ public class Tens implements GameMode{
     
     private void show(){  
         GameView gameView = game.getGameView();
-        double width = gameView.getWidth();
-        double height = gameView.getHeight();
-        double cardWidth = gameView.getCardWidth();
-        double cardHeight = gameView.getCardHeight();
         
         cards = new GridPane();
         cards.setAlignment(Pos.CENTER);
-        cards.setPrefWidth(width);
-        cards.setPrefHeight(height);
+        cards.setPrefWidth(gameView.getWidth());
+        cards.setPrefHeight(gameView.getHeight());
         cards.setHgap(NUM_OF_COLS);
         cards.setVgap(NUM_OF_ROWS);
 
@@ -144,8 +143,8 @@ public class Tens implements GameMode{
                 ImageView cardView = new ImageView(card.getFront());
                 cardView.setOpacity(0.2);
                 
-                cardView.setFitWidth(cardWidth);
-                cardView.setFitHeight(cardHeight);
+                cardView.setFitWidth(gameView.getCardWidth());
+                cardView.setFitHeight(gameView.getCardHeight());
                 cardView.setPreserveRatio(true);
                 
                 GridPane.setConstraints(cardView, col, row);
@@ -155,7 +154,14 @@ public class Tens implements GameMode{
             }
         }
         
-        game.getGameView().getTable().getChildren().add(cards);
+        gameView.getTable().getChildren().add(cards);
+        
+        passButton.setAlignment(Pos.BOTTOM_RIGHT);
+        passButton.setOnAction(e -> {
+            game.getPlayer(0).playCard(null);
+        });
+        
+        gameView.getChildren().add(passButton);
     }
     
     private void showCard(Card card){

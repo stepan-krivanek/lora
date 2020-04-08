@@ -65,7 +65,7 @@ public class Minigame {
         int timeToWait = 1000;
         if (playersPlayed == 0){
 
-            GameUtils.wait(5 * timeToWait, new Callable() {
+            GameUtils.wait(3 * timeToWait, new Callable() {
                 @Override
                 public Void call() throws Exception {
                     newRound();
@@ -145,7 +145,8 @@ public class Minigame {
         discardLayout.setPrefWidth(gameView.getWidth());
         discardLayout.setPrefHeight(gameView.getHeight());
         discardLayout.setAlignment(Pos.CENTER);
-        game.getGameView().getTable().getChildren().add(discardLayout);
+        
+        gameView.getTable().getChildren().add(discardLayout);
     }
     
     private void showCard(Card card){
