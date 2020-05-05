@@ -15,8 +15,9 @@ public class Bot extends Player{
     
     private boolean isPlaying = false;
     
-    public Bot(Game game, int id) {
-        super(game, id);
+    public Bot(Game game) {
+        super(game);
+        //add id
     }
     
     @Override

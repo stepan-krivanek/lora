@@ -5,6 +5,7 @@
  */
 package card_game.lora;
 
+import card_game.net.ClientConnection;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCombination;
@@ -64,7 +65,9 @@ public class Main extends Application {
     
     private void setStage(Stage stage, String title){
         stage.setTitle(title);
-        stage.setFullScreen(true);
+        stage.setWidth(500);
+        stage.setHeight(300);
+        //stage.setFullScreen(true);
         stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         stage.initStyle(StageStyle.UTILITY);
         stage.setOnCloseRequest(e -> {

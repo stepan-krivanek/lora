@@ -5,6 +5,8 @@
  */
 package card_game.lora;
 
+import card_game.net.ClientConnection;
+import card_game.net.Server;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
@@ -19,44 +21,84 @@ import javafx.stage.Stage;
  *
  * @author stepan
  */
-public class GameMenu extends Parent{
+public class GameMenu extends StackPane{
     
     private final int SPACING = 20;
     private final String bcgrPath = "/images/the_card_players.jpg";
     private final Rectangle2D bounds = Screen.getPrimary().getBounds();
     private final double width = bounds.getWidth();
     private final double height = bounds.getHeight();
-    private Button startButton;
+    private Button spButton;
+    private Button mpButton;
     private Button exitButton;
+    private VBox centerVBox;
+    private Main program;
 
     public GameMenu(Main program, Stage stage){
-        StackPane menu = new StackPane();
-        Background bcgr = GameUtils.loadBackground(bcgrPath, width, height);
-        menu.setBackground(bcgr);
-        menu.setPrefHeight(height);
-        menu.setPrefWidth(width);
+        this.program = program;
         
-        VBox centerVBox = new VBox();
+        Background bcgr = GameUtils.loadBackground(bcgrPath, width, height);
+        setBackground(bcgr);
+        setPrefHeight(height);
+        setPrefWidth(width);
+        
+        centerVBox = new VBox();
         centerVBox.setAlignment(Pos.CENTER);
         centerVBox.setSpacing(SPACING);
         
-        //Start Button
-        startButton = new Button("START");
-        startButton.setOnAction(e -> {
-            Game game = new Game(false, program);
-            program.getRoot().getChildren().add(game.getGameView());
-            this.setVisible(false);
-            game.start();
+        //SP Button
+        spButton = new Button("Singleplayer");
+        spButton.setOnAction(e -> {
+            joinGame();
+        });
+        
+        //MP Button
+        mpButton = new Button("Multiplayer");
+        mpButton.setOnAction(e -> {
+            gameCreation();
         });
         
         //Exit Button
-        exitButton = new Button("EXIT");
+        exitButton = new Button("Exit");
         exitButton.setOnAction(e -> program.closeProgram(stage));
         
-        centerVBox.getChildren().addAll(startButton, exitButton);
-        menu.getChildren().add(centerVBox);
-        menu.setAlignment(centerVBox, Pos.CENTER);
+        getChildren().add(centerVBox);
+        setAlignment(centerVBox, Pos.CENTER);
         
-        getChildren().add(menu);
+        setMainButtons();
+    }
+    
+    private void setMainButtons(){
+        centerVBox.getChildren().clear();
+        centerVBox.getChildren().addAll(spButton, mpButton, exitButton);
+    }
+    
+    private void gameCreation(){
+        Button serverButton = new Button("Create new game");
+        serverButton.setOnAction(e -> {
+            Server server = new Server(4);
+            Thread t = new Thread(server);
+            t.start();
+            joinGame();
+        });
+        
+        Button clientButton = new Button("Join existing game");
+        clientButton.setOnAction(e -> {
+            joinGame();
+        });
+        
+        Button returnButton = new Button("Return");
+        returnButton.setOnAction(e -> {
+            setMainButtons();
+        });
+        
+        centerVBox.getChildren().clear();
+        centerVBox.getChildren().addAll(serverButton, clientButton, returnButton);
+    }
+    
+    private void joinGame(){
+        Game game = new Game(program);
+        program.getRoot().getChildren().add(game.getGameView());
+        this.setVisible(false);
     }
 }

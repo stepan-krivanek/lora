@@ -22,6 +22,10 @@ import card_game.lora.game_modes.RedKing;
 import card_game.lora.game_modes.Reds;
 import card_game.lora.game_modes.Superiors;
 import card_game.lora.game_modes.Tens;
+import card_game.net.ClientConnection;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -38,11 +42,15 @@ public class Game {
     private final List<Suit> suits;
     private final List<Rank> ranks;
     private final List<GameModes> gameModes;
+    private final Main program;
     private GameMode gameMode;
     private Player forehand;
     private int round;
+    private ClientConnection connection;
     
-    public Game(boolean multiplayer, Main program){
+    public Game(Main program){
+        this.program = program;
+        
         Rank[] rankArr = new Rank[Rank.values().length];
         for (Rank rank : Rank.values()){
             rankArr[GameUtils.getRankValue(rank)] = rank;
@@ -55,17 +63,18 @@ public class Game {
         
         program.getScene().setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE){
-                program.getMainMenu().setVisible(true);
-                gameView.setVisible(false);
-                program.getRoot().getChildren().remove(gameView);
+                exit();
             }
         });
         
-        players[0] = new Player(this, 0);
-        for (int i = 1; i < NUM_OF_PLAYERS; i++){
-            players[i] = new Bot(this, i);
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            players[i] = new Player(this);
         }
-        forehand = players[0];
+        
+        int id = connectToServer();
+        if (id == -1){
+            exit();
+        }
     }
     
     public void start(){
@@ -204,5 +213,27 @@ public class Game {
             return players[0];
         }
         return  players[index];
+    }
+    
+    /**
+     returns player's id or -1 if connection fails;
+     */
+    private int connectToServer(){
+        int ret = -1;
+        
+        connection = new ClientConnection("localhost");
+        try {
+            ret = connection.getInput().readInt();
+        } catch (IOException ex) {
+            Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return ret;
+    }
+    
+    private void exit(){
+        program.getMainMenu().setVisible(true);
+        gameView.setVisible(false);
+        program.getRoot().getChildren().remove(gameView);
     }
 }

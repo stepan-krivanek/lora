@@ -7,6 +7,10 @@ package card_game.lora;
 
 import card_game.card.Card;
 import card_game.card.Deck;
+import card_game.net.ClientConnection;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -16,14 +20,13 @@ public class Player {
 
     private final Deck hand = new Deck(8);
     private final Deck table = new Deck(32);
-    private final int id;
-    private final Game game;
+    private Game game;
+    private int id;
     private HandView handView;
     private boolean isPlaying = false;
     
-    public Player(Game game, int id) {
+    public Player(Game game){
         this.game = game;
-        this.id = id;      
     }
     
     public void play(){
@@ -62,6 +65,10 @@ public class Player {
     
     public int getId(){
         return id;
+    }
+    
+    public void setId(int id){
+        this.id = id;
     }
     
     public boolean isPlaying(){
