@@ -11,10 +11,7 @@ import card_game.card.Rank;
 import card_game.card.Suit;
 import card_game.lora.game_modes.All;
 import card_game.lora.game_modes.FrLa;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import javafx.scene.input.KeyCode;
 import card_game.lora.game_modes.GameMode;
 import card_game.lora.game_modes.GameModes;
 import card_game.lora.game_modes.Quarts;
@@ -22,10 +19,7 @@ import card_game.lora.game_modes.RedKing;
 import card_game.lora.game_modes.Reds;
 import card_game.lora.game_modes.Superiors;
 import card_game.lora.game_modes.Tens;
-import card_game.net.ClientConnection;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import card_game.net.Client;
 
 /**
  *
@@ -38,42 +32,16 @@ public class Game {
     private final int NUM_OF_ROUNDS = 4;
     private final Deck mainDeck = new Deck(DECK_SIZE, true);
     private final Player[] players = new Player[NUM_OF_PLAYERS];
-    private final GameView gameView = new GameView(this);
-    private final List<Suit> suits;
-    private final List<Rank> ranks;
-    private final List<GameModes> gameModes;
-    private final Main program;
+    private final List<Suit> suits = GameUtils.getOrderedSuits();
+    private final List<Rank> ranks = GameUtils.getOrderedRanks();
+    private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
     private GameMode gameMode;
     private Player forehand;
     private int round;
-    private ClientConnection connection;
     
-    public Game(Main program){
-        this.program = program;
-        
-        Rank[] rankArr = new Rank[Rank.values().length];
-        for (Rank rank : Rank.values()){
-            rankArr[GameUtils.getRankValue(rank)] = rank;
-        }
-        ranks = Collections.unmodifiableList(Arrays.asList(rankArr));
-        suits = Collections.unmodifiableList(Arrays.asList(Suit.values()));
-        gameModes = Collections.unmodifiableList(
-                Arrays.asList(GameModes.values())
-        );
-        
-        program.getScene().setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ESCAPE){
-                exit();
-            }
-        });
-        
+    public Game(){
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             players[i] = new Player(this);
-        }
-        
-        int id = connectToServer();
-        if (id == -1){
-            exit();
         }
     }
     
@@ -144,7 +112,7 @@ public class Game {
     private void nextRound(){
         if (++round > NUM_OF_ROUNDS){
             round = 0;
-            endgame();
+            exit();
         } else {
             graduation(forehand);
         }
@@ -154,13 +122,8 @@ public class Game {
         //gameMode = gameView.chooseGameMode(player);
     }
     
-    private void endgame(){
-        gameView.showWinner(forehand);
-    }
-    
     private void cardDealing(){
         mainDeck.shuffle();
-        gameView.cardDealing();
         
         final int cardsToDeal = 2;
         Player player = forehand;
@@ -173,12 +136,6 @@ public class Game {
             
             player = getNextPlayer(player);
         }
-        
-        players[0].setHandView(
-            new HandView(players[0], gameView.getWidth(), gameView.getHeight())
-        );
-        gameView.showHand(players[0]);
-        gameView.showPassButton(players[0]);
     }
     
     public List<Suit> getSuits(){
@@ -187,10 +144,6 @@ public class Game {
     
     public List<Rank> getRanks(){
         return ranks;
-    }
-    
-    public GameView getGameView(){
-        return gameView;
     }
     
     public Player getForehand(){
@@ -215,25 +168,7 @@ public class Game {
         return  players[index];
     }
     
-    /**
-     returns player's id or -1 if connection fails;
-     */
-    private int connectToServer(){
-        int ret = -1;
-        
-        connection = new ClientConnection("localhost");
-        try {
-            ret = connection.getInput().readInt();
-        } catch (IOException ex) {
-            Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return ret;
-    }
-    
     private void exit(){
-        program.getMainMenu().setVisible(true);
-        gameView.setVisible(false);
-        program.getRoot().getChildren().remove(gameView);
+        
     }
 }

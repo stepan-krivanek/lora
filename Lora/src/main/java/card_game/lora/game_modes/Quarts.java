@@ -7,17 +7,10 @@ package card_game.lora.game_modes;
 
 import card_game.card.Card;
 import card_game.card.Deck;
-import card_game.card.Rank;
 import card_game.lora.Game;
 import card_game.lora.GameUtils;
-import card_game.lora.GameView;
 import card_game.lora.Player;
-import java.util.List;
 import java.util.concurrent.Callable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 /**
  *
@@ -27,13 +20,10 @@ public class Quarts implements GameMode{
 
     private final int MAX_CARDS = 32;
     private final int DECK_SIZE = MAX_CARDS / 8;
-    private final int HGAP = DECK_SIZE;
-    private final int VGAP = 1;
     private final int id = GameModes.QUARTS.ordinal();
     private final Deck cardsPlayed = new Deck(MAX_CARDS);
     private final Deck discardDeck = new Deck(DECK_SIZE);
     private final Game game;
-    private GridPane discardLayout;
     private Card leadCard;
     private Card highestCard;
     private Player first;
@@ -46,7 +36,6 @@ public class Quarts implements GameMode{
     
     @Override
     public void start() {
-        show();
         first = game.getForehand();
         first.play();
     }
@@ -56,7 +45,6 @@ public class Quarts implements GameMode{
         if (checkRules(card)){
             if (discardDeck.isEmpty()){
                 leadCard = card;
-                showDeck(card);
                 setFirstPlayer();
                 playAll();
             }
@@ -64,7 +52,6 @@ public class Quarts implements GameMode{
             cardsToPlay -= 1;
             cardsPlayed.add(card);
             discardDeck.add(card);
-            showCard(card);
             
             if (cardsToPlay <= 0){
                 stopAll();
@@ -96,8 +83,6 @@ public class Quarts implements GameMode{
     }
     
     private void end(){
-        game.getGameView().getTable().getChildren().remove(discardLayout);
-        
         Deck mainDeck = new Deck(MAX_CARDS);
         for (int i = 0; i < game.getNumOfPlayers(); i++){
             Player p = game.getPlayer(i);
@@ -147,52 +132,6 @@ public class Quarts implements GameMode{
                 }
             }
         }
-    }
-    
-    private void show(){
-        GameView gameView = game.getGameView();
-        discardLayout = new GridPane();
-        discardLayout.setVgap(VGAP);
-        discardLayout.setHgap(HGAP);
-        discardLayout.setPrefWidth(gameView.getWidth());
-        discardLayout.setPrefHeight(gameView.getHeight());
-        discardLayout.setAlignment(Pos.CENTER);
-        
-        gameView.getTable().getChildren().add(discardLayout);
-    }
-    
-    private void showDeck(Card card){
-        GameView gameView = game.getGameView();
-        List<Rank> ranks = game.getRanks();
-        int rankIndex = ranks.indexOf(card.getRank());
-        
-        cardsToPlay = 0;
-        for (int i = 0; i < DECK_SIZE; i++){
-            Card tmp = new Card(card.getSuit(), ranks.get(rankIndex));
-            
-            if (rankIndex >= ranks.size() || cardsPlayed.contains(tmp)){
-                break;
-            }
-            cardsToPlay += 1;
-            highestCard = tmp;
-            
-            ImageView cardView = new ImageView(tmp.getFront());
-            cardView.setOpacity(0.2);
-            
-            cardView.setFitWidth(gameView.getCardWidth());
-            cardView.setFitHeight(gameView.getCardHeight());
-            cardView.setPreserveRatio(true);
-
-            GridPane.setConstraints(cardView, i, 0);
-            GridPane.setMargin(cardView, new Insets(5, 10, 5 ,10));
-
-            discardLayout.getChildren().add(cardView);
-        }
-    }
-    
-    private void showCard(Card card){
-        int index =  getRankDiff(card);
-        discardLayout.getChildren().get(index).setOpacity(1);
     }
 
     private int getRankDiff(Card card){

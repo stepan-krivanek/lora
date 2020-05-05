@@ -5,15 +5,19 @@
  */
 package card_game.lora;
 
-import card_game.net.ClientConnection;
+import card_game.net.Client;
 import card_game.net.Server;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -28,11 +32,10 @@ public class GameMenu extends StackPane{
     private final Rectangle2D bounds = Screen.getPrimary().getBounds();
     private final double width = bounds.getWidth();
     private final double height = bounds.getHeight();
-    private Button spButton;
-    private Button mpButton;
-    private Button exitButton;
-    private VBox centerVBox;
-    private Main program;
+    private final Button spButton, mpButton, exitButton;
+    private final VBox centerVBox;
+    private final Main program;
+    private Player player;
 
     public GameMenu(Main program, Stage stage){
         this.program = program;
@@ -49,7 +52,7 @@ public class GameMenu extends StackPane{
         //SP Button
         spButton = new Button("Singleplayer");
         spButton.setOnAction(e -> {
-            joinGame();
+            //TBA
         });
         
         //MP Button
@@ -79,12 +82,12 @@ public class GameMenu extends StackPane{
             Server server = new Server(4);
             Thread t = new Thread(server);
             t.start();
-            joinGame();
+            start();
         });
         
         Button clientButton = new Button("Join existing game");
         clientButton.setOnAction(e -> {
-            joinGame();
+            start();
         });
         
         Button returnButton = new Button("Return");
@@ -96,9 +99,13 @@ public class GameMenu extends StackPane{
         centerVBox.getChildren().addAll(serverButton, clientButton, returnButton);
     }
     
-    private void joinGame(){
-        Game game = new Game(program);
-        program.getRoot().getChildren().add(game.getGameView());
-        this.setVisible(false);
+    private void start(){
+        MpPlayer player = new MpPlayer();
+        
+        if (player.connectToServer()){
+            GameView gameView = new GameView(program, player);
+            gameView.show();
+            this.setVisible(false);
+        }
     }
 }

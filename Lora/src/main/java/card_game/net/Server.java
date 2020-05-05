@@ -45,6 +45,9 @@ public class Server implements Runnable{
                 Connection connection = new Connection(s, connectedPlayers);
                 players[connectedPlayers] = connection;
                 
+                Thread t = new Thread(connection);
+                t.start();
+                
                 System.out.println("Player number " + connectedPlayers + " has joint the game.");
                 connectedPlayers += 1;
             } catch (IOException ex) {
@@ -58,11 +61,6 @@ public class Server implements Runnable{
     @Override
     public void run() {
         acceptConnections();
-        
-        for (int i = 0; i < numOfPlayers; i++){
-            Thread t = new Thread(players[i]);
-            t.start();
-        }
     }
     
     private class Connection implements Runnable {

@@ -6,7 +6,12 @@
 package card_game.lora;
 
 import card_game.card.Rank;
+import card_game.card.Suit;
+import card_game.lora.game_modes.GameModes;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Callable;
 import javafx.concurrent.Task;
 import javafx.geometry.Rectangle2D;
@@ -83,6 +88,22 @@ public class GameUtils {
         });
         
         new Thread(wait).start();
+    }
+    
+    public static List<GameModes> getOrderedGamemodes(){
+        return Collections.unmodifiableList(Arrays.asList(GameModes.values()));
+    }
+    
+    public static List<Suit> getOrderedSuits(){
+        return Collections.unmodifiableList(Arrays.asList(Suit.values()));
+    }
+    
+    public static List<Rank> getOrderedRanks(){
+        Rank[] rankArr = new Rank[Rank.values().length];
+        for (Rank rank : Rank.values()){
+            rankArr[getRankValue(rank)] = rank;
+        }
+        return Collections.unmodifiableList(Arrays.asList(rankArr));
     }
     
     public static double getScreenWidth(){

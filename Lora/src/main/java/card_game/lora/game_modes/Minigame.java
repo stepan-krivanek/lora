@@ -11,14 +11,9 @@ import card_game.card.Rank;
 import card_game.card.Suit;
 import card_game.lora.Game;
 import card_game.lora.GameUtils;
-import card_game.lora.GameView;
 import card_game.lora.Player;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Callable;
-import javafx.geometry.Pos;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
 
 /**
  *
@@ -34,7 +29,6 @@ public class Minigame {
     private Player first;
     private Player player;
     private Suit leadSuit;
-    private StackPane discardLayout;
     
     public Minigame(Game game){
         this.game = game;
@@ -42,7 +36,6 @@ public class Minigame {
     }
     
     public void start() {
-        show();
         first = game.getForehand();
         player = first;
         player.play();
@@ -54,8 +47,6 @@ public class Minigame {
 
         cardsPlayed += 1;
         discardDeck.addTopCard(card);
-        showCard(card);
-
         int playersPlayed = cardsPlayed % NUM_OF_PLAYERS;
 
         if (playersPlayed == 1){
@@ -64,7 +55,6 @@ public class Minigame {
 
         int timeToWait = 1000;
         if (playersPlayed == 0){
-
             GameUtils.wait(3 * timeToWait, new Callable() {
                 @Override
                 public Void call() throws Exception {
@@ -77,7 +67,6 @@ public class Minigame {
                 }
             });
         } else {
-
             GameUtils.wait(timeToWait, new Callable() {
                 @Override
                 public Void call() throws Exception {
@@ -99,8 +88,6 @@ public class Minigame {
     }
     
     private void end(){
-        game.getGameView().getTable().getChildren().remove(discardLayout);
-        
         Deck mainDeck = new Deck(MAX_CARDS);
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             player = game.getNextPlayer(player);
@@ -132,35 +119,9 @@ public class Minigame {
         first.getTable().addAll(discardDeck, true);
         player = first;
         
-        discardLayout.getChildren().clear();
-        
         if (cardsPlayed == MAX_CARDS){
             end();
         }
-    }
-    
-    private void show(){
-        GameView gameView = game.getGameView();
-        discardLayout = new StackPane();
-        discardLayout.setPrefWidth(gameView.getWidth());
-        discardLayout.setPrefHeight(gameView.getHeight());
-        discardLayout.setAlignment(Pos.CENTER);
-        
-        gameView.getTable().getChildren().add(discardLayout);
-    }
-    
-    private void showCard(Card card){
-        GameView gameView = game.getGameView();
-        double cardWidth = gameView.getCardWidth();
-        double cardHeight = gameView.getCardHeight();
-        
-        ImageView cardView = new ImageView(card.getFront());
-        cardView.setFitWidth(cardWidth);
-        cardView.setFitHeight(cardHeight);
-        cardView.setPreserveRatio(true);
-        cardView.setRotate(new Random().nextInt(360));
-        
-        discardLayout.getChildren().add(cardView);
     }
     
     public Player getCurrentPlayer(){

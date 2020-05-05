@@ -5,7 +5,7 @@
  */
 package card_game.lora;
 
-import card_game.net.ClientConnection;
+import card_game.net.Client;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCombination;

@@ -15,22 +15,18 @@ public class Card {
     
     private final Suit suit;
     private final Rank rank;
-    private final Image frontImage;
-    private final Image backImage;
     
     public Card(Suit suit, Rank rank){
         this.suit = suit;
         this.rank = rank;
-        frontImage = CardUtils.getFrontImage(this);
-        backImage = CardUtils.getBackImage();
     }
     
     public Image getFront(){
-        return frontImage;
+        return CardUtils.getFrontImage(this);
     }
     
     public Image getBack(){
-        return backImage;
+        return CardUtils.getBackImage();
     }
 
     public Suit getSuit() {

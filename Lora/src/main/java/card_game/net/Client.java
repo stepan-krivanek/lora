@@ -18,18 +18,18 @@ import java.util.logging.Logger;
  *
  * @author stepa
  */
-public class ClientConnection extends Thread {
+public class Client extends Thread {
     
     private InetAddress ipAddress;
     private Socket socket;
     private DataInputStream input;
     private DataOutputStream output;
     
-    public ClientConnection(String ipAddress){
+    public Client(String ipAddress){
         try {
             this.ipAddress = InetAddress.getByName(ipAddress);
         } catch (UnknownHostException ex) {
-            Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }       
             
         try {
@@ -37,7 +37,7 @@ public class ClientConnection extends Thread {
             input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
         } catch (IOException ex) {
-            Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

@@ -9,14 +9,8 @@ import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.lora.Game;
-import card_game.lora.GameView;
 import card_game.lora.Player;
 import java.util.List;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 
 /**
  *
@@ -29,10 +23,8 @@ public class Tens implements GameMode{
     private final int DECK_SIZE = 32;
     private final int id = GameModes.TENS.ordinal();
     private final Deck cardsPlayed = new Deck(DECK_SIZE);
-    private final Button passButton = new Button("PASS");
     private final Game game;
     private Player player;
-    private GridPane cards;
     
     public Tens(Game game){
         this.game = game;
@@ -40,7 +32,6 @@ public class Tens implements GameMode{
 
     @Override
     public void start(){
-        show();
         player = game.getForehand();
         player.play();
     }
@@ -54,7 +45,6 @@ public class Tens implements GameMode{
                 player.play();
             } else if (checkRules(card)){
                 cardsPlayed.add(card);
-                showCard(card);
                 checkWinner();
             }
         }
@@ -88,8 +78,6 @@ public class Tens implements GameMode{
     }
     
     private void end(){
-        game.getGameView().getTable().getChildren().remove(cards);
-        game.getGameView().getChildren().remove(passButton);
         Deck mainDeck = new Deck(DECK_SIZE);
         
         for (int row = 0; row < NUM_OF_ROWS; row++){
@@ -121,54 +109,6 @@ public class Tens implements GameMode{
         if (player.getHand().isEmpty()){
             end();
         }
-    }
-    
-    private void show(){  
-        GameView gameView = game.getGameView();
-        
-        cards = new GridPane();
-        cards.setAlignment(Pos.CENTER);
-        cards.setPrefWidth(gameView.getWidth());
-        cards.setPrefHeight(gameView.getHeight());
-        cards.setHgap(NUM_OF_COLS);
-        cards.setVgap(NUM_OF_ROWS);
-
-        for (int col = 0; col < NUM_OF_COLS; col++){
-            for (int row = 0; row < NUM_OF_ROWS; row++){
-                Card card = new Card(
-                        game.getSuits().get(row),
-                        game.getRanks().get(col)
-                );
-                
-                ImageView cardView = new ImageView(card.getFront());
-                cardView.setOpacity(0.2);
-                
-                cardView.setFitWidth(gameView.getCardWidth());
-                cardView.setFitHeight(gameView.getCardHeight());
-                cardView.setPreserveRatio(true);
-                
-                GridPane.setConstraints(cardView, col, row);
-                GridPane.setMargin(cardView, new Insets(5, 10, 5 ,10));
-                
-                cards.getChildren().add(cardView);
-            }
-        }
-        
-        gameView.getTable().getChildren().add(cards);
-        
-        passButton.setAlignment(Pos.BOTTOM_RIGHT);
-        passButton.setOnAction(e -> {
-            game.getPlayer(0).playCard(null);
-        });
-        
-        gameView.getChildren().add(passButton);
-    }
-    
-    private void showCard(Card card){
-        int suitIndex = game.getSuits().indexOf(card.getSuit());
-        int rankIndex = game.getRanks().indexOf(card.getRank());
-        int cardIndex = suitIndex + rankIndex * game.getSuits().size();
-        cards.getChildren().get(cardIndex).setOpacity(1);
     }
     
     @Override
