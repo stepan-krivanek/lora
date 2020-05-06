@@ -170,7 +170,7 @@ public class Server implements Runnable{
                 while(true){
                     byte data[] = new byte[MSG_SIZE];
                     input.read(data);
-                    
+                    game.playCard(new Card(data[0]), playerId);
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);

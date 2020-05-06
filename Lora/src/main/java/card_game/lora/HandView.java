@@ -25,8 +25,7 @@ public class HandView extends GridPane{
     private final double CARD_HEIGHT;
     private final double toRadians = (Math.PI / 180);
     
-    public HandView(Player player, double width, double height){
-        Deck deck = player.getHand();
+    public HandView(Deck deck, MpPlayer player, double width, double height){
         CARD_WIDTH = width / 10;
         CARD_HEIGHT = height / 3;
         

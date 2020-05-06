@@ -96,8 +96,7 @@ public class GameMenu extends StackPane{
         MpPlayer player = new MpPlayer();
         
         if (player.connectToServer()){
-            GameView gameView = new GameView(program, player);
-            gameView.showLoadingScreen();
+            player.setGameView(program);
             this.setVisible(false);
         }
     }

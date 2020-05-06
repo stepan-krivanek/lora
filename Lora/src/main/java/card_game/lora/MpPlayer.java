@@ -5,6 +5,9 @@
  */
 package card_game.lora;
 
+import card_game.card.Card;
+import card_game.card.Deck;
+import card_game.net.Message;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -20,10 +23,11 @@ import java.util.logging.Logger;
  */
 public class MpPlayer {
     
+    private final int MSG_SIZE = 10;
     private int id;
-    private HandView handView;
     private boolean isPlaying = false;
     private Connection connection;
+    private GameView gameView;
     
     public void play(){
         isPlaying = true;
@@ -33,16 +37,27 @@ public class MpPlayer {
         isPlaying = false;
     }
     
-    public HandView getHandView(){
-        return handView;
-    }
-    
-    public void setHandView(HandView handView){
-        this.handView = handView;
+    // Must be reworked!!!
+    public boolean playCard(Card card){
+        byte[] data = new byte[MSG_SIZE];
+        data[0] = card.toByte();
+        
+        try {
+            connection.output.write(data);
+            connection.input.read(data);
+        } catch (IOException ex) {
+            Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return data[1] == 1;
     }
     
     public boolean isPlaying(){
         return isPlaying;
+    }
+    
+    public void setGameView(Main program){
+        gameView = new GameView(program, this);
     }
     
     public boolean connectToServer(){   
@@ -60,7 +75,60 @@ public class MpPlayer {
         return true;
     }
     
-    public class Connection implements Runnable {
+    private void action(byte[] data){
+        Message msg = Message.values()[data[0]];
+        
+        switch(msg){
+            case START:
+                gameView.show();
+                break;
+                
+            case EXIT:
+                gameView.exit();
+                break;
+                
+            case SCORE:
+                //TBA
+                break;
+                
+            case PLAY:
+                play();
+                break;
+                
+            case STOP_PLAYING:
+                stopPlaying();
+                break;
+                
+            case CARD_PLAYED:
+                Card card1 = new Card(data[1]);
+                gameView.showCard(card1);
+                break;
+               
+            case GAME_MODE:
+                gameView.setGameMode(data[1]);
+                break;
+                
+            case END_OF_ROUND:
+                gameView.showWinner(id);
+                break;
+                
+            case HAND:
+                Deck hand = new Deck(8);
+                
+                for (int i = 1; i <= 8; i++){
+                    Card card2 = new Card(data[i]);
+                    hand.add(card2);
+                }
+                
+                gameView.showHand(hand);
+                break;
+                
+            case PLAY_RESPONSE:
+                break;
+        }
+    }
+    
+    private class Connection implements Runnable {
     
         private InetAddress ipAddress;
         private Socket socket;
@@ -93,7 +161,15 @@ public class MpPlayer {
 
         @Override
         public void run() {
-            
+            while (true){
+                try {
+                    byte[] data = new byte[MSG_SIZE];
+                    input.read(data);
+                    action(data);
+                } catch (IOException ex) {
+                    Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
 }
