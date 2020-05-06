@@ -9,10 +9,12 @@ import card_game.card.Card;
 import card_game.card.Rank;
 import card_game.card.Suit;
 import card_game.lora.game_modes.GameModes;
-import card_game.net.Client;
-import card_game.net.Server;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -88,7 +90,7 @@ public class GameView extends StackPane{
         program.getRoot().getChildren().add(this);
     }
     
-    public void showHand(Player player){
+    public void showHand(MpPlayer player){
         this.getChildren().removeAll(primaryHand, playZone);
         primaryHand = player.getHandView();
         
@@ -238,9 +240,15 @@ public class GameView extends StackPane{
             }
             
             passButton.setAlignment(Pos.BOTTOM_RIGHT);
-            passButton.setOnAction(e -> {
-                //game.getPlayer(0).playCard(null);//send null to server
-            });
+            /*passButton.setOnAction(e -> {
+                Card card = new Card(Suit.HEART, Rank.NINE);
+                try {
+                    ObjectOutputStream output = new ObjectOutputStream(player.output());
+                } catch (IOException ex) {
+                    Logger.getLogger(GameView.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+            });*/
         }
         
         private void show(){  

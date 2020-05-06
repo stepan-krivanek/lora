@@ -5,7 +5,10 @@
  */
 package card_game.net;
 
+import card_game.card.Card;
+import card_game.card.Deck;
 import card_game.lora.Game;
+import card_game.lora.GameUtils;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -20,6 +23,8 @@ import java.util.logging.Logger;
  */
 public class Server implements Runnable{
     
+    private final Game game = new Game(this);
+    private final int MSG_SIZE = 10;
     private final int port = 1341;
     private ServerSocket socket;
     private int numOfPlayers;
@@ -61,6 +66,81 @@ public class Server implements Runnable{
     @Override
     public void run() {
         acceptConnections();
+        start();
+        game.start();
+    }
+    
+    private void broadcast(byte[] data) {
+        for (int i = 0; i < numOfPlayers; i++){
+            send(data, i);
+        }
+    }
+    
+    private void send(byte[] data, int id){
+        try {
+            players[id].output.write(data);
+            players[id].output.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private byte[] initMessage(Message id){
+        byte[] data = new byte[MSG_SIZE];
+        data[0] = (new Integer(id.ordinal())).byteValue();
+        return data;
+    }
+    
+    public void start(){
+        broadcast(initMessage(Message.START));
+    }
+    
+    public void exit(){
+        broadcast(initMessage(Message.EXIT));
+    }
+    
+    public void endOfRound(){
+        broadcast(initMessage(Message.END_OF_ROUND));
+    }
+    
+    public void cardPlayed(Card card){
+        byte[] data = initMessage(Message.CARD_PLAYED);
+        data[1] = card.toByte();
+        broadcast(data);
+    }
+    
+    public void response(boolean correct, int id){
+        byte[] data = initMessage(Message.PLAY_RESPONSE);
+        data[1] = correct == true ? (byte)1 : (byte)0;
+        send(data, id);
+    }
+    
+    public void hand(Deck deck, int id){
+        byte[] data = initMessage(Message.HAND);
+        
+        for (int i = 0; i < deck.size(); i++){
+            data[i+1] = deck.get(i).toByte();
+        }
+        
+        send(data, id);
+    }
+    
+    public void score(){
+        //TBA
+    }
+    
+    public void gameMode(int id){
+        byte[] data = initMessage(Message.GAME_MODE);
+        data[1] = (new Integer(id)).byteValue();
+        broadcast(data);
+    }
+    
+    public void play(int id){
+        send(initMessage(Message.PLAY), id);
+    }
+    
+    public void stopPlaying(int id){
+        send(initMessage(Message.STOP_PLAYING), id);
     }
     
     private class Connection implements Runnable {
@@ -88,6 +168,8 @@ public class Server implements Runnable{
                 output.flush();
                 
                 while(true){
+                    byte data[] = new byte[MSG_SIZE];
+                    input.read(data);
                     
                 }
             } catch (IOException ex) {

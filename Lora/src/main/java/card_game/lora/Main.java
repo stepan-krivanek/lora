@@ -5,7 +5,7 @@
  */
 package card_game.lora;
 
-import card_game.net.Client;
+import card_game.card.CardUtils;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCombination;
@@ -26,6 +26,7 @@ public class Main extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
+        CardUtils.preloadImages();
         root = new StackPane();
         setStage(stage, "Lora");
         

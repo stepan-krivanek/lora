@@ -16,31 +16,28 @@ public class Player {
 
     private final Deck hand = new Deck(8);
     private final Deck table = new Deck(32);
-    private Game game;
-    private int id;
-    private HandView handView;
+    private final Game game;
+    private final int id;
     private boolean isPlaying = false;
     
-    public Player(Game game){
+    public Player(Game game, int id){
+        this.id = id;
         this.game = game;
     }
     
     public void play(){
         isPlaying = true;
+        game.getServer().play(id);
     }
     
     public void stopPlaying(){
         isPlaying = false;
+        game.getServer().stopPlaying(id);
     }
     
-    public boolean playCard(Card card){
-        if (game.checkRules(card)){
-            hand.remove(card);
-            game.playCard(card);
-            return true;
-        }
-        
-        return false;
+    public void playCard(Card card){
+        hand.remove(card);
+        game.playCard(card);
     }
     
     public Deck getTable(){
@@ -51,20 +48,8 @@ public class Player {
         return hand;
     }
     
-    public HandView getHandView(){
-        return handView;
-    }
-    
-    public void setHandView(HandView handView){
-        this.handView = handView;
-    }
-    
     public int getId(){
         return id;
-    }
-    
-    public void setId(int id){
-        this.id = id;
     }
     
     public boolean isPlaying(){

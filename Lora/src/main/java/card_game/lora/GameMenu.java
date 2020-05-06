@@ -5,19 +5,13 @@
  */
 package card_game.lora;
 
-import card_game.net.Client;
 import card_game.net.Server;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -35,7 +29,6 @@ public class GameMenu extends StackPane{
     private final Button spButton, mpButton, exitButton;
     private final VBox centerVBox;
     private final Main program;
-    private Player player;
 
     public GameMenu(Main program, Stage stage){
         this.program = program;
@@ -82,12 +75,12 @@ public class GameMenu extends StackPane{
             Server server = new Server(4);
             Thread t = new Thread(server);
             t.start();
-            start();
+            joinServer();
         });
         
         Button clientButton = new Button("Join existing game");
         clientButton.setOnAction(e -> {
-            start();
+            joinServer();
         });
         
         Button returnButton = new Button("Return");
@@ -99,12 +92,12 @@ public class GameMenu extends StackPane{
         centerVBox.getChildren().addAll(serverButton, clientButton, returnButton);
     }
     
-    private void start(){
+    private void joinServer(){
         MpPlayer player = new MpPlayer();
         
         if (player.connectToServer()){
             GameView gameView = new GameView(program, player);
-            gameView.show();
+            gameView.showLoadingScreen();
             this.setVisible(false);
         }
     }

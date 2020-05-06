@@ -6,8 +6,6 @@
 package card_game.card;
 
 import card_game.lora.GameUtils;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import javafx.scene.image.Image;
 
@@ -38,7 +36,7 @@ public class CardUtils {
         return BACK_IMAGE;
     }
     
-    private static void preloadImages(){
+    public static void preloadImages(){
         initFrontImages();
         imagesLoaded = true;
     }

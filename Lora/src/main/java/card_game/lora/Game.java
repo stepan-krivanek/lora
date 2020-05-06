@@ -19,7 +19,7 @@ import card_game.lora.game_modes.RedKing;
 import card_game.lora.game_modes.Reds;
 import card_game.lora.game_modes.Superiors;
 import card_game.lora.game_modes.Tens;
-import card_game.net.Client;
+import card_game.net.Server;
 
 /**
  *
@@ -35,24 +35,39 @@ public class Game {
     private final List<Suit> suits = GameUtils.getOrderedSuits();
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
+    private final Server server;
     private GameMode gameMode;
     private Player forehand;
     private int round;
     
-    public Game(){
+    public Game(Server server){
+        this.server = server;
+        
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
-            players[i] = new Player(this);
+            players[i] = new Player(this, i);
         }
+        forehand = players[0];
     }
     
     public void start(){
-        cardDealing();
         setGameMode(0);
+        cardDealing();
         gameMode.start();
     }
     
     public void playCard(Card card){
         gameMode.playCard(card);
+    }
+    
+    public void playCard(Card card, int id){
+        
+        if (players[id].isPlaying() && checkRules(card)){
+            players[id].playCard(card);
+            server.response(true, id);
+            server.cardPlayed(card);
+        } else {
+            server.response(false, id);
+        }
     }
     
     public boolean checkRules(Card card){
@@ -106,7 +121,9 @@ public class Game {
             case QUARTS:
                 gameMode = new Quarts(this);
                 break;
-        } 
+        }
+        
+        server.gameMode(index);
     }
     
     private void nextRound(){
@@ -136,6 +153,10 @@ public class Game {
             
             player = getNextPlayer(player);
         }
+        
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            server.hand(players[i].getHand(), i);
+        }
     }
     
     public List<Suit> getSuits(){
@@ -157,6 +178,10 @@ public class Game {
     public Player getPlayer(int index){
         index = index % NUM_OF_PLAYERS;
         return players[index];
+    }
+    
+    public Server getServer(){
+        return server;
     }
     
     public Player getNextPlayer(Player player){

@@ -5,6 +5,8 @@
  */
 package card_game.card;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.image.Image;
 
 /**
@@ -21,6 +23,12 @@ public class Card {
         this.rank = rank;
     }
     
+    public Card(byte b){
+        int id = (new Byte(b)).intValue();
+        suit = Suit.values()[(id / 10) % 10];
+        rank = Rank.values()[id % 10];
+    }
+    
     public Image getFront(){
         return CardUtils.getFrontImage(this);
     }
@@ -35,5 +43,10 @@ public class Card {
 
     public Rank getRank() {
         return rank;
+    }
+    
+    public byte toByte(){
+        Integer id = new Integer(suit.ordinal() * 10 + rank.ordinal());
+        return id.byteValue();
     }
 }
