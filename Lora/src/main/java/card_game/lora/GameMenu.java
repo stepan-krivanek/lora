@@ -93,10 +93,9 @@ public class GameMenu extends StackPane{
     }
     
     private void joinServer(){
-        MpPlayer player = new MpPlayer();
+        MpPlayer player = new MpPlayer(program);
         
         if (player.connectToServer()){
-            player.setGameView(program);
             this.setVisible(false);
         }
     }

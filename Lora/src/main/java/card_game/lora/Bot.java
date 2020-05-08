@@ -5,8 +5,6 @@
  */
 package card_game.lora;
 
-import java.util.Random;
-
 /**
  *
  * @author stepa
@@ -15,8 +13,8 @@ public class Bot extends Player{
     
     private boolean isPlaying = false;
     
-    public Bot(Game game) {
-        super(game);
+    public Bot(Game game, int id) {
+        super(game, id);
         //add id
     }
     

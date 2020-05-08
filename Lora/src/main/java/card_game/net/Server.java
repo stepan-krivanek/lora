@@ -8,7 +8,6 @@ package card_game.net;
 import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.lora.Game;
-import card_game.lora.GameUtils;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -109,9 +108,10 @@ public class Server implements Runnable{
         broadcast(data);
     }
     
-    public void response(boolean correct, int id){
+    public void response(Card card, boolean correct, int id){
         byte[] data = initMessage(Message.PLAY_RESPONSE);
-        data[1] = correct == true ? (byte)1 : (byte)0;
+        data[1] = card.toByte();
+        data[2] = correct == true ? (byte)1 : (byte)0;
         send(data, id);
     }
     

@@ -60,13 +60,14 @@ public class Game {
     }
     
     public void playCard(Card card, int id){
+        Player player = players[id];
         
-        if (players[id].isPlaying() && checkRules(card)){
-            players[id].playCard(card);
-            server.response(true, id);
+        if (player.isPlaying() && checkRules(card)){
+            player.playCard(card);
+            server.response(card, true, id);
             server.cardPlayed(card);
         } else {
-            server.response(false, id);
+            server.response(card, false, id);
         }
     }
     

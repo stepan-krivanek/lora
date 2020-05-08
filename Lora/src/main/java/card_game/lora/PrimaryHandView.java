@@ -16,7 +16,7 @@ public class PrimaryHandView extends HandView{
     private final double CARD_WIDTH;
     private final double CARD_HEIGHT;
     
-    public PrimaryHandView(Player player, double width, double height){
+    public PrimaryHandView(MpPlayer player, double width, double height){
         super(player, width, height);
         CARD_WIDTH = super.getCardWidth();
         CARD_HEIGHT = super.getCardHeight();

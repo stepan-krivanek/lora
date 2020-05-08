@@ -7,10 +7,12 @@ package card_game.lora;
 
 import card_game.card.Card;
 import card_game.card.Deck;
+import java.util.ArrayList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -24,8 +26,10 @@ public class HandView extends GridPane{
     private final double CARD_WIDTH;
     private final double CARD_HEIGHT;
     private final double toRadians = (Math.PI / 180);
+    private ArrayList<CardView> cards;
     
-    public HandView(Deck deck, MpPlayer player, double width, double height){
+    public HandView(MpPlayer player, double width, double height){
+        Deck deck = player.getHand();
         CARD_WIDTH = width / 10;
         CARD_HEIGHT = height / 3;
         
@@ -35,54 +39,47 @@ public class HandView extends GridPane{
         setHgap(deck.size());
         setVgap(1);
         
-        double cardShift = CARD_HEIGHT / 5;
-        double overlay = CARD_WIDTH / 2;
+        final double overlay = CARD_WIDTH / 2;
+        cards = new ArrayList<>();
+        
         for (int i = 0; i < deck.size(); i++){
             Card card = deck.get(i);
-            ImageView cardView = new ImageView(card.getFront());
-            cardView.setFitWidth(CARD_WIDTH);
-            cardView.setFitHeight(CARD_HEIGHT);
-            cardView.setPreserveRatio(true);
-            
-            DropShadow borderGlow = new DropShadow();
-            borderGlow.setRadius(CARD_WIDTH / 2);
-            borderGlow.setSpread(0.2);
-            
-            cardView.setOnMouseEntered(e -> {
-                double radians = cardView.getRotate() * toRadians;
-                cardView.setTranslateX(cardShift * Math.tan(radians));
-                cardView.setTranslateY(cardView.getTranslateY() - cardShift);
-                
-                borderGlow.setColor(Color.WHEAT);
-                cardView.setEffect(borderGlow);
-            });
-            
-            cardView.setOnMouseExited(e -> {
-                cardView.setTranslateX(0);
-                cardView.setTranslateY(cardView.getTranslateY() + cardShift);
-                
-                cardView.setEffect(null);
-            });
+            CardView cardView = new CardView(card.getFront());
             
             cardView.setOnMouseClicked(e -> {
-                if (player.isPlaying() == true){
-                    boolean correctPlay = player.playCard(card);
-                    
-                    if(correctPlay == true){
-                        this.getChildren().remove(cardView);
-                        this.applyRotation();
-                    } else {
-                        borderGlow.setColor(Color.RED);
-                    }
+                if (player.isPlaying()){
+                    player.playCard(card);
                 }
             });
             
             GridPane.setConstraints(cardView, i, 0);
             GridPane.setMargin(cardView, new Insets(0, -overlay, 0, 0));
             this.getChildren().add(cardView);
+            
+            cards.add(i, cardView);
         }
         
         this.applyRotation();
+    }
+    
+    public boolean glowCard(int index, Color color){
+        if (index >= cards.size() || index < 0){
+            return false;
+        }
+        
+        cards.get(index).getBorderGlow().setColor(color);
+        return true;
+    }
+    
+    public boolean removeCard(int index){
+        if (index >= cards.size() || index < 0){
+            return false;
+        }
+        
+        cards.remove(index);
+        getChildren().remove(index);
+        applyRotation();
+        return true;
     }
     
     private void applyRotation(){
@@ -116,11 +113,48 @@ public class HandView extends GridPane{
         }
     }
     
-    protected double getCardWidth(){
+    public class CardView extends ImageView {
+        
+        private final double cardShift = CARD_HEIGHT / 5;
+        private final DropShadow borderGlow = new DropShadow();
+        
+        public CardView(Image image){
+            super(image);
+            
+            setFitWidth(CARD_WIDTH);
+            setFitHeight(CARD_HEIGHT);
+            setPreserveRatio(true);
+            
+            borderGlow.setRadius(CARD_WIDTH / 2);
+            borderGlow.setSpread(0.2);
+            
+            setOnMouseEntered(e -> {
+                double radians = getRotate() * toRadians;
+                setTranslateX(cardShift * Math.tan(radians));
+                setTranslateY(getTranslateY() - cardShift);
+                
+                borderGlow.setColor(Color.WHEAT);
+                setEffect(borderGlow);
+            });
+            
+            setOnMouseExited(e -> {
+                setTranslateX(0);
+                setTranslateY(getTranslateY() + cardShift);
+                
+                setEffect(null);
+            });
+        }
+        
+        public DropShadow getBorderGlow(){
+            return borderGlow;
+        }
+    }
+    
+    public double getCardWidth(){
         return CARD_WIDTH;
     }
     
-    protected double getCardHeight(){
+    public double getCardHeight(){
         return CARD_HEIGHT;
     }
     

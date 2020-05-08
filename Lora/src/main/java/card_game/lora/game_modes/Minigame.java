@@ -78,6 +78,10 @@ public class Minigame {
     }
     
     public boolean checkRules(Suit suit){
+        if (cardsPlayed % 4 == 0){
+            return true;
+        }
+        
         if (suit != leadSuit){
             if (player.getHand().contains(leadSuit)){
                 return false;

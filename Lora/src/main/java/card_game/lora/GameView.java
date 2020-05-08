@@ -39,10 +39,10 @@ import javafx.scene.text.Text;
  */
 public class GameView extends StackPane{
     
-    private final double WIDTH = GameUtils.getScreenWidth();
-    private final double HEIGHT = GameUtils.getScreenHeight();
-    private final double CARD_WIDTH = WIDTH / 10;
-    private final double CARD_HEIGHT = HEIGHT / 5;
+    private final double WIDTH;// = GameUtils.getScreenWidth();
+    private final double HEIGHT;// = GameUtils.getScreenHeight();
+    private final double CARD_WIDTH;// = WIDTH / 10;
+    private final double CARD_HEIGHT;// = HEIGHT / 5;
     private final List<Suit> suits = GameUtils.getOrderedSuits();
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
@@ -51,12 +51,20 @@ public class GameView extends StackPane{
     private final GameView gameView = this;
     private final Main program;
     private final MpPlayer player;
+    
     private HandView primaryHand;
     private Rectangle playZone;
     private GameModes gameMode;
-    private TableGUI tableGUI;
+    private TableGUI tableGUI = null;
     
     public GameView(Main program, MpPlayer player){
+        ///For testing
+        WIDTH = program.getStage().getWidth();
+        HEIGHT = program.getStage().getHeight();
+        CARD_WIDTH = WIDTH / 10;
+        CARD_HEIGHT = HEIGHT / 5;
+        ///
+        
         this.player = player;
         this.program = program;
         program.getScene().setOnKeyPressed(e -> {
@@ -92,9 +100,9 @@ public class GameView extends StackPane{
         program.getRoot().getChildren().add(this);
     }
     
-    public void showHand(Deck hand){
+    public void showHand(){
         this.getChildren().removeAll(primaryHand, playZone);
-        primaryHand = new HandView(hand, player, WIDTH, HEIGHT);
+        primaryHand = new HandView(player, WIDTH, HEIGHT);
         
         playZone = new Rectangle(WIDTH, HEIGHT * 2 / 3);
         this.setAlignment(playZone, Pos.TOP_CENTER);
@@ -121,7 +129,9 @@ public class GameView extends StackPane{
     }
     
     public void setGameMode(int id){
-        tableGUI.hide();
+        if (tableGUI != null){
+            tableGUI.hide();
+        }
         
         gameMode = gameModes.get(id);
         if (gameMode == GameModes.TENS){
@@ -148,6 +158,10 @@ public class GameView extends StackPane{
         getChildren().addAll(rect, winner);
     }
     
+    public HandView getHandView(){
+        return primaryHand;
+    }
+    
     private PerspectiveTransform perspection(double width, double height){
         final double hSegment = width / 6;
         final double vSegment = height / 5;
@@ -160,17 +174,6 @@ public class GameView extends StackPane{
         );
         
         return perspection;
-    }
-    
-    private void showPassButton(Player player){
-        Button passButton = new Button("PASS");
-        
-        this.setAlignment(passButton, Pos.BOTTOM_RIGHT);
-        passButton.setOnAction(e -> {
-            player.playCard(null);
-        });
-        
-        this.getChildren().add(passButton);
     }
     
     private class LoadingScreen {
@@ -198,7 +201,9 @@ public class GameView extends StackPane{
     private class MinigameGUI implements TableGUI{
         
         private StackPane discardLayout;
+        private int cardsPlayed = 0;
         
+        @Override
         public void show(){
             discardLayout = new StackPane();
             discardLayout.setPrefWidth(WIDTH);
@@ -208,7 +213,13 @@ public class GameView extends StackPane{
             table.getChildren().add(discardLayout);
         }
 
+        @Override
         public void showCard(Card card){
+            if (++cardsPlayed > 4){
+                discardLayout.getChildren().clear();
+                cardsPlayed = 1;
+            }
+            
             ImageView cardView = new ImageView(card.getFront());
             cardView.setFitWidth(CARD_WIDTH);
             cardView.setFitHeight(CARD_HEIGHT);
@@ -218,6 +229,7 @@ public class GameView extends StackPane{
             discardLayout.getChildren().add(cardView);
         }
         
+        @Override
         public void hide(){
             table.getChildren().remove(discardLayout);
         }
@@ -231,11 +243,6 @@ public class GameView extends StackPane{
         private final GridPane cards;
         
         public TensGUI(){
-            Rank[] rankArr = new Rank[Rank.values().length];
-            for (Rank rank : Rank.values()){
-                rankArr[GameUtils.getRankValue(rank)] = rank;
-            }
-            
             cards = new GridPane();
             cards.setAlignment(Pos.CENTER);
             cards.setPrefWidth(WIDTH);
@@ -262,22 +269,18 @@ public class GameView extends StackPane{
             }
             
             passButton.setAlignment(Pos.BOTTOM_RIGHT);
-            /*passButton.setOnAction(e -> {
-                Card card = new Card(Suit.HEART, Rank.NINE);
-                try {
-                    ObjectOutputStream output = new ObjectOutputStream(player.output());
-                } catch (IOException ex) {
-                    Logger.getLogger(GameView.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
-            });*/
+            passButton.setOnAction(e -> {
+                player.pass();
+            });
         }
         
+        @Override
         public void show(){  
             table.getChildren().add(cards);
             gameView.getChildren().add(passButton);
         }
 
+        @Override
         public void showCard(Card card){
             int suitIndex = suits.indexOf(card.getSuit());
             int rankIndex = ranks.indexOf(card.getRank());
@@ -285,6 +288,7 @@ public class GameView extends StackPane{
             cards.getChildren().get(cardIndex).setOpacity(1);
         }
         
+        @Override
         public void hide(){
             table.getChildren().remove(cards);
             gameView.getChildren().remove(passButton);
@@ -293,10 +297,16 @@ public class GameView extends StackPane{
     
     private class QuartsGUI implements TableGUI{
         
+        private final int COLOR_SIZE = 8;
+        private final int DISCARD_DECK_SIZE = 4;
         private final int HGAP = 4;
         private final int VGAP = 1;
         private final GridPane discardLayout;
+        private final Deck discardDeck = new Deck(4);
+        
         private Card leadCard;
+        private int cardsPlayed = 0;
+        private int cardsToPlay = 0;
         
         public QuartsGUI(){
             discardLayout = new GridPane();
@@ -307,20 +317,44 @@ public class GameView extends StackPane{
             discardLayout.setAlignment(Pos.CENTER);
         }
         
+        @Override
         public void show(){
             table.getChildren().add(discardLayout);
         }
 
-        public void showDeck(Card card1, Card card2){
-            leadCard = card1;
-            int value1 = ranks.indexOf(card1.getRank());
-            int value2 = ranks.indexOf(card2.getRank());
-            int range = value2 - value1 + 1;
+        @Override
+        public void showCard(Card card){
+            if (++cardsPlayed > cardsToPlay){
+                cardsPlayed = 1;
+                showDeck(card);
+            }
             
-            for (int i = 0; i < range; i++){
-                Card card = new Card(card1.getSuit(), ranks.get(value1 + i));
-
-                ImageView cardView = new ImageView(card.getFront());
+            int index = getRankDiff(card);
+            discardLayout.getChildren().get(index).setOpacity(1);
+        }
+        
+        @Override
+        public void hide(){
+            table.getChildren().remove(discardLayout);
+        }
+        
+        private void showDeck(Card card){
+            discardLayout.getChildren().clear();
+            cardsToPlay = 0;
+            leadCard = card;
+            
+            int value = ranks.indexOf(card.getRank());
+            for (int i = 0; i < DISCARD_DECK_SIZE; i++){
+                int index = value + i;
+                Card tmp = new Card(card.getSuit(), ranks.get(index));
+                
+                if(index >= COLOR_SIZE || discardDeck.contains(tmp)){
+                    break;
+                }
+                discardDeck.add(tmp);
+                cardsToPlay += 1;
+                
+                ImageView cardView = new ImageView(tmp.getFront());
                 cardView.setOpacity(0.2);
 
                 cardView.setFitWidth(CARD_WIDTH);
@@ -332,15 +366,6 @@ public class GameView extends StackPane{
 
                 discardLayout.getChildren().add(cardView);
             }
-        }
-        
-        public void showCard(Card card){
-            int index = getRankDiff(card);
-            discardLayout.getChildren().get(index).setOpacity(1);
-        }
-        
-        public void hide(){
-            table.getChildren().remove(discardLayout);
         }
         
         private int getRankDiff(Card card){

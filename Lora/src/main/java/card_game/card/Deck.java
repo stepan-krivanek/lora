@@ -14,7 +14,7 @@ import java.util.Random;
  *
  * @author stepan
  */
-public class Deck extends ArrayList<Card>{
+public class Deck extends ArrayList<Card> {
     
     private final int MAX_SIZE;
     
@@ -120,6 +120,22 @@ public class Deck extends ArrayList<Card>{
         }
     }
     
+    public int indexOf(Card card){
+        int ret = -1;
+        
+        for (int i = 0; i < size(); i++){
+            Card tmp = get(i);
+            if (tmp.getRank() == card.getRank()){
+                if (tmp.getSuit() == card.getSuit()){
+                    ret = i;
+                    break;
+                }
+            }
+        }
+        
+        return ret;
+    }
+    
     public boolean contains(Card card){
         boolean contains = false;
         
@@ -151,5 +167,9 @@ public class Deck extends ArrayList<Card>{
     
     public boolean isFull(){
         return this.size() == MAX_SIZE;
+    }
+    
+    public void remove(Card card){
+        remove(indexOf(card));
     }
 }

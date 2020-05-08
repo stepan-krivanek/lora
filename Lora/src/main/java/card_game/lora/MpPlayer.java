@@ -16,6 +16,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -26,8 +28,13 @@ public class MpPlayer {
     private final int MSG_SIZE = 10;
     private int id;
     private boolean isPlaying = false;
+    private Deck hand;
     private Connection connection;
     private GameView gameView;
+    
+    public MpPlayer(Main program){
+        gameView = new GameView(program, this);
+    }
     
     public void play(){
         isPlaying = true;
@@ -37,27 +44,23 @@ public class MpPlayer {
         isPlaying = false;
     }
     
-    // Must be reworked!!!
-    public boolean playCard(Card card){
+    public void playCard(Card card){
         byte[] data = new byte[MSG_SIZE];
         data[0] = card.toByte();
         
         try {
             connection.output.write(data);
-            connection.input.read(data);
         } catch (IOException ex) {
             Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public void pass(){
         
-        return data[1] == 1;
     }
     
     public boolean isPlaying(){
         return isPlaying;
-    }
-    
-    public void setGameView(Main program){
-        gameView = new GameView(program, this);
     }
     
     public boolean connectToServer(){   
@@ -75,16 +78,24 @@ public class MpPlayer {
         return true;
     }
     
+    public Deck getHand(){
+        return hand;
+    }
+    
     private void action(byte[] data){
         Message msg = Message.values()[data[0]];
         
         switch(msg){
             case START:
-                gameView.show();
+                Platform.runLater(() -> {
+                    gameView.show();
+                });
                 break;
                 
             case EXIT:
-                gameView.exit();
+                Platform.runLater(() -> {
+                    gameView.exit();
+                });
                 break;
                 
             case SCORE:
@@ -101,29 +112,55 @@ public class MpPlayer {
                 
             case CARD_PLAYED:
                 Card card1 = new Card(data[1]);
-                gameView.showCard(card1);
+                Platform.runLater(() -> {
+                    gameView.showCard(card1);
+                });
                 break;
                
             case GAME_MODE:
-                gameView.setGameMode(data[1]);
+                Platform.runLater(() -> {
+                    gameView.setGameMode(data[1]);
+                });
                 break;
                 
             case END_OF_ROUND:
-                gameView.showWinner(id);
+                Platform.runLater(() -> {
+                    gameView.showWinner(id);
+                });
                 break;
                 
             case HAND:
-                Deck hand = new Deck(8);
+                hand = new Deck(8);
                 
                 for (int i = 1; i <= 8; i++){
                     Card card2 = new Card(data[i]);
-                    hand.add(card2);
+                    hand.addTopCard(card2);
                 }
                 
-                gameView.showHand(hand);
+                Platform.runLater(() -> {
+                    gameView.showHand();
+                });
                 break;
                 
             case PLAY_RESPONSE:
+                Card card3 = new Card(data[1]);
+                int index = hand.indexOf(card3);
+                
+                if (index == -1){
+                    break;
+                }
+                
+                if (data[2] == 1){
+                    hand.remove(index);
+                    Platform.runLater(() -> {
+                        gameView.getHandView().removeCard(index);
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        gameView.getHandView().glowCard(index, Color.RED);
+                    });
+                }
+                
                 break;
         }
     }

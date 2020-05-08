@@ -23,6 +23,7 @@ public class Main extends Application {
     private StackPane root;
     private GameMenu mainMenu;
     private Scene mainScene;
+    private Stage stage;
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -37,6 +38,8 @@ public class Main extends Application {
         mainScene = new Scene(root);
         stage.setScene(mainScene);
         stage.show();
+        
+        this.stage = stage;
     }
     
     public void closeProgram(Stage stage){
@@ -46,6 +49,10 @@ public class Main extends Application {
             }
             stage.close();
         }
+    }
+    
+    public Stage getStage(){
+        return stage;
     }
     
     public Scene getScene(){
