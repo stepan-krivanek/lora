@@ -50,29 +50,22 @@ public class Game {
     }
     
     public void start(){
-        setGameMode(0);
         cardDealing();
+        setGameMode(gameModes.indexOf(GameModes.QUARTS));
         gameMode.start();
     }
     
-    public void playCard(Card card){
-        gameMode.playCard(card);
-    }
-    
-    public void playCard(Card card, int id){
-        Player player = players[id];
-        
+    public void playCard(Card card, int playerId){
+        Player player = players[playerId];
+
         if (player.isPlaying() && checkRules(card)){
-            player.playCard(card);
-            server.response(card, true, id);
+            server.response(card, true, playerId);
             server.cardPlayed(card);
+            gameMode.playCard(card, playerId);
+            player.playCard(card);
         } else {
-            server.response(card, false, id);
+            server.response(card, false, playerId);
         }
-    }
-    
-    public boolean checkRules(Card card){
-        return gameMode.checkRules(card);
     }
     
     public void nextGameMode(Deck deck){
@@ -91,6 +84,10 @@ public class Game {
             setGameMode(index);
             gameMode.start();
         }
+    }
+    
+    private boolean checkRules(Card card){
+        return gameMode.checkRules(card);
     }
     
     private void setGameMode(int index){

@@ -44,7 +44,11 @@ public class Card {
     }
     
     public byte toByte(){
-        Integer id = new Integer(suit.ordinal() * 10 + rank.ordinal());
+        Integer id = suit.ordinal() * 10 + rank.ordinal();
         return id.byteValue();
+    }
+    
+    public boolean equals(Card card){
+        return (card.rank == rank && card.suit == suit);
     }
 }

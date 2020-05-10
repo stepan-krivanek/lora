@@ -37,13 +37,13 @@ public class Tens implements GameMode{
     }
     
     @Override
-    public void playCard(Card card){
+    public void playCard(Card card, int playerId){
         if (checkRules(card)){
             if (card == null){
                 player.stopPlaying();
                 player = game.getNextPlayer(player);
                 player.play();
-            } else if (checkRules(card)){
+            } else {
                 cardsPlayed.add(card);
                 checkWinner();
             }

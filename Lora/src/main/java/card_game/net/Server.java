@@ -66,7 +66,6 @@ public class Server implements Runnable{
     public void run() {
         acceptConnections();
         start();
-        game.start();
     }
     
     private void broadcast(byte[] data) {
@@ -86,12 +85,13 @@ public class Server implements Runnable{
     
     private byte[] initMessage(Message id){
         byte[] data = new byte[MSG_SIZE];
-        data[0] = (new Integer(id.ordinal())).byteValue();
+        data[0] = (byte)id.ordinal();
         return data;
     }
     
-    public void start(){
+    private void start(){
         broadcast(initMessage(Message.START));
+        game.start();
     }
     
     public void exit(){
@@ -103,12 +103,16 @@ public class Server implements Runnable{
     }
     
     public void cardPlayed(Card card){
+        if (card == null) return;
+        
         byte[] data = initMessage(Message.CARD_PLAYED);
         data[1] = card.toByte();
         broadcast(data);
     }
     
     public void response(Card card, boolean correct, int id){
+        if (card == null) return;
+        
         byte[] data = initMessage(Message.PLAY_RESPONSE);
         data[1] = card.toByte();
         data[2] = correct == true ? (byte)1 : (byte)0;
@@ -170,7 +174,8 @@ public class Server implements Runnable{
                 while(true){
                     byte data[] = new byte[MSG_SIZE];
                     input.read(data);
-                    game.playCard(new Card(data[0]), playerId);
+                    Card card = data[0] == -1 ? null : new Card(data[0]);
+                    game.playCard(card, playerId);
                 }
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);

@@ -15,8 +15,8 @@ public interface GameMode {
     
     public void start();
     
-    public void playCard(Card card);
-    
+    public void playCard(Card card, int playerId);
+ 
     public boolean checkRules(Card card);
     
     public int getId();

@@ -36,11 +36,9 @@ public class Player {
     }
     
     public void playCard(Card card){
-        hand.remove(card);
-        if (hand.contains(card)){
-            System.out.println("Remove failed");
+        if (card != null){
+            hand.remove(card);
         }
-        game.playCard(card);
     }
     
     public Deck getTable(){

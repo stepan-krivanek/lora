@@ -47,16 +47,13 @@ public class MpPlayer {
     public void playCard(Card card){
         byte[] data = new byte[MSG_SIZE];
         data[0] = card.toByte();
-        
-        try {
-            connection.output.write(data);
-        } catch (IOException ex) {
-            Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        sendToServer(data);
     }
     
     public void pass(){
-        
+        byte[] data = new byte[MSG_SIZE];
+        data[0] = (byte)-1;
+        sendToServer(data);
     }
     
     public boolean isPlaying(){
@@ -80,6 +77,14 @@ public class MpPlayer {
     
     public Deck getHand(){
         return hand;
+    }
+    
+    private void sendToServer(byte[] data){
+        try {
+            connection.output.write(data);
+        } catch (IOException ex) {
+            Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private void action(byte[] data){

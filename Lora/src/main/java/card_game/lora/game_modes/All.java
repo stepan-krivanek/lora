@@ -26,7 +26,7 @@ public class All extends Minigame implements GameMode{
     }
 
     @Override
-    public void playCard(Card card) {
+    public void playCard(Card card, int playerId) {
         if (checkRules(card)){
             super.playCard(card);
         }

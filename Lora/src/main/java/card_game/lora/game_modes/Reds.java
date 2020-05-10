@@ -31,7 +31,7 @@ public class Reds extends Minigame implements GameMode{
     }
 
     @Override
-    public void playCard(Card card) {
+    public void playCard(Card card, int playerId) {
         if (checkRules(card)){
             cardsPlayed += 1;
             super.playCard(card);

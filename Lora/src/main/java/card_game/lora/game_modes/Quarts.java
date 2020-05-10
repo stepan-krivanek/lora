@@ -7,9 +7,11 @@ package card_game.lora.game_modes;
 
 import card_game.card.Card;
 import card_game.card.Deck;
+import card_game.card.Rank;
 import card_game.lora.Game;
 import card_game.lora.GameUtils;
 import card_game.lora.Player;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -19,8 +21,9 @@ import java.util.concurrent.Callable;
 public class Quarts implements GameMode{
 
     private final int MAX_CARDS = 32;
-    private final int DECK_SIZE = MAX_CARDS / 8;
+    private final int DECK_SIZE = 4;
     private final int id = GameModes.QUARTS.ordinal();
+    private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final Deck cardsPlayed = new Deck(MAX_CARDS);
     private final Deck discardDeck = new Deck(DECK_SIZE);
     private final Game game;
@@ -28,7 +31,6 @@ public class Quarts implements GameMode{
     private Card highestCard;
     private Player first;
     private int cardsToPlay;
-    
     
     public Quarts(Game game){
         this.game = game;
@@ -41,19 +43,22 @@ public class Quarts implements GameMode{
     }
 
     @Override
-    public void playCard(Card card) {
+    public void playCard(Card card, int playerId) {
         if (checkRules(card)){
             if (discardDeck.isEmpty()){
                 leadCard = card;
-                setFirstPlayer();
+                setCardsToPlay(card);
                 playAll();
             }
             
-            cardsToPlay -= 1;
+            if (card.equals(highestCard)){
+                first = game.getPlayer(playerId);
+            }
+            
             cardsPlayed.add(card);
             discardDeck.add(card);
             
-            if (cardsToPlay <= 0){
+            if (discardDeck.size() >= cardsToPlay){
                 stopAll();
                 
                 GameUtils.wait(3000, new Callable() {
@@ -78,11 +83,15 @@ public class Quarts implements GameMode{
             return true;
         }
         
-        int index = getRankDiff(card);        
-        return !(index >= DECK_SIZE || index < 0);
+        if (card.getSuit() != leadCard.getSuit()){
+            return false;
+        }
+        
+        int index = getRankDiff(card); 
+        return !(index >= cardsToPlay || index < 0);
     }
     
-    private void end(){
+    private void exit(){
         Deck mainDeck = new Deck(MAX_CARDS);
         for (int i = 0; i < game.getNumOfPlayers(); i++){
             Player p = game.getPlayer(i);
@@ -104,33 +113,42 @@ public class Quarts implements GameMode{
         }
     }
     
-    private void playNext(){        
+    private void playNext(){    
         first.getTable().addAll(discardDeck, true);
 
-        if (cardsPlayed.size() >= MAX_CARDS){
-            end();
+        boolean end = false;
+        for (int i = 0; i < game.getNumOfPlayers(); i++){
+            if (game.getPlayer(i).getHand().isEmpty()){
+                end = true;
+                break;
+            }
+        }
+        
+        if (end){
+            exit();
         } else {
             first.play();
         }
     }
     
-    private void setFirstPlayer(){
-        boolean found = false;
+    private void setCardsToPlay(Card card){
+        int value = ranks.indexOf(card.getRank());
         
-        for (int i = 0; i < game.getNumOfPlayers(); i++){
-            Player p = game.getPlayer(i);
-            
-            for (int j = 0; j < p.getHand().size(); j++){
-                if (p.getHand().get(j) == highestCard){
-                    first = p;
-                    found = true;
-                    break;
-                }
-                
-                if (found){
-                    break;
-                }
+        cardsToPlay = 1;
+        highestCard = card;
+        for (int i = 1; i < DECK_SIZE; i++){
+            int rankIndex = value + i;
+            if (rankIndex >= ranks.size()){
+                break;
             }
+            
+            Card tmp = new Card(card.getSuit(), ranks.get(rankIndex));
+            if (cardsPlayed.contains(tmp)){
+                break;
+            }
+            
+            cardsToPlay += 1;
+            highestCard = tmp;
         }
     }
 
