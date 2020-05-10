@@ -18,7 +18,6 @@ public class Reds extends Minigame implements GameMode{
 
     private final int NUM_OF_PLAYERS;
     private final int id = GameModes.REDS.ordinal();
-    private int cardsPlayed = 0;
     
     public Reds(Game game){
         super(game);
@@ -33,7 +32,6 @@ public class Reds extends Minigame implements GameMode{
     @Override
     public void playCard(Card card, int playerId) {
         if (checkRules(card)){
-            cardsPlayed += 1;
             super.playCard(card);
         }
     }
@@ -44,7 +42,7 @@ public class Reds extends Minigame implements GameMode{
             return false;
         }
         
-        if (cardsPlayed % NUM_OF_PLAYERS == 0){
+        if (cardsPlayed() % NUM_OF_PLAYERS == 0){
             if (card.getSuit() == Suit.HEART){
                 if (!hasOnlyReds()){
                     return false;

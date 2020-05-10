@@ -36,6 +36,7 @@ public class Game {
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
     private final Server server;
+    
     private GameMode gameMode;
     private Player forehand;
     private int round;
@@ -51,7 +52,7 @@ public class Game {
     
     public void start(){
         cardDealing();
-        setGameMode(gameModes.indexOf(GameModes.QUARTS));
+        setGameMode(gameModes.indexOf(GameModes.RED_KING));
         gameMode.start();
     }
     
@@ -60,9 +61,9 @@ public class Game {
 
         if (player.isPlaying() && checkRules(card)){
             server.response(card, true, playerId);
-            server.cardPlayed(card);
-            gameMode.playCard(card, playerId);
+            server.cardPlayed(card, playerId);
             player.playCard(card);
+            gameMode.playCard(card, playerId);
         } else {
             server.response(card, false, playerId);
         }

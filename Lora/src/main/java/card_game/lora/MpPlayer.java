@@ -79,6 +79,10 @@ public class MpPlayer {
         return hand;
     }
     
+    public int getId(){
+        return id;
+    }
+    
     private void sendToServer(byte[] data){
         try {
             connection.output.write(data);
@@ -117,8 +121,10 @@ public class MpPlayer {
                 
             case CARD_PLAYED:
                 Card card1 = new Card(data[1]);
+                int playerId = data[2];
+                        
                 Platform.runLater(() -> {
-                    gameView.showCard(card1);
+                    gameView.showCard(card1, playerId);
                 });
                 break;
                

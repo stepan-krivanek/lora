@@ -10,8 +10,10 @@ import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.card.Suit;
 import card_game.lora.game_modes.GameModes;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -124,8 +126,8 @@ public class GameView extends StackPane{
         
     }
     
-    public void showCard(Card card){
-        tableGUI.showCard(card);
+    public void showCard(Card card, int playerId){
+        tableGUI.showCard(card, playerId);
     }
     
     public void setGameMode(int id){
@@ -204,18 +206,22 @@ public class GameView extends StackPane{
         
         public void show();
         
-        public void showCard(Card card);
+        public void showCard(Card card, int playerId);
         
         public void hide();
     }
     
     private class MinigameGUI implements TableGUI{
         
+        private final int ANGLE = 70;
         private StackPane discardLayout;
         private int cardsPlayed = 0;
+        private int lastUpdate;
         
         @Override
         public void show(){
+            lastUpdate = LocalDateTime.now().toLocalTime().toSecondOfDay();
+            
             discardLayout = new StackPane();
             discardLayout.setPrefWidth(WIDTH);
             discardLayout.setPrefHeight(HEIGHT);
@@ -225,19 +231,33 @@ public class GameView extends StackPane{
         }
 
         @Override
-        public void showCard(Card card){
+        public void showCard(Card card, int playerId){
             if (++cardsPlayed > 4){
                 discardLayout.getChildren().clear();
                 cardsPlayed = 1;
             }
             
+            int id = playerId - player.getId();
+            int rotation = new Random().nextInt(ANGLE) - (ANGLE / 2) + (id * 90);
+            
             ImageView cardView = new ImageView(card.getFront());
             cardView.setFitWidth(CARD_WIDTH);
             cardView.setFitHeight(CARD_HEIGHT);
             cardView.setPreserveRatio(true);
-            cardView.setRotate(new Random().nextInt(360));
-
-            discardLayout.getChildren().add(cardView);
+            cardView.setRotate(rotation);
+            
+            // Slowing animations to see the cards played
+            int sec = LocalDateTime.now().toLocalTime().toSecondOfDay();
+            int secsToWait = lastUpdate + 1 - sec;
+            secsToWait = secsToWait < 0 ? 0 : secsToWait;
+            lastUpdate = sec + 1;
+            GameUtils.wait(secsToWait * 1000, new Callable() {
+                @Override
+                public Void call() throws Exception {
+                    discardLayout.getChildren().add(cardView);
+                    return null;
+                }
+            });
         }
         
         @Override
@@ -292,7 +312,7 @@ public class GameView extends StackPane{
         }
 
         @Override
-        public void showCard(Card card){
+        public void showCard(Card card, int playerId){
             int suitIndex = suits.indexOf(card.getSuit());
             int rankIndex = ranks.indexOf(card.getRank());
             int cardIndex = suitIndex + rankIndex * suits.size();
@@ -333,7 +353,7 @@ public class GameView extends StackPane{
         }
 
         @Override
-        public void showCard(Card card){
+        public void showCard(Card card, int playerId){
             if (++cardsPlayed > cardsToPlay){
                 cardsPlayed = 1;
                 showDeck(card);

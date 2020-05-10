@@ -91,11 +91,12 @@ public class Quarts implements GameMode{
         return !(index >= cardsToPlay || index < 0);
     }
     
-    private void exit(){
+    private void end(){
         Deck mainDeck = new Deck(MAX_CARDS);
         for (int i = 0; i < game.getNumOfPlayers(); i++){
             Player p = game.getPlayer(i);
             mainDeck.addAll(p.getTable(), true);
+            mainDeck.addAll(p.getHand(), true);
         }
         
         game.nextGameMode(mainDeck);
@@ -125,7 +126,7 @@ public class Quarts implements GameMode{
         }
         
         if (end){
-            exit();
+            end();
         } else {
             first.play();
         }

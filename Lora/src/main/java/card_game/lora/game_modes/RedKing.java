@@ -17,7 +17,8 @@ import card_game.lora.Game;
 public class RedKing extends Reds implements GameMode{
     
     private final int id = GameModes.RED_KING.ordinal();
-    private int cardsPlayed = 0;
+    private final Card RED_KING = new Card(Suit.HEART, Rank.KING);
+    private boolean redKingPlayed = false;
     
     public RedKing(Game game){
         super(game);
@@ -31,8 +32,15 @@ public class RedKing extends Reds implements GameMode{
     @Override
     public void playCard(Card card, int playerId) {
         if (checkRules(card)){
-            cardsPlayed += 1;
             super.playCard(card);
+            
+            if (card.equals(RED_KING)){
+                redKingPlayed = true;
+            }
+            
+            if (redKingPlayed && (cardsPlayed() % 4 == 0)){
+                super.end();
+            }
         }
     }
 
@@ -42,10 +50,7 @@ public class RedKing extends Reds implements GameMode{
             return false;
         }
         
-        if (cardsPlayed < 4 && 
-            card.getRank() == Rank.KING &&
-            card.getSuit() == Suit.HEART
-        ){    
+        if (cardsPlayed() < 4 && card.equals(RED_KING)){ 
             return false;
         }
         

@@ -68,13 +68,13 @@ public class Main extends Application {
     }
     
     private void save(){
-        //TO BE DONE
+        //TBA
     }
     
     private void setStage(Stage stage, String title){
         stage.setTitle(title);
-        stage.setWidth(500);
-        stage.setHeight(300);
+        stage.setWidth(750);
+        stage.setHeight(450);
         //stage.setFullScreen(true);
         stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         stage.initStyle(StageStyle.UTILITY);

@@ -23,7 +23,7 @@ public class Minigame {
     
     private final int MAX_CARDS = 32;
     private final int NUM_OF_PLAYERS;
-    private final Deck discardDeck = new Deck(MAX_CARDS / 8);
+    private final Deck discardDeck = new Deck(4);
     private final Game game;
     private int cardsPlayed = 0;
     private Player first;
@@ -53,27 +53,10 @@ public class Minigame {
             leadSuit = card.getSuit();
         }
 
-        int timeToWait = 1000;
         if (playersPlayed == 0){
-            GameUtils.wait(3 * timeToWait, new Callable() {
-                @Override
-                public Void call() throws Exception {
-                    newRound();
-
-                    if (cardsPlayed < MAX_CARDS){
-                        player.play();
-                    }
-                    return null;
-                }
-            });
+            newRound();
         } else {
-            GameUtils.wait(timeToWait, new Callable() {
-                @Override
-                public Void call() throws Exception {
-                    player.play();
-                    return null;
-                }
-            });
+            player.play();
         }
     }
     
@@ -91,11 +74,12 @@ public class Minigame {
         return true;
     }
     
-    private void end(){
+    public void end(){
         Deck mainDeck = new Deck(MAX_CARDS);
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             player = game.getNextPlayer(player);
             mainDeck.addAll(player.getTable(), true);
+            mainDeck.addAll(player.getHand(), true);
         }
         
         game.nextGameMode(mainDeck);
@@ -123,12 +107,18 @@ public class Minigame {
         first.getTable().addAll(discardDeck, true);
         player = first;
         
-        if (cardsPlayed == MAX_CARDS){
+        if (cardsPlayed >= MAX_CARDS){
             end();
+        } else {
+            player.play();
         }
     }
     
     public Player getCurrentPlayer(){
         return player;
+    }
+    
+    public int cardsPlayed(){
+        return cardsPlayed;
     }
 }

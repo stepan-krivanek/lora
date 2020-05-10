@@ -52,7 +52,7 @@ public class Server implements Runnable{
                 Thread t = new Thread(connection);
                 t.start();
                 
-                System.out.println("Player number " + connectedPlayers + " has joint the game.");
+                System.out.println("Player " + connectedPlayers + " has joint the game.");
                 connectedPlayers += 1;
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
@@ -102,11 +102,12 @@ public class Server implements Runnable{
         broadcast(initMessage(Message.END_OF_ROUND));
     }
     
-    public void cardPlayed(Card card){
+    public void cardPlayed(Card card, int playerId){
         if (card == null) return;
         
         byte[] data = initMessage(Message.CARD_PLAYED);
         data[1] = card.toByte();
+        data[2] = (byte)playerId;
         broadcast(data);
     }
     
