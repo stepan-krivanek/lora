@@ -10,8 +10,12 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -72,10 +76,7 @@ public class GameMenu extends StackPane{
     private void gameCreation(){
         Button serverButton = new Button("Create new game");
         serverButton.setOnAction(e -> {
-            Server server = new Server(4);
-            Thread t = new Thread(server);
-            t.start();
-            joinServer();
+            chooseNumOfPlayers();
         });
         
         Button clientButton = new Button("Join existing game");
@@ -90,6 +91,60 @@ public class GameMenu extends StackPane{
         
         centerVBox.getChildren().clear();
         centerVBox.getChildren().addAll(serverButton, clientButton, returnButton);
+    }
+    
+    private void chooseNumOfPlayers(){
+        Text text = new Text("Choose number of players");
+        text.setFont(Font.font ("Verdana", 30));
+        text.setFill(Color.WHITE);
+        
+        Button one = new Button("1");
+        one.setOnAction(e -> {
+            startServer(1);
+        });
+        
+        Button two = new Button("2");
+        two.setOnAction(e -> {
+            startServer(2);
+        });
+        
+        Button three = new Button("3");
+        three.setOnAction(e -> {
+            startServer(3);
+        });
+        
+        Button four = new Button("4");
+        four.setOnAction(e -> {
+            startServer(4);
+        });
+        
+        Button cancel = new Button("Cancel");
+        cancel.setOnAction(e -> {
+            gameCreation();
+        });
+        
+        HBox hBox = new HBox(one, two, three, four);
+        hBox.setAlignment(Pos.CENTER);
+        hBox.setSpacing(SPACING);
+        
+        centerVBox.getChildren().clear();
+        centerVBox.getChildren().addAll(text, hBox, cancel);
+    }
+    
+    private void startServer(int numOfPlayers){
+        Server server = new Server();
+        Thread t = new Thread(server);
+        t.start();
+        
+        addBots(server, numOfPlayers);
+        joinServer();
+    }
+    
+    private void addBots(Server server, int numOfPlayers){
+        for (int i = 4; i > numOfPlayers;  --i){
+            MpBot bot = new MpBot(program);
+            bot.connectToServer();
+        }
     }
     
     private void joinServer(){

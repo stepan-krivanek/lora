@@ -23,16 +23,14 @@ import java.util.logging.Logger;
 public class Server implements Runnable{
     
     private final Game game = new Game(this);
+    private final int NUM_OF_PLAYERS = 4;
     private final int MSG_SIZE = 10;
     private final int port = 1341;
-    private ServerSocket socket;
-    private int numOfPlayers;
-    private Connection[] players;
+    private final Connection[] players = new Connection[NUM_OF_PLAYERS];
     
-    public Server(int numOfPlayers){
-        this.numOfPlayers = numOfPlayers;
-        players = new Connection[numOfPlayers];
-            
+    private ServerSocket socket;
+    
+    public Server(){
         try {
             socket = new ServerSocket(port);
         } catch (IOException ex) {
@@ -43,7 +41,7 @@ public class Server implements Runnable{
     public void acceptConnections(){
         int connectedPlayers = 0;
         
-        while (connectedPlayers < numOfPlayers){
+        while (connectedPlayers < NUM_OF_PLAYERS){
             try {
                 Socket s = socket.accept();
                 Connection connection = new Connection(s, connectedPlayers);
@@ -69,12 +67,16 @@ public class Server implements Runnable{
     }
     
     private void broadcast(byte[] data) {
-        for (int i = 0; i < numOfPlayers; i++){
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
             send(data, i);
         }
     }
     
     private void send(byte[] data, int id){
+        if (id >= NUM_OF_PLAYERS){
+            return;
+        }
+        
         try {
             players[id].output.write(data);
             players[id].output.flush();

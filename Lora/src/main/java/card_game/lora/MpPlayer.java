@@ -7,13 +7,9 @@ package card_game.lora;
 
 import card_game.card.Card;
 import card_game.card.Deck;
+import card_game.net.ClientConnection;
 import card_game.net.Message;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -26,10 +22,11 @@ import javafx.scene.paint.Color;
 public class MpPlayer {
     
     private final int MSG_SIZE = 10;
+    protected final int HAND_SIZE = 8;
     private int id;
     private boolean isPlaying = false;
-    private Deck hand;
-    private Connection connection;
+    private final Deck hand = new Deck(HAND_SIZE);
+    private ClientConnection connection;
     private GameView gameView;
     
     public MpPlayer(Main program){
@@ -61,7 +58,7 @@ public class MpPlayer {
     }
     
     public boolean connectToServer(){   
-        connection = new Connection("localhost");
+        connection = new ClientConnection(this, "localhost");
         
         try {
             id = connection.getInput().readInt();
@@ -83,15 +80,19 @@ public class MpPlayer {
         return id;
     }
     
+    public void setId(int id){
+        this.id = id;
+    }
+    
     private void sendToServer(byte[] data){
         try {
-            connection.output.write(data);
+            connection.getOutput().write(data);
         } catch (IOException ex) {
             Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    private void action(byte[] data){
+    public void action(byte[] data){
         Message msg = Message.values()[data[0]];
         
         switch(msg){
@@ -141,9 +142,9 @@ public class MpPlayer {
                 break;
                 
             case HAND:
-                hand = new Deck(8);
+                hand.clear();
                 
-                for (int i = 1; i <= 8; i++){
+                for (int i = 1; i <= HAND_SIZE; i++){
                     Card card2 = new Card(data[i]);
                     hand.addTopCard(card2);
                 }
@@ -173,51 +174,6 @@ public class MpPlayer {
                 }
                 
                 break;
-        }
-    }
-    
-    private class Connection implements Runnable {
-    
-        private InetAddress ipAddress;
-        private Socket socket;
-        private DataInputStream input;
-        private DataOutputStream output;
-
-        public Connection(String ipAddress){
-            try {
-                this.ipAddress = InetAddress.getByName(ipAddress);
-            } catch (UnknownHostException ex) {
-                Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
-            }       
-
-            try {
-                socket = new Socket(ipAddress, 1341);
-                input = new DataInputStream(socket.getInputStream());
-                output = new DataOutputStream(socket.getOutputStream());
-            } catch (IOException ex) {
-                Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-        public DataInputStream getInput(){
-            return input;
-        }
-
-        public DataOutputStream getOutput(){
-            return output;
-        }
-
-        @Override
-        public void run() {
-            while (true){
-                try {
-                    byte[] data = new byte[MSG_SIZE];
-                    input.read(data);
-                    action(data);
-                } catch (IOException ex) {
-                    Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
         }
     }
 }

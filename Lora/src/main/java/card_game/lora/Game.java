@@ -59,7 +59,11 @@ public class Game {
     public void playCard(Card card, int playerId){
         Player player = players[playerId];
 
-        if (player.isPlaying() && checkRules(card)){
+        if (
+            player.isPlaying() &&
+            player.getHand().contains(card) &&
+            checkRules(card))
+        {
             server.response(card, true, playerId);
             server.cardPlayed(card, playerId);
             player.playCard(card);
