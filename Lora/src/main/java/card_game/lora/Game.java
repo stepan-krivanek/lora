@@ -52,7 +52,7 @@ public class Game {
     
     public void start(){
         cardDealing();
-        setGameMode(gameModes.indexOf(GameModes.RED_KING));
+        setGameMode(gameModes.indexOf(GameModes.QUARTS));//repair red king
         gameMode.start();
     }
     
@@ -61,7 +61,7 @@ public class Game {
 
         if (
             player.isPlaying() &&
-            player.getHand().contains(card) &&
+            (card == null || player.getHand().contains(card)) &&
             checkRules(card))
         {
             server.response(card, true, playerId);

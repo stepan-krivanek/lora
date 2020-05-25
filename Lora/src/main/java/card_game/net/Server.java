@@ -8,11 +8,13 @@ package card_game.net;
 import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.lora.Game;
+import card_game.lora.GameUtils;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -106,6 +108,7 @@ public class Server implements Runnable{
     
     public void cardPlayed(Card card, int playerId){
         if (card == null) return;
+        System.out.println("Card played " + card.toString() + " by " + playerId);
         
         byte[] data = initMessage(Message.CARD_PLAYED);
         data[1] = card.toByte();
@@ -139,11 +142,24 @@ public class Server implements Runnable{
     public void gameMode(int id){
         byte[] data = initMessage(Message.GAME_MODE);
         data[1] = (new Integer(id)).byteValue();
-        broadcast(data);
+        
+        GameUtils.wait(1000, new Callable() {
+            @Override
+            public Void call() throws Exception {
+                broadcast(data);
+                return null;
+            }
+        });
     }
     
     public void play(int id){
-        send(initMessage(Message.PLAY), id);
+        GameUtils.wait(1000, new Callable() {
+            @Override
+            public Void call() throws Exception {
+                send(initMessage(Message.PLAY), id);
+                return null;
+            }
+        });
     }
     
     public void stopPlaying(int id){
@@ -177,6 +193,7 @@ public class Server implements Runnable{
                 while(true){
                     byte data[] = new byte[MSG_SIZE];
                     input.read(data);
+                    //BUG other connections need to wait here
                     Card card = data[0] == -1 ? null : new Card(data[0]);
                     game.playCard(card, playerId);
                 }

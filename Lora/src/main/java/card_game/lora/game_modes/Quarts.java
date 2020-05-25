@@ -47,7 +47,9 @@ public class Quarts implements GameMode{
         if (checkRules(card)){
             if (discardDeck.isEmpty()){
                 leadCard = card;
+                System.out.println("Card " + card.toString() + " is new leadCard");
                 setCardsToPlay(card);
+                System.out.println("Cards to play: " + cardsToPlay + " Highest card: " + highestCard);
                 playAll();
             }
             
@@ -57,7 +59,7 @@ public class Quarts implements GameMode{
             
             cardsPlayed.add(card);
             discardDeck.add(card);
-            
+            System.out.println(card.toString() + " added to discardDeck");
             if (discardDeck.size() >= cardsToPlay){
                 stopAll();
                 
@@ -80,6 +82,7 @@ public class Quarts implements GameMode{
         }
         
         if (discardDeck.isEmpty()){
+            System.out.println("Deck is empty " + card.toString());
             return true;
         }
         

@@ -246,18 +246,7 @@ public class GameView extends StackPane{
             cardView.setPreserveRatio(true);
             cardView.setRotate(rotation);
             
-            // Slowing animations to see the cards played
-            int sec = LocalDateTime.now().toLocalTime().toSecondOfDay();
-            int secsToWait = lastUpdate + 1 - sec;
-            secsToWait = secsToWait < 0 ? 0 : secsToWait;
-            lastUpdate = sec + 1;
-            GameUtils.wait(secsToWait * 1000, new Callable() {
-                @Override
-                public Void call() throws Exception {
-                    discardLayout.getChildren().add(cardView);
-                    return null;
-                }
-            });
+            discardLayout.getChildren().add(cardView);
         }
         
         @Override
@@ -360,6 +349,9 @@ public class GameView extends StackPane{
             }
             
             int index = getRankDiff(card);
+            if(index > 3 || index < 0){
+                System.out.println("leadCard: " + leadCard.toString() + " playedCard: " + card.toString());
+            }
             discardLayout.getChildren().get(index).setOpacity(1);
         }
         

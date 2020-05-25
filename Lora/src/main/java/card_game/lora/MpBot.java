@@ -21,8 +21,11 @@ public class MpBot extends MpPlayer{
     private final int NUM_OF_PLAYERS = 4;
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
     private final Deck[] memory;
+    
     private GameModes gameMode = GameModes.REDS;
     private Brain brain;
+    private boolean awaitingResponse = false;
+    private boolean exit = false;
     
     public MpBot(Main program) {
         super(program);
@@ -48,7 +51,7 @@ public class MpBot extends MpPlayer{
                 break;
                 
             case EXIT:
-                
+                exit = true;
                 break;
                 
             case SCORE:
@@ -94,7 +97,9 @@ public class MpBot extends MpPlayer{
                 
                 if (index != -1 && data[2] == 1){
                     getHand().remove(index);
-                }                
+                }
+                
+                awaitingResponse = false;
                 break;
         }
     }
@@ -146,6 +151,10 @@ public class MpBot extends MpPlayer{
 
         @Override
         public Card playTens() {
+            if (r.nextInt(4) == 0){
+                return null;
+            }
+            
             return getHand().get(r.nextInt(getHand().size()));
         }
 
@@ -163,12 +172,16 @@ public class MpBot extends MpPlayer{
             Tactic tactic = new RandomTactic();
             
             while(true){
-                if (getHand().size() == 0 || !isPlaying()){
+                if (exit){
+                    break;
+                }
+                
+                if (!isPlaying() || awaitingResponse || getHand().isEmpty()){
+                    Thread.interrupted();
                     continue;
                 }
                 
                 Card card = null;
-                
                 switch(gameMode){
                     case REDS:
                         card = tactic.playReds();
@@ -201,6 +214,7 @@ public class MpBot extends MpPlayer{
                 
                 if(isPlaying()){
                     if (card != null){
+                        awaitingResponse = true;
                         playCard(card);
                     } else {
                         pass();

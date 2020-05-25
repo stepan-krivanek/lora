@@ -122,6 +122,7 @@ public class MpPlayer {
                 
             case CARD_PLAYED:
                 Card card1 = new Card(data[1]);
+                System.out.println("Card received: " + card1.toString());
                 int playerId = data[2];
                         
                 Platform.runLater(() -> {

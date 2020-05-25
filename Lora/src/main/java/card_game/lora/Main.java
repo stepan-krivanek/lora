@@ -75,7 +75,7 @@ public class Main extends Application {
         stage.setTitle(title);
         stage.setWidth(750);
         stage.setHeight(450);
-        stage.setFullScreen(true);
+        //stage.setFullScreen(true);
         stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         stage.initStyle(StageStyle.UTILITY);
         stage.setOnCloseRequest(e -> {

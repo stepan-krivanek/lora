@@ -136,11 +136,11 @@ public class GameMenu extends StackPane{
         Thread t = new Thread(server);
         t.start();
         
-        addBots(server, numOfPlayers);
+        addBots(numOfPlayers);
         joinServer();
     }
     
-    private void addBots(Server server, int numOfPlayers){
+    private void addBots(int numOfPlayers){
         for (int i = 4; i > numOfPlayers;  --i){
             MpBot bot = new MpBot(program);
             bot.connectToServer();

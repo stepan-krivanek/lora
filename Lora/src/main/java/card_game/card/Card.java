@@ -51,4 +51,8 @@ public class Card {
     public boolean equals(Card card){
         return (card.rank == rank && card.suit == suit);
     }
+    
+    public String toString(){
+        return suit.toString() + " " + rank.toString();
+    }
 }

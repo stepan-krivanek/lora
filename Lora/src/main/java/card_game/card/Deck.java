@@ -169,6 +169,10 @@ public class Deck extends ArrayList<Card> {
         return this.size() == MAX_SIZE;
     }
     
+    public boolean isEmpty(){
+        return this.size() == 0;
+    }
+    
     public void remove(Card card){
         remove(indexOf(card));
     }
