@@ -42,6 +42,14 @@ public class FrLa extends Minigame implements GameMode{
     }
 
     @Override
+    public void end(){
+        int[] trickTakers = getTrickTakers();
+        penalties[trickTakers[0]] += 4;
+        penalties[trickTakers[trickTakers.length - 1]] += 4;
+        super.end();
+    }
+    
+    @Override
     public int getId() {
         return id;
     }

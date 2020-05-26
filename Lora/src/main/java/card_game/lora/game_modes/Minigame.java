@@ -10,10 +10,8 @@ import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.card.Suit;
 import card_game.lora.Game;
-import card_game.lora.GameUtils;
 import card_game.lora.Player;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  *
@@ -23,8 +21,12 @@ public class Minigame {
     
     private final int MAX_CARDS = 32;
     private final int NUM_OF_PLAYERS;
+    private final int[] trickTakers;
     private final Deck discardDeck = new Deck(4);
-    private final Game game;
+    protected final Game game;
+    protected final int[] penalties;
+    
+    private int round = 0;
     private int cardsPlayed = 0;
     private Player first;
     private Player player;
@@ -33,6 +35,8 @@ public class Minigame {
     public Minigame(Game game){
         this.game = game;
         NUM_OF_PLAYERS = game.getNumOfPlayers();
+        trickTakers = new int[MAX_CARDS / NUM_OF_PLAYERS];
+        penalties = new int[NUM_OF_PLAYERS];
     }
     
     public void start() {
@@ -82,7 +86,7 @@ public class Minigame {
             mainDeck.addAll(player.getHand(), true);
         }
         
-        game.nextGameMode(mainDeck);
+        game.nextGameMode(mainDeck, penalties);
     }
     
     private void newRound(){
@@ -107,6 +111,9 @@ public class Minigame {
         first.getTable().addAll(discardDeck, true);
         player = first;
         
+        trickTakers[round] = first.getId();
+        round += 1;
+        
         if (cardsPlayed >= MAX_CARDS){
             end();
         } else {
@@ -120,5 +127,9 @@ public class Minigame {
     
     public int cardsPlayed(){
         return cardsPlayed;
+    }
+    
+    public int[] getTrickTakers(){
+        return trickTakers;
     }
 }

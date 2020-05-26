@@ -6,6 +6,8 @@
 package card_game.lora.game_modes;
 
 import card_game.card.Card;
+import card_game.card.Rank;
+import card_game.card.Suit;
 import card_game.lora.Game;
 
 /**
@@ -41,6 +43,22 @@ public class Superiors extends Minigame implements GameMode{
         return super.checkRules(card.getSuit());
     }
 
+    @Override
+    public void end(){
+        for (int i = 0; i < penalties.length; i++){
+            int superiors = 0;
+            for (Card card : game.getPlayer(i).getTable()){
+                if (card.getRank().equals(Rank.SUPERIOR)){
+                    superiors += 1;
+                }
+            }
+            
+            penalties[i] = superiors;
+        }
+        
+        super.end();
+    }
+    
     @Override
     public int getId() {
         return id;

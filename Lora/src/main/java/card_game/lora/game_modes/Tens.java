@@ -23,11 +23,15 @@ public class Tens implements GameMode{
     private final int DECK_SIZE = 32;
     private final int id = GameModes.TENS.ordinal();
     private final Deck cardsPlayed = new Deck(DECK_SIZE);
+    private final int[] penalties;
     private final Game game;
+    
     private Player player;
+    private int cardsPlayedByPlayer = 0;
     
     public Tens(Game game){
         this.game = game;
+        penalties = new int[game.getNumOfPlayers()];
     }
 
     @Override
@@ -41,9 +45,13 @@ public class Tens implements GameMode{
         if (checkRules(card)){
             if (card == null){
                 player.stopPlaying();
+                penalties[player.getId()] += cardsPlayedByPlayer > 0 ? 0 : 1;
+                cardsPlayedByPlayer = 0;
+                
                 player = game.getNextPlayer(player);
                 player.play();
             } else {
+                cardsPlayedByPlayer += 1;
                 cardsPlayed.add(card);
                 checkWinner();
             }
@@ -95,14 +103,11 @@ public class Tens implements GameMode{
         
         for (int i = 0; i < game.getNumOfPlayers(); i++){
             player = game.getNextPlayer(player);
-            
-            while(!player.getHand().isEmpty()){
-                mainDeck.addTopCard(player.getHand().removeTopCard());
-                //add points
-            }
+            penalties[i] += player.getHand().size();
+            mainDeck.addAll(player.getHand(), true);
         }
         
-        game.nextGameMode(mainDeck);
+        game.nextGameMode(mainDeck, penalties);
     }
     
     private void checkWinner(){

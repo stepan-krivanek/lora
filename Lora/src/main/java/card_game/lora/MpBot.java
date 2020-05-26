@@ -8,7 +8,7 @@ package card_game.lora;
 import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.lora.game_modes.GameModes;
-import card_game.net.Message;
+import card_game.net.ServerMessage;
 import java.util.List;
 import java.util.Random;
 
@@ -41,7 +41,7 @@ public class MpBot extends MpPlayer{
     
     @Override
     public void action(byte[] data){
-        Message msg = Message.values()[data[0]];
+        ServerMessage msg = ServerMessage.values()[data[0]];
         
         switch(msg){
             case START:
@@ -78,8 +78,8 @@ public class MpBot extends MpPlayer{
                 gameMode = gameModes.get(data[1]);
                 break;
                 
-            case END_OF_ROUND:
-                //TBA
+            case GRADUATION:
+                chooseGameMode(GameModes.QUARTS.ordinal());
                 break;
                 
             case HAND:

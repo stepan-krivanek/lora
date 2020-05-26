@@ -13,7 +13,6 @@ import card_game.lora.game_modes.GameModes;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -91,7 +90,7 @@ public class GameView extends StackPane{
         table.setBackground(tableBcgr);
         table.setPrefSize(WIDTH, HEIGHT);
         table.setEffect(perspection(WIDTH, HEIGHT));
-        this.setAlignment(table, Pos.CENTER);
+        GameView.setAlignment(table, Pos.CENTER);
         this.getChildren().add(table);
         
         loadingScreen.show();
@@ -107,7 +106,7 @@ public class GameView extends StackPane{
         primaryHand = new HandView(player, WIDTH, HEIGHT);
         
         playZone = new Rectangle(WIDTH, HEIGHT * 2 / 3);
-        this.setAlignment(playZone, Pos.TOP_CENTER);
+        GameView.setAlignment(playZone, Pos.TOP_CENTER);
         playZone.setOpacity(0);
         
         double handShift = CARD_HEIGHT / 2;
@@ -120,6 +119,22 @@ public class GameView extends StackPane{
         });
         
         this.getChildren().addAll(primaryHand, playZone);
+    }
+    
+    public void showGameModeSelection(MpPlayer player){
+        primaryHand.setTranslateY(CARD_HEIGHT / 2);
+        Rectangle rect = new Rectangle(WIDTH, HEIGHT);
+        rect.setOpacity(0);
+        //cards are too low
+        Button quarts = new Button("Quarts");
+        quarts.setAlignment(Pos.CENTER);
+        quarts.setOnAction(e -> {
+            primaryHand.setTranslateY(0);
+            player.chooseGameMode(GameModes.QUARTS.ordinal());
+            this.getChildren().removeAll(rect, quarts);
+        });
+        
+        this.getChildren().addAll(rect, quarts);
     }
     
     public void cardDealing(){
@@ -156,11 +171,10 @@ public class GameView extends StackPane{
         Text winner = new Text("The winner is player number " + id);
         Font font = new Font(40);
         winner.setFont(font);
-        this.setAlignment(winner, Pos.TOP_CENTER);
+        GameView.setAlignment(winner, Pos.TOP_CENTER);
         
         Rectangle rect = new Rectangle(WIDTH, HEIGHT);
         rect.setOpacity(0);
-        this.setAlignment(rect, Pos.CENTER);
         
         getChildren().addAll(rect, winner);
     }
@@ -191,7 +205,7 @@ public class GameView extends StackPane{
     
     private class LoadingScreen {
         
-        private Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.CORAL);
+        private final Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.CORAL);
         
         public void show(){
             program.getRoot().getChildren().add(rect);
@@ -216,12 +230,9 @@ public class GameView extends StackPane{
         private final int ANGLE = 70;
         private StackPane discardLayout;
         private int cardsPlayed = 0;
-        private int lastUpdate;
         
         @Override
         public void show(){
-            lastUpdate = LocalDateTime.now().toLocalTime().toSecondOfDay();
-            
             discardLayout = new StackPane();
             discardLayout.setPrefWidth(WIDTH);
             discardLayout.setPrefHeight(HEIGHT);
@@ -349,9 +360,6 @@ public class GameView extends StackPane{
             }
             
             int index = getRankDiff(card);
-            if(index > 3 || index < 0){
-                System.out.println("leadCard: " + leadCard.toString() + " playedCard: " + card.toString());
-            }
             discardLayout.getChildren().get(index).setOpacity(1);
         }
         

@@ -7,8 +7,10 @@ package card_game.lora;
 
 import card_game.card.Card;
 import card_game.card.Deck;
+import card_game.lora.game_modes.GameModes;
 import card_game.net.ClientConnection;
-import card_game.net.Message;
+import card_game.net.ClientMessage;
+import card_game.net.ServerMessage;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,13 +23,14 @@ import javafx.scene.paint.Color;
  */
 public class MpPlayer {
     
+    private final GameView gameView;
     private final int MSG_SIZE = 10;
     protected final int HAND_SIZE = 8;
+    
     private int id;
     private boolean isPlaying = false;
     private final Deck hand = new Deck(HAND_SIZE);
     private ClientConnection connection;
-    private GameView gameView;
     
     public MpPlayer(Main program){
         gameView = new GameView(program, this);
@@ -43,13 +46,21 @@ public class MpPlayer {
     
     public void playCard(Card card){
         byte[] data = new byte[MSG_SIZE];
-        data[0] = card.toByte();
+        data[0] = (byte)ClientMessage.PLAY_CARD.ordinal();
+        data[1] = card.toByte();
         sendToServer(data);
     }
     
     public void pass(){
         byte[] data = new byte[MSG_SIZE];
-        data[0] = (byte)-1;
+        data[0] = (byte)ClientMessage.PASS.ordinal();
+        sendToServer(data);
+    }
+    
+    public void chooseGameMode(int id){
+        byte[] data = new byte[MSG_SIZE];
+        data[0] = (byte)ClientMessage.GAME_MODE.ordinal();
+        data[1] = (byte)id;
         sendToServer(data);
     }
     
@@ -58,7 +69,7 @@ public class MpPlayer {
     }
     
     public boolean connectToServer(){   
-        connection = new ClientConnection(this, "localhost");
+        connection = new ClientConnection(this);
         
         try {
             id = connection.getInput().readInt();
@@ -93,7 +104,7 @@ public class MpPlayer {
     }
     
     public void action(byte[] data){
-        Message msg = Message.values()[data[0]];
+        ServerMessage msg = ServerMessage.values()[data[0]];
         
         switch(msg){
             case START:
@@ -122,7 +133,6 @@ public class MpPlayer {
                 
             case CARD_PLAYED:
                 Card card1 = new Card(data[1]);
-                System.out.println("Card received: " + card1.toString());
                 int playerId = data[2];
                         
                 Platform.runLater(() -> {
@@ -136,9 +146,9 @@ public class MpPlayer {
                 });
                 break;
                 
-            case END_OF_ROUND:
+            case GRADUATION:
                 Platform.runLater(() -> {
-                    gameView.showWinner(id);
+                    gameView.showGameModeSelection(this);
                 });
                 break;
                 

@@ -54,6 +54,22 @@ public class Reds extends Minigame implements GameMode{
         return super.checkRules(card.getSuit());
     }
     
+    @Override
+    public void end(){
+        for (int i = 0; i < penalties.length; i++){
+            int reds = 0;
+            for (Card card : game.getPlayer(i).getTable()){
+                if (card.getSuit().equals(Suit.HEART)){
+                    reds += 1;
+                }
+            }
+            
+            penalties[i] = reds;
+        }
+        
+        super.end();
+    }
+    
     private boolean hasOnlyReds(){
         boolean onlyReds = true;
         

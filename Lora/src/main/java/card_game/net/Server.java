@@ -74,43 +74,42 @@ public class Server implements Runnable{
         }
     }
     
-    private void send(byte[] data, int id){
-        if (id >= NUM_OF_PLAYERS){
+    private void send(byte[] data, int playerId){
+        if (playerId >= NUM_OF_PLAYERS){
             return;
         }
         
         try {
-            players[id].output.write(data);
-            players[id].output.flush();
+            players[playerId].output.write(data);
+            players[playerId].output.flush();
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    private byte[] initMessage(Message id){
+    private byte[] initMessage(ServerMessage msg){
         byte[] data = new byte[MSG_SIZE];
-        data[0] = (byte)id.ordinal();
+        data[0] = (byte)msg.ordinal();
         return data;
     }
     
     private void start(){
-        broadcast(initMessage(Message.START));
+        broadcast(initMessage(ServerMessage.START));
         game.start();
     }
     
     public void exit(){
-        broadcast(initMessage(Message.EXIT));
+        broadcast(initMessage(ServerMessage.EXIT));
     }
     
-    public void endOfRound(){
-        broadcast(initMessage(Message.END_OF_ROUND));
+    public void graduation(int playerId){
+        send(initMessage(ServerMessage.GRADUATION), playerId);
     }
     
     public void cardPlayed(Card card, int playerId){
         if (card == null) return;
-        System.out.println("Card played " + card.toString() + " by " + playerId);
         
-        byte[] data = initMessage(Message.CARD_PLAYED);
+        byte[] data = initMessage(ServerMessage.CARD_PLAYED);
         data[1] = card.toByte();
         data[2] = (byte)playerId;
         broadcast(data);
@@ -119,14 +118,14 @@ public class Server implements Runnable{
     public void response(Card card, boolean correct, int id){
         if (card == null) return;
         
-        byte[] data = initMessage(Message.PLAY_RESPONSE);
+        byte[] data = initMessage(ServerMessage.PLAY_RESPONSE);
         data[1] = card.toByte();
         data[2] = correct == true ? (byte)1 : (byte)0;
         send(data, id);
     }
     
     public void hand(Deck deck, int id){
-        byte[] data = initMessage(Message.HAND);
+        byte[] data = initMessage(ServerMessage.HAND);
         
         for (int i = 0; i < deck.size(); i++){
             data[i+1] = deck.get(i).toByte();
@@ -140,30 +139,20 @@ public class Server implements Runnable{
     }
     
     public void gameMode(int id){
-        byte[] data = initMessage(Message.GAME_MODE);
+        byte[] data = initMessage(ServerMessage.GAME_MODE);
         data[1] = (new Integer(id)).byteValue();
-        
-        GameUtils.wait(1000, new Callable() {
-            @Override
-            public Void call() throws Exception {
-                broadcast(data);
-                return null;
-            }
-        });
+        broadcast(data);
     }
     
     public void play(int id){
-        GameUtils.wait(1000, new Callable() {
-            @Override
-            public Void call() throws Exception {
-                send(initMessage(Message.PLAY), id);
-                return null;
-            }
+        GameUtils.wait(2000, (Callable) () -> {
+            send(initMessage(ServerMessage.PLAY), id);
+            return null;
         });
     }
     
     public void stopPlaying(int id){
-        send(initMessage(Message.STOP_PLAYING), id);
+        send(initMessage(ServerMessage.STOP_PLAYING), id);
     }
     
     private class Connection implements Runnable {
@@ -193,8 +182,14 @@ public class Server implements Runnable{
                 while(true){
                     byte data[] = new byte[MSG_SIZE];
                     input.read(data);
-                    //BUG other connections need to wait here
-                    Card card = data[0] == -1 ? null : new Card(data[0]);
+                    
+                    ClientMessage msg = ClientMessage.values()[data[0]];
+                    if(msg.equals(ClientMessage.GAME_MODE)){
+                        game.startMode(data[1]);
+                        continue;
+                    }
+                    
+                    Card card = msg.equals(ClientMessage.PASS) ? null : new Card(data[1]);
                     game.playCard(card, playerId);
                 }
             } catch (IOException ex) {

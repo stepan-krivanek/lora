@@ -28,11 +28,11 @@ public class ClientConnection implements Runnable {
     private DataInputStream input;
     private DataOutputStream output;
 
-    public ClientConnection(MpPlayer player, String ipAddress){
+    public ClientConnection(MpPlayer player){
         this.player = player;
 
         try {
-            this.ipAddress = InetAddress.getByName(ipAddress);
+            this.ipAddress = InetAddress.getLocalHost();
         } catch (UnknownHostException ex) {
             Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
         }       

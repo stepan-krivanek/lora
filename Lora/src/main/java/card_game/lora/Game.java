@@ -20,6 +20,8 @@ import card_game.lora.game_modes.Reds;
 import card_game.lora.game_modes.Superiors;
 import card_game.lora.game_modes.Tens;
 import card_game.net.Server;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -32,6 +34,7 @@ public class Game {
     private final int NUM_OF_ROUNDS = 4;
     private final Deck mainDeck = new Deck(DECK_SIZE, true);
     private final Player[] players = new Player[NUM_OF_PLAYERS];
+    private final int[] score = new int[NUM_OF_PLAYERS];
     private final List<Suit> suits = GameUtils.getOrderedSuits();
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
@@ -39,24 +42,27 @@ public class Game {
     
     private GameMode gameMode;
     private Player forehand;
-    private int round;
+    private int round = 0;
+    private int gamesPlayedInRound = 6;
+    private int graduationAttempt = 0;
     
     public Game(Server server){
         this.server = server;
         
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             players[i] = new Player(this, i);
+            score[i] = 0;
         }
         forehand = players[0];
     }
     
     public void start(){
         cardDealing();
-        setGameMode(gameModes.indexOf(GameModes.QUARTS));//repair red king
+        setGameMode(gameModes.indexOf(GameModes.QUARTS));
         gameMode.start();
     }
     
-    public void playCard(Card card, int playerId){
+    public synchronized void playCard(Card card, int playerId){
         Player player = players[playerId];
 
         if (
@@ -73,21 +79,38 @@ public class Game {
         }
     }
     
-    public void nextGameMode(Deck deck){
+    public void nextGameMode(Deck deck, int[] penalties){  
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             players[i].stopPlaying();
         }
         
         mainDeck.addAll(deck);
-        int index = gameMode.getId() + 1;
+        if (mainDeck.size() != DECK_SIZE){
+            GameModes current = gameModes.get(gameMode.getId());
+            String msg = "Main deck was corrupted by " + current + ", creating new one.";
+            Logger.getLogger(Game.class.getName()).log(Level.WARNING, msg);
+            
+            mainDeck.clear();
+            Deck tmp = new Deck(DECK_SIZE, true);
+            for (int i = 0; i < DECK_SIZE; i++){
+                mainDeck.addTopCard(tmp.get(i));
+            }
+        }
         
-        if (index >= gameModes.size()){
-            nextRound();
-            System.out.println("Next round not implemented yet.");
+        gamesPlayedInRound += 1;
+        if (gamesPlayedInRound >= gameModes.size()){
+            graduation(penalties);
         } else {
+            addScore(penalties);
             cardDealing();
-            setGameMode(index);
+            setGameMode(gamesPlayedInRound);
             gameMode.start();
+        }
+    }
+    
+    private void addScore(int[] penalties){
+        for (int i = 0; i < score.length; i++){
+            score[i] += penalties[i];
         }
     }
     
@@ -130,16 +153,44 @@ public class Game {
     }
     
     private void nextRound(){
-        if (++round > NUM_OF_ROUNDS){
+        if (++round >= NUM_OF_ROUNDS){
             round = 0;
             exit();
         } else {
-            graduation(forehand);
+            forehand = getNextPlayer(forehand);
+            cardDealing();
+            setGameMode(0);
+            gameMode.start();
         }
     }
     
-    private void graduation(Player player){
-        //gameMode = gameView.chooseGameMode(player);
+    private void graduation(int[] penalties){
+        if (graduationAttempt > 0 && penalties[forehand.getId()] == 0){
+            gamesPlayedInRound = 0;
+            graduationAttempt = 0;
+            addScore(penalties);
+            nextRound();
+        } else {
+            if (graduationAttempt > 0){
+                for (int i = 0; i < score.length; i++){
+                    penalties[i] = i == forehand.getId() ? 8 : 0;
+                }
+            }
+            addScore(penalties);
+            
+            if (++graduationAttempt > 3){
+                graduationAttempt = 0;
+                nextRound();
+            } else {
+                cardDealing();
+                server.graduation(forehand.getId());
+            }
+        }
+    }
+    
+    public void startMode(int id){
+        setGameMode(id);
+        gameMode.start();
     }
     
     private void cardDealing(){
@@ -188,12 +239,7 @@ public class Game {
     }
     
     public Player getNextPlayer(Player player){
-        int index = player.getId() + 1;
-        
-        if (index >= players.length){
-            return players[0];
-        }
-        return  players[index];
+        return  players[(player.getId() + 1) % NUM_OF_PLAYERS];
     }
     
     private void exit(){

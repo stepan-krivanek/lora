@@ -19,6 +19,7 @@ public class RedKing extends Reds implements GameMode{
     private final int id = GameModes.RED_KING.ordinal();
     private final Card RED_KING = new Card(Suit.HEART, Rank.KING);
     private boolean redKingPlayed = false;
+    private int redKingPlayerId;
     
     public RedKing(Game game){
         super(game);
@@ -32,14 +33,15 @@ public class RedKing extends Reds implements GameMode{
     @Override
     public void playCard(Card card, int playerId) {
         if (checkRules(card)){
-            super.playCard(card);
-            
             if (card.equals(RED_KING)){
                 redKingPlayed = true;
+                redKingPlayerId = playerId;
             }
             
             if (redKingPlayed && (cardsPlayed() % 4 == 0)){
-                super.end();
+                end();
+            } else {
+                super.playCard(card);
             }
         }
     }
@@ -55,6 +57,12 @@ public class RedKing extends Reds implements GameMode{
         }
         
         return super.checkRules(card);
+    }
+    
+    @Override
+    public void end(){
+        penalties[redKingPlayerId] = 8;
+        super.end();
     }
 
     @Override

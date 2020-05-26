@@ -9,6 +9,7 @@ import card_game.net.Server;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -30,10 +31,12 @@ public class GameMenu extends StackPane{
     private final Rectangle2D bounds = Screen.getPrimary().getBounds();
     private final double width = bounds.getWidth();
     private final double height = bounds.getHeight();
-    private final Button spButton, mpButton, exitButton;
+    private final Button serverButton, clientButton, exitButton;
     private final VBox centerVBox;
     private final Main program;
 
+    private int numOfPlayers = -1;
+    
     public GameMenu(Main program, Stage stage){
         this.program = program;
         
@@ -46,16 +49,16 @@ public class GameMenu extends StackPane{
         centerVBox.setAlignment(Pos.CENTER);
         centerVBox.setSpacing(SPACING);
         
-        //SP Button
-        spButton = new Button("Singleplayer");
-        spButton.setOnAction(e -> {
-            //TBA
+        //Create game
+        serverButton = new Button("Create new game");
+        serverButton.setOnAction(e -> {
+            createGame();
         });
         
-        //MP Button
-        mpButton = new Button("Multiplayer");
-        mpButton.setOnAction(e -> {
-            gameCreation();
+        //Join game
+        clientButton = new Button("Join existing game");
+        clientButton.setOnAction(e -> {
+            joinServer();
         });
         
         //Exit Button
@@ -70,68 +73,83 @@ public class GameMenu extends StackPane{
     
     private void setMainButtons(){
         centerVBox.getChildren().clear();
-        centerVBox.getChildren().addAll(spButton, mpButton, exitButton);
+        centerVBox.getChildren().addAll(serverButton, clientButton, exitButton);
     }
     
-    private void gameCreation(){
-        Button serverButton = new Button("Create new game");
-        serverButton.setOnAction(e -> {
-            chooseNumOfPlayers();
-        });
-        
-        Button clientButton = new Button("Join existing game");
-        clientButton.setOnAction(e -> {
-            joinServer();
-        });
-        
-        Button returnButton = new Button("Return");
-        returnButton.setOnAction(e -> {
-            setMainButtons();
-        });
-        
-        centerVBox.getChildren().clear();
-        centerVBox.getChildren().addAll(serverButton, clientButton, returnButton);
-    }
+    private void unselectAll(ToggleButton a, ToggleButton b, ToggleButton c, ToggleButton d){
+        a.setSelected(false);
+        b.setSelected(false);
+        c.setSelected(false);
+        d.setSelected(false);
+    }    
     
-    private void chooseNumOfPlayers(){
+    private void createGame(){
+        numOfPlayers = -1;
+        
         Text text = new Text("Choose number of players");
         text.setFont(Font.font ("Verdana", 30));
         text.setFill(Color.WHITE);
         
-        Button one = new Button("1");
+        ToggleButton one = new ToggleButton("1");
+        ToggleButton two = new ToggleButton("2");
+        ToggleButton three = new ToggleButton("3");
+        ToggleButton four = new ToggleButton("4");
+        
+        one.setStyle("-fx-focus-color: transparent;");
         one.setOnAction(e -> {
-            startServer(1);
+            unselectAll(one, two, three, four);
+            one.setSelected(true);
+            numOfPlayers = 1;
         });
         
-        Button two = new Button("2");
+        two.setStyle("-fx-focus-color: transparent;");
         two.setOnAction(e -> {
-            startServer(2);
+            unselectAll(one, two, three, four);
+            two.setSelected(true);
+            numOfPlayers = 2;
         });
         
-        Button three = new Button("3");
+        three.setStyle("-fx-focus-color: transparent;");
         three.setOnAction(e -> {
-            startServer(3);
+            unselectAll(one, two, three, four);
+            three.setSelected(true);
+            numOfPlayers = 3;
         });
         
-        Button four = new Button("4");
+        four.setStyle("-fx-focus-color: transparent;");
         four.setOnAction(e -> {
-            startServer(4);
+            unselectAll(one, two, three, four);
+            four.setSelected(true);
+            numOfPlayers = 4;
         });
         
-        Button cancel = new Button("Cancel");
-        cancel.setOnAction(e -> {
-            gameCreation();
+        Button playButton = new Button("Play");
+        playButton.setStyle("-fx-focus-color: transparent;");
+        playButton.setOnAction(e -> {
+            if (numOfPlayers > 0 && numOfPlayers <= 4){
+                startServer();
+            }
         });
         
-        HBox hBox = new HBox(one, two, three, four);
-        hBox.setAlignment(Pos.CENTER);
-        hBox.setSpacing(SPACING);
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setStyle("-fx-focus-color: transparent;");
+        cancelButton.setOnAction(e -> {
+            setMainButtons();
+        });
+        
+        HBox numbers = new HBox(one, two, three, four);
+        numbers.setAlignment(Pos.CENTER);
+        numbers.setSpacing(SPACING);
+        
+        HBox buttons = new HBox(playButton, cancelButton);
+        buttons.setAlignment(Pos.CENTER);
+        buttons.setSpacing(SPACING);
         
         centerVBox.getChildren().clear();
-        centerVBox.getChildren().addAll(text, hBox, cancel);
+        centerVBox.getChildren().addAll(text, numbers, buttons);
     }
     
-    private void startServer(int numOfPlayers){
+    private void startServer(){
         Server server = new Server();
         Thread t = new Thread(server);
         t.start();

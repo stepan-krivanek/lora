@@ -40,6 +40,15 @@ public class All extends Minigame implements GameMode{
         
         return super.checkRules(card.getSuit());
     }
+    
+    @Override
+    public void end(){
+        for (int id : getTrickTakers()){
+            penalties[id] += 1;
+        }
+        
+        super.end();
+    }
 
     @Override
     public int getId() {
