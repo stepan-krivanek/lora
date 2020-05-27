@@ -121,6 +121,10 @@ public class GameView extends StackPane{
         this.getChildren().addAll(primaryHand, playZone);
     }
     
+    public void updateScore(int[] score){
+        
+    }
+    
     public void showGameModeSelection(MpPlayer player){
         primaryHand.setTranslateY(CARD_HEIGHT / 2);
         Rectangle rect = new Rectangle(WIDTH, HEIGHT);

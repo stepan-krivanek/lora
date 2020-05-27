@@ -24,6 +24,7 @@ import java.util.logging.Logger;
  */
 public class Server implements Runnable{
     
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
     private final Game game = new Game(this);
     private final int NUM_OF_PLAYERS = 4;
     private final int MSG_SIZE = 10;
@@ -36,7 +37,7 @@ public class Server implements Runnable{
         try {
             socket = new ServerSocket(port);
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         } 
     }
     
@@ -56,7 +57,7 @@ public class Server implements Runnable{
                 System.out.println("Player " + connectedPlayers + " has joint the game.");
                 connectedPlayers += 1;
             } catch (IOException ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
         }
         
@@ -84,7 +85,7 @@ public class Server implements Runnable{
             players[playerId].output.write(data);
             players[playerId].output.flush();
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         }
     }
     
@@ -109,6 +110,7 @@ public class Server implements Runnable{
     
     public void cardPlayed(Card card, int playerId){
         if (card == null) return;
+        logger.log(Level.INFO, "Card {0} played by {1}", new Object[]{card.toString(), playerId});
         
         byte[] data = initMessage(ServerMessage.CARD_PLAYED);
         data[1] = card.toByte();
@@ -125,18 +127,35 @@ public class Server implements Runnable{
         send(data, id);
     }
     
-    public void hand(Deck deck, int id){
+    public void hand(Deck deck, int playerId){
         byte[] data = initMessage(ServerMessage.HAND);
         
+        String msg = "Player " + playerId + " has got cards [";
         for (int i = 0; i < deck.size(); i++){
-            data[i+1] = deck.get(i).toByte();
+            Card card = deck.get(i);
+            data[i+1] = card.toByte();
+            msg += card.toString() + ", ";
         }
+        msg += "]";
         
-        send(data, id);
+        logger.log(Level.INFO, msg);
+        send(data, playerId);
     }
     
-    public void score(){
-        //TBA
+    public boolean score(int[] penalties){
+        int length = penalties.length;
+        if (penalties.length != 4){
+            logger.log(Level.SEVERE, "Error: Wrong score format!");
+            return false;
+        }
+        
+        byte[] data = initMessage(ServerMessage.SCORE);
+        for (int i = 0; i < length; i++){
+            data[i+1] = (byte)penalties[i];
+        }
+        
+        broadcast(data);
+        return true;
     }
     
     public void gameMode(int id){
@@ -171,7 +190,7 @@ public class Server implements Runnable{
                 input = new DataInputStream(socket.getInputStream());
                 output = new DataOutputStream(socket.getOutputStream());
             } catch (IOException ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
         }
         
@@ -194,7 +213,7 @@ public class Server implements Runnable{
                     game.playCard(card, playerId);
                 }
             } catch (IOException ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
         }
     }

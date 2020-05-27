@@ -45,7 +45,6 @@ public class CardUtils {
         return new Image(path, CARD_WIDTH, 0, true, true);
     }
 
-    //TO BE REWORKED
     private static void initFrontImages() {
         final HashMap<Rank, Image> leaves = new HashMap();
         leaves.put(Rank.SEVEN, loadCardImage("/images/green7.png"));

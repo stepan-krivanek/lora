@@ -60,13 +60,9 @@ public class Quarts implements GameMode{
             if (discardDeck.size() >= cardsToPlay){
                 stopAll();
                 
-                GameUtils.wait(3000, new Callable() {
-                    @Override
-                    public Void call() throws Exception {
-                        
-                        playNext();
-                        return null;
-                    }
+                GameUtils.wait(3000, (Callable) () -> {
+                    playNext();
+                    return null;
                 });
             }
         }

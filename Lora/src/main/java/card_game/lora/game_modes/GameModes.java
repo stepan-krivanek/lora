@@ -7,8 +7,19 @@ package card_game.lora.game_modes;
 
 /**
  *
- * @author stepa
+ * @author stepan
  */
 public enum GameModes {
-    REDS, SUPERIORS, FRLA, ALL, RED_KING, TENS, QUARTS;
+    REDS("Reds"), SUPERIORS("Superiors"), FRLA("First-Last"), ALL("All"),
+    RED_KING("Red King"), TENS("Tens"), QUARTS("Quarts");
+    
+    private final String name;
+    private GameModes(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString(){
+        return name;
+    }
 }

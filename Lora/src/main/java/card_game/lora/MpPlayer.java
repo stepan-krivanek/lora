@@ -25,6 +25,8 @@ public class MpPlayer {
     
     private final GameView gameView;
     private final int MSG_SIZE = 10;
+    private final int NUM_OF_PLAYERS = 4;
+    private final int[] score = new int[NUM_OF_PLAYERS];
     protected final int HAND_SIZE = 8;
     
     private int id;
@@ -121,7 +123,13 @@ public class MpPlayer {
                 break;
                 
             case SCORE:
-                //TBA
+                for (int i = 0; i < NUM_OF_PLAYERS; i++){
+                    score[i] += data[i+1];
+                }
+                
+                Platform.runLater(() -> {
+                    gameView.updateScore(score);
+                });
                 break;
                 
             case PLAY:

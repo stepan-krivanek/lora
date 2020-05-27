@@ -34,6 +34,7 @@ public class GameUtils {
     private static final Rectangle2D BOUNDS = Screen.getPrimary().getBounds();
     private static final double SCREEN_WIDTH = BOUNDS.getWidth();
     private static final double SCREEN_HEIGHT = BOUNDS.getHeight();
+    private static final HashMap<GameModes, Image> MODES_IMAGES = new HashMap();
     private static final HashMap<Rank, Integer> rankValues = new HashMap(){
         {
             put(Rank.SEVEN, 0);
@@ -46,6 +47,8 @@ public class GameUtils {
             put(Rank.ACE, 7);
         }
     };
+    
+    private static boolean imagesLoaded = false;
     
     private GameUtils(){}
     
@@ -70,6 +73,18 @@ public class GameUtils {
         );
         
         return new Background(bcgrImage);
+    }
+    
+    public static void preloadImages(){
+        initModeImages();
+        imagesLoaded = true;
+    }
+    
+    public static Image getModeImage(GameModes gameMode){
+        if (!imagesLoaded){
+            preloadImages();
+        }
+        return MODES_IMAGES.get(gameMode);
     }
     
     public static void wait(int ms, Callable function){
@@ -122,5 +137,19 @@ public class GameUtils {
     
     public static int getRankValue(Rank rank){
         return rankValues.get(rank);
+    }
+    
+    private static Image loadModeImage(String path){
+        return new Image(path, SCREEN_WIDTH / 7, 0, true, true);
+    }
+    
+    private static void initModeImages(){
+        MODES_IMAGES.put(GameModes.REDS, loadModeImage("path"));
+        MODES_IMAGES.put(GameModes.SUPERIORS, loadModeImage("path"));
+        MODES_IMAGES.put(GameModes.FRLA, loadModeImage("path"));
+        MODES_IMAGES.put(GameModes.ALL, loadModeImage("path"));
+        MODES_IMAGES.put(GameModes.RED_KING, loadModeImage("path"));
+        MODES_IMAGES.put(GameModes.TENS, loadModeImage("path"));
+        MODES_IMAGES.put(GameModes.QUARTS, loadModeImage("path"));
     }
 }
