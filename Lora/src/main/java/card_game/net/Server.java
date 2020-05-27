@@ -50,6 +50,7 @@ public class Server implements Runnable{
                 players[connectedPlayers] = connection;
                 
                 Thread t = new Thread(connection);
+                t.setName("Thread: connection to player " + connectedPlayers);
                 t.start();
                 
                 System.out.println("Player " + connectedPlayers + " has joint the game.");

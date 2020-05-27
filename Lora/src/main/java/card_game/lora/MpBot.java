@@ -11,6 +11,8 @@ import card_game.lora.game_modes.GameModes;
 import card_game.net.ServerMessage;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -47,6 +49,7 @@ public class MpBot extends MpPlayer{
             case START:
                 brain = new Brain();
                 Thread t = new Thread(brain);
+                t.setName("Thread: Bot " + getId());
                 t.start();
                 break;
                 
@@ -177,7 +180,11 @@ public class MpBot extends MpPlayer{
                 }
                 
                 if (!isPlaying() || awaitingResponse || getHand().isEmpty()){
-                    Thread.interrupted();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MpBot.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     continue;
                 }
                 

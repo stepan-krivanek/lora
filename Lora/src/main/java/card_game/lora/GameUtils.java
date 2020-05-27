@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
@@ -83,11 +85,15 @@ public class GameUtils {
             try {
                 function.call();
             } catch (Exception exception){
-                System.out.println(exception);
+                Logger.getLogger(GameUtils.class.getName()).log(
+                        Level.SEVERE, "Function call failed", exception
+                );
             }
         });
         
-        new Thread(wait).start();
+        Thread t = new Thread(wait);
+        t.setName("Thread: wait");
+        t.start();
     }
     
     public static List<GameModes> getOrderedGamemodes(){

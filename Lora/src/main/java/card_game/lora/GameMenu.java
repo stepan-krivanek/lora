@@ -152,6 +152,7 @@ public class GameMenu extends StackPane{
     private void startServer(){
         Server server = new Server();
         Thread t = new Thread(server);
+        t.setName("Thread: server");
         t.start();
         
         addBots(numOfPlayers);

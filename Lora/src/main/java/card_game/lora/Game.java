@@ -43,7 +43,7 @@ public class Game {
     private GameMode gameMode;
     private Player forehand;
     private int round = 0;
-    private int gamesPlayedInRound = 6;
+    private int gamesPlayedInRound = 0;
     private int graduationAttempt = 0;
     
     public Game(Server server){
@@ -58,7 +58,7 @@ public class Game {
     
     public void start(){
         cardDealing();
-        setGameMode(gameModes.indexOf(GameModes.QUARTS));
+        setGameMode(gameModes.indexOf(GameModes.RED_KING));
         gameMode.start();
     }
     

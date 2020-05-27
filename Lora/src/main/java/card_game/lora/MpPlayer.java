@@ -79,6 +79,7 @@ public class MpPlayer {
         }
         
         Thread t = new Thread(connection);
+        t.setName("Thread: connection to server " + id);
         t.start();
         return true;
     }
