@@ -10,10 +10,10 @@ import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.card.Suit;
 import card_game.lora.game_modes.GameModes;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.effect.PerspectiveTransform;
@@ -40,6 +40,8 @@ import javafx.scene.text.Text;
  */
 public class GameView extends StackPane{
     
+    private final int MAX_CARDS = 32;
+    private final int NUM_OF_PLAYERS = 4;
     private final double WIDTH;// = GameUtils.getScreenWidth();
     private final double HEIGHT;// = GameUtils.getScreenHeight();
     private final double CARD_WIDTH;// = WIDTH / 10;
@@ -49,6 +51,7 @@ public class GameView extends StackPane{
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
     private final LoadingScreen loadingScreen = new LoadingScreen();
     private final StackPane table = new StackPane();
+    private final HandView[] otherHands = new HandView[NUM_OF_PLAYERS - 1];
     private final Main program;
     private final MpPlayer player;
     
@@ -101,8 +104,55 @@ public class GameView extends StackPane{
         program.getRoot().getChildren().add(this);
     }
     
-    public void showHand(){
-        this.getChildren().removeAll(primaryHand, playZone);
+    public void showHands(){
+        //Other hands
+        int handSize = MAX_CARDS / NUM_OF_PLAYERS;
+        for (int i = 0; i < NUM_OF_PLAYERS - 1; i++){
+            otherHands[i] = new HandView(handSize, WIDTH, HEIGHT);
+        }
+        
+        double newCardHeight = otherHands[0].getCardHeight() * 50 / 23;
+        double rightX, leftX, topY, botY;
+        rightX = WIDTH / 6;
+        leftX = - WIDTH / 10;
+        botY = HEIGHT;
+        topY = HEIGHT / 4;
+        PerspectiveTransform leftHand = new PerspectiveTransform(
+                leftX, botY - newCardHeight,
+                rightX, topY - newCardHeight,
+                rightX, topY,
+                leftX, botY
+        );
+        
+        PerspectiveTransform rightHand = new PerspectiveTransform(
+                WIDTH - rightX, topY - newCardHeight,
+                WIDTH - leftX, botY - newCardHeight,
+                WIDTH - leftX, botY,
+                WIDTH - rightX, topY
+        );
+        
+        newCardHeight = otherHands[0].getCardHeight() * 5 / 4;
+        rightX = WIDTH/2 + (otherHands[1].getCardWidth() * 8 * 5 / 9 / 2);   //(WIDTH / 2) + (WIDTH * 2 / 9);
+        leftX = WIDTH/2 - otherHands[1].getCardWidth() * 8 * 5 / 9 / 2;    //(WIDTH / 2) - (WIDTH * 2 / 9);
+        botY = HEIGHT / 4;
+        topY = botY - newCardHeight;
+        PerspectiveTransform topHand = new PerspectiveTransform(
+                leftX, topY,
+                rightX, topY,
+                rightX, botY,
+                leftX, botY
+        );
+        
+        otherHands[0].setEffect(leftHand);
+        otherHands[1].setEffect(topHand);
+        otherHands[2].setEffect(rightHand);
+        
+        for (HandView hand : otherHands){
+            this.getChildren().remove(hand);
+            this.getChildren().add(hand);
+        }
+        
+        //Primary hand
         primaryHand = new HandView(player, WIDTH, HEIGHT);
         
         playZone = new Rectangle(WIDTH, HEIGHT * 2 / 3);
@@ -118,6 +168,7 @@ public class GameView extends StackPane{
             primaryHand.setTranslateY(0);
         });
         
+        this.getChildren().removeAll(primaryHand, playZone);
         this.getChildren().addAll(primaryHand, playZone);
     }
     
@@ -146,6 +197,12 @@ public class GameView extends StackPane{
     }
     
     public void showCard(Card card, int playerId){
+        if (playerId != player.getId()){
+            int idx = playerId + NUM_OF_PLAYERS - player.getId();
+            idx = idx % NUM_OF_PLAYERS - 1;
+            otherHands[idx].removeCard(0);
+        }
+        
         tableGUI.showCard(card, playerId);
     }
     
@@ -195,7 +252,7 @@ public class GameView extends StackPane{
     
     private PerspectiveTransform perspection(double width, double height){
         final double hSegment = width / 6;
-        final double vSegment = height / 5;
+        final double vSegment = height / 4;
         
         PerspectiveTransform perspection = new PerspectiveTransform(
                 hSegment, vSegment,

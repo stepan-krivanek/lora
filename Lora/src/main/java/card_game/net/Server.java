@@ -9,6 +9,7 @@ import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.lora.Game;
 import card_game.lora.GameUtils;
+import card_game.lora.game_modes.GameModes;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -161,6 +162,9 @@ public class Server implements Runnable{
     public void gameMode(int id){
         byte[] data = initMessage(ServerMessage.GAME_MODE);
         data[1] = (new Integer(id)).byteValue();
+        
+        String msg = "Starting game mode " + GameModes.values()[id].toString();
+        logger.log(Level.INFO, msg);
         broadcast(data);
     }
     

@@ -170,7 +170,7 @@ public class MpPlayer {
                 }
                 
                 Platform.runLater(() -> {
-                    gameView.showHand();
+                    gameView.showHands();
                 });
                 break;
                 

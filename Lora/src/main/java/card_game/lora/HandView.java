@@ -6,6 +6,7 @@
 package card_game.lora;
 
 import card_game.card.Card;
+import card_game.card.CardUtils;
 import card_game.card.Deck;
 import java.util.ArrayList;
 import javafx.geometry.Insets;
@@ -26,7 +27,7 @@ public class HandView extends GridPane{
     private final double CARD_WIDTH;
     private final double CARD_HEIGHT;
     private final double toRadians = (Math.PI / 180);
-    private ArrayList<CardView> cards;
+    private final ArrayList<CardView> cards;
     
     public HandView(MpPlayer player, double width, double height){
         Deck deck = player.getHand();
@@ -51,6 +52,32 @@ public class HandView extends GridPane{
                     player.playCard(card);
                 }
             });
+            
+            GridPane.setConstraints(cardView, i, 0);
+            GridPane.setMargin(cardView, new Insets(0, -overlay, 0, 0));
+            this.getChildren().add(cardView);
+            
+            cards.add(i, cardView);
+        }
+        
+        this.applyRotation();
+    }
+    
+    public HandView(int size, double width, double height){
+        CARD_WIDTH = width / 10;
+        CARD_HEIGHT = height / 3;
+        
+        setAlignment(Pos.BOTTOM_CENTER);
+        setPrefWidth(width);
+        setPrefHeight(height);
+        setHgap(size);
+        setVgap(1);
+        
+        final double overlay = CARD_WIDTH / 2;
+        cards = new ArrayList<>();
+        
+        for (int i = 0; i < size; i++){
+            CardView cardView = new CardView(CardUtils.getBackImage());
             
             GridPane.setConstraints(cardView, i, 0);
             GridPane.setMargin(cardView, new Insets(0, -overlay, 0, 0));
@@ -113,7 +140,7 @@ public class HandView extends GridPane{
         }
     }
     
-    public class CardView extends ImageView {
+    private class CardView extends ImageView {
         
         private final double cardShift = CARD_HEIGHT / 5;
         private final DropShadow borderGlow = new DropShadow();
