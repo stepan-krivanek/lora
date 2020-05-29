@@ -33,6 +33,8 @@ public class Server implements Runnable{
     private final Connection[] players = new Connection[NUM_OF_PLAYERS];
     private final int gameModeId;
     
+    private boolean exit = false;
+    
     private ServerSocket socket;
     
     public Server(int gameModeId){
@@ -105,6 +107,7 @@ public class Server implements Runnable{
     }
     
     public void exit(){
+        exit = true;
         broadcast(initMessage(ServerMessage.EXIT));
     }
     
@@ -182,6 +185,12 @@ public class Server implements Runnable{
         send(initMessage(ServerMessage.STOP_PLAYING), id);
     }
     
+    private void connectionLost(int playerId){
+        byte[] data = initMessage(ServerMessage.CONNECTION_LOST);
+        data[1] = (byte)playerId;
+        broadcast(data);
+    }
+    
     private class Connection implements Runnable {
         
         private Socket socket;
@@ -211,6 +220,15 @@ public class Server implements Runnable{
                     input.read(data);
                     
                     ClientMessage msg = ClientMessage.values()[data[0]];
+                    if (msg.equals(ClientMessage.DISCONNECT)){
+                        if (!exit){
+                            exit = true;
+                            connectionLost(playerId);
+                        }
+                        
+                        break;
+                    }
+                    
                     if(msg.equals(ClientMessage.GAME_MODE)){
                         game.startMode(data[1]);
                         continue;

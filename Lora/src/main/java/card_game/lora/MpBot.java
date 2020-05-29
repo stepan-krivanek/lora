@@ -55,6 +55,15 @@ public class MpBot extends MpPlayer{
                 
             case EXIT:
                 exit = true;
+                disconnect();
+                break;
+                
+            case CONNECTION_LOST:
+                int pId = data[1];
+                if (pId != getId()){
+                    exit = true;
+                    disconnect();
+                }
                 break;
                 
             case SCORE:

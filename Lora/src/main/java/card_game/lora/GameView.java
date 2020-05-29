@@ -10,8 +10,11 @@ import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.card.Suit;
 import card_game.lora.game_modes.GameModes;
+import card_game.net.ClientConnection;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -19,7 +22,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.PerspectiveTransform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
@@ -31,12 +33,11 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 
@@ -91,7 +92,7 @@ public class GameView extends StackPane{
         // Table
         table = new StackPane();
         Background tableBcgr = new Background(new BackgroundImage(
-                new Image("/images/table.png", WIDTH / 5, 0, true, true),
+                new Image("/images/table2.png", WIDTH / 5, 0, true, true),
                 BackgroundRepeat.REPEAT,
                 BackgroundRepeat.REPEAT,
                 BackgroundPosition.CENTER,
@@ -294,7 +295,28 @@ public class GameView extends StackPane{
         getChildren().addAll(rect, winner);
     }
     
+    public void connectionLost(int playerId){
+        Rectangle rect = new Rectangle(WIDTH, HEIGHT);
+        rect.setOpacity(0);
+        
+        Text text = new Text("Connection lost! Player " + playerId + " left the game.");
+        text.setFont(Design.Font(40));
+        
+        ToggleButton exitButton = new Design.Button(WIDTH / 5, HEIGHT / 10);
+        exitButton.setText("Exit");
+        exitButton.setOnAction(e -> {
+            exit();
+        });
+        
+        VBox alertBox = new VBox(text, exitButton);
+        
+        this.getChildren().addAll(rect, alertBox);
+        String msg = "Player " + playerId + " left the game! Connection Lost!";
+        Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, msg);
+    }
+    
     public void exit(){
+        player.disconnect();
         program.getMainMenu().setVisible(true);
         this.setVisible(false);
         program.getRoot().getChildren().remove(this);

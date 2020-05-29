@@ -61,6 +61,11 @@ public class ClientConnection implements Runnable {
                 byte[] data = new byte[MSG_SIZE];
                 input.read(data);
                 player.action(data);
+                
+                ServerMessage msg = ServerMessage.values()[data[0]];
+                if (msg.equals(ServerMessage.EXIT) || msg.equals(ServerMessage.CONNECTION_LOST)){
+                    break;
+                }
             } catch (IOException ex) {
                 Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
             }

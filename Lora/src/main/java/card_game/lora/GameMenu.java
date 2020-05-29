@@ -39,7 +39,7 @@ public class GameMenu extends StackPane{
     private final double HEIGHT = bounds.getHeight();
     private final double buttonWidth = WIDTH / 5;
     private final double buttonHeight = HEIGHT / 10;
-    private final String bcgrPath = "/images/the_card_players.jpg";
+    private final String bcgrPath = "/images/main_menu_bcgr.png";
     private final Main program;
     private final Stage stage;
 

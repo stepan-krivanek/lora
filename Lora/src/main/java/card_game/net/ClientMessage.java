@@ -10,5 +10,5 @@ package card_game.net;
  * @author stepa
  */
 public enum ClientMessage {
-    PLAY_CARD, PASS, GAME_MODE
+    PLAY_CARD, PASS, GAME_MODE, DISCONNECT;
 }

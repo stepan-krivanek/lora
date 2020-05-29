@@ -32,6 +32,7 @@ public class MpPlayer {
     private boolean isPlaying = false;
     private final Deck hand = new Deck(HAND_SIZE);
     private ClientConnection connection;
+    private boolean isConnected = false;
     
     public MpPlayer(Main program){
         gameView = new GameView(program, this);
@@ -69,7 +70,16 @@ public class MpPlayer {
         return isPlaying;
     }
     
-    public boolean connectToServer(){   
+    public void disconnect(){
+        byte[] data = new byte[MSG_SIZE];
+        data[0] = (byte)ClientMessage.DISCONNECT.ordinal();
+        sendToServer(data);
+        
+        isConnected = false;
+    }
+    
+    public boolean connectToServer(){
+        isConnected = true;
         connection = new ClientConnection(this);
         
         try {
@@ -116,9 +126,20 @@ public class MpPlayer {
                 break;
                 
             case EXIT:
+                disconnect();
                 Platform.runLater(() -> {
                     gameView.exit();
                 });
+                break;
+                
+            case CONNECTION_LOST:
+                int pId = data[1];
+                if (pId != id){
+                    disconnect();
+                    Platform.runLater(() -> {
+                        gameView.connectionLost(pId);
+                    });
+                }
                 break;
                 
             case SCORE:
@@ -194,5 +215,9 @@ public class MpPlayer {
                 
                 break;
         }
+    }
+    
+    public boolean isConnected(){
+        return isConnected;
     }
 }

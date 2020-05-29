@@ -144,12 +144,13 @@ public class GameUtils {
     }
     
     private static void initModeImages(){
-        MODES_IMAGES.put(GameModes.REDS, loadModeImage("path"));
-        MODES_IMAGES.put(GameModes.SUPERIORS, loadModeImage("path"));
-        MODES_IMAGES.put(GameModes.FRLA, loadModeImage("path"));
-        MODES_IMAGES.put(GameModes.ALL, loadModeImage("path"));
-        MODES_IMAGES.put(GameModes.RED_KING, loadModeImage("path"));
-        MODES_IMAGES.put(GameModes.TENS, loadModeImage("path"));
-        MODES_IMAGES.put(GameModes.QUARTS, loadModeImage("path"));
+        final String modes = "/images/mode_icons/";
+        MODES_IMAGES.put(GameModes.REDS, loadModeImage(modes + "reds.png"));
+        MODES_IMAGES.put(GameModes.SUPERIORS, loadModeImage(modes + "superiors.png"));
+        MODES_IMAGES.put(GameModes.FRLA, loadModeImage(modes + "fr-la.png"));
+        MODES_IMAGES.put(GameModes.ALL, loadModeImage(modes + "all.png"));
+        MODES_IMAGES.put(GameModes.RED_KING, loadModeImage(modes + "red_king.png"));
+        MODES_IMAGES.put(GameModes.TENS, loadModeImage(modes + "tens.png"));
+        MODES_IMAGES.put(GameModes.QUARTS, loadModeImage(modes + "quarts.png"));
     }
 }
