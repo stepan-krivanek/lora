@@ -23,18 +23,19 @@ import javafx.scene.effect.PerspectiveTransform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -57,14 +58,15 @@ public class GameView extends StackPane{
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
     private final LoadingScreen loadingScreen = new LoadingScreen();
-    private final StackPane playGround;
+    private final StackPane playGround = new StackPane();
     private final StackPane table;
-    private final GridPane topBar;
-    private final HBox botBar;
+    private final Text modeText, playerScore;
+    private final Text[] score;
     private final HandView[] otherHands = new HandView[NUM_OF_PLAYERS - 1];
     private final Main program;
     private final MpPlayer player;
     
+    private boolean soundOn = true;
     private TableGUI tableGUI = null;
     private HandView primaryHand;
     private Rectangle playZone;
@@ -82,14 +84,30 @@ public class GameView extends StackPane{
         this.player = player;
         this.program = program;
         
-        // Background
-        //Background bcgr = GameUtils.loadBackground(path, WIDTH, HEIGHT);
-        Background bcgr = new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY));
+        //-----------------------Background-------------------------
+        Background bcgr = GameUtils.loadBackground(
+                "/images/game_bcgr.png", WIDTH, HEIGHT
+        );
         this.setBackground(bcgr);
         this.setHeight(HEIGHT);
         this.setWidth(WIDTH);
-
-        // Table
+         
+        ////////////////////////////////////////////////////////////
+        //--------------------------Table-------------------------//
+        ////////////////////////////////////////////////////////////
+        
+        //--------------------------Score---------------------------
+        playerScore = new Text("123");
+        playerScore.setFont(Design.Font(HEIGHT / 20));
+        playerScore.setBoundsType(TextBoundsType.VISUAL);
+        
+        score = new Text[NUM_OF_PLAYERS];
+        for (Text text : score){
+            text = new Text("0");
+            text.setFont(Design.Font(HEIGHT / 10));
+        }
+        
+        //--------------------------Table---------------------------
         table = new StackPane();
         Background tableBcgr = new Background(new BackgroundImage(
                 new Image("/images/table2.png", WIDTH / 5, 0, true, true),
@@ -103,54 +121,95 @@ public class GameView extends StackPane{
         table.setEffect(perspection(WIDTH, HEIGHT));
         GameView.setAlignment(table, Pos.CENTER);
         
-        // Game mode
-        Text modeText = new Text(GameModes.RED_KING.toString());
+        //----------------------Personal info-----------------------
+        //BETA
+        Text name = new Text("Ututu halabala");
+        name.setFont(Design.Font(HEIGHT / 20));
         
-        Circle circle = new Circle(HEIGHT / 100, Design.BROWN);
-        Text info = new Text("i");
-        info.setFont(Design.Font(HEIGHT / 100));
-        info.setFill(Design.BLUE);
-        info.setBoundsType(TextBoundsType.VISUAL); 
-        StackPane iStack = new StackPane();
-        iStack.getChildren().addAll(circle, info);
+        ImageView goldView = new ImageView("/images/gold.png");
+        goldView.setFitWidth(WIDTH / 20);
+        goldView.setFitHeight(HEIGHT / 15);
+        StackPane gold = new StackPane(goldView, playerScore);
+        gold.setMinSize(WIDTH / 20, HEIGHT / 15);
+        gold.setMaxSize(WIDTH / 20, HEIGHT / 15);
         
-        HBox modeBox = new HBox(modeText, iStack);
+        HBox personalBox = new HBox(name, gold);
+        personalBox.setAlignment(Pos.BOTTOM_LEFT);
+        personalBox.setPadding(new Insets(10, WIDTH / 100, 10, WIDTH / 100));
         
-        // Pause button
-        Button pauseButton = new Button("Pause");
-        pauseButton.setAlignment(Pos.TOP_RIGHT);
-        pauseButton.setOnAction(e -> {
-            exit();
+        /////////////////////////////////////////////////////////////
+        //--------------------------Top bar------------------------//
+        /////////////////////////////////////////////////////////////
+        
+        //-------------------------Game mode-------------------------
+        modeText = new Text(GameModes.REDS.toString());
+        modeText.setFont(Design.Font(HEIGHT / 10));
+        
+        HBox modeBox = new HBox(modeText);
+        modeBox.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(modeBox, Priority.ALWAYS);
+        
+        //------------------------Pause button-----------------------
+        Rectangle pause = new Rectangle(WIDTH / 15, HEIGHT / 10);
+        pause.setFill(fillRect("/images/icons/pause_grey.png"));
+        pause.setOnMouseEntered(e -> {
+            pause.setFill(fillRect("/images/icons/pause_orange.png"));
         });
+        pause.setOnMouseExited(e -> {
+            pause.setFill(fillRect("/images/icons/pause_grey.png"));
+        });
+        pause.setOnMouseClicked(e -> {
+            showMenu();
+        });
+        
+        //------------------------Volume button----------------------
+        Rectangle volume = new Rectangle(WIDTH / 15, HEIGHT / 10);
+        volume.setFill(fillRect("/images/icons/sound_on_grey.png"));
+        volume.setOnMouseEntered(e -> {
+            if (soundOn){
+                volume.setFill(fillRect("/images/icons/sound_on_orange.png"));
+            } else {
+                volume.setFill(fillRect("/images/icons/sound_off_orange.png"));
+            }
+        });
+        volume.setOnMouseExited(e -> {
+            if (soundOn){
+                volume.setFill(fillRect("/images/icons/sound_on_grey.png"));
+            } else {
+                volume.setFill(fillRect("/images/icons/sound_off_grey.png"));
+            }
+        });
+        volume.setOnMouseClicked(e -> {
+            soundOn = !soundOn;
+            if (soundOn){
+                volume.setFill(fillRect("/images/icons/sound_on_orange.png"));
+            } else {
+                volume.setFill(fillRect("/images/icons/sound_off_orange.png"));
+            }
+        });
+        
+        HBox pauseBox = new HBox(volume, pause);
+        pauseBox.setAlignment(Pos.CENTER_RIGHT);
+        HBox.setHgrow(pauseBox, Priority.ALWAYS);
 
-        // Bottom bar
-        botBar = new HBox();
-        botBar.setBackground(tableBcgr);
+        //---------------------------Top bar--------------------------
+        HBox topBar = new HBox(modeBox, pauseBox);
+        topBar.setPadding(new Insets(10, WIDTH / 100, 10, WIDTH / 100));
         
-        
-        // Playground
-        playGround = new StackPane();
-        
-        
-        // Top bar
-        topBar = new GridPane();
-        topBar.setAlignment(Pos.CENTER);
-        topBar.setHgap(10);
-        topBar.setVgap(1);
-        topBar.setPrefWidth(WIDTH);
-        //topBar.setPrefHeight();
-        
-        topBar.add(modeBox, 0, 0, 1, 1);
-        topBar.add(pauseButton, 9, 0, 1, 1);
-        
-        // Border
+        //////////////////////////////////////////////////////////////
+        //-------------------------Border pane----------------------//
+        //////////////////////////////////////////////////////////////
         BorderPane border = new BorderPane();
-        border.setBottom(botBar);
+        // The order matters!
         border.setCenter(playGround);
         border.setTop(topBar);
         
-        this.getChildren().addAll(table, border);
+        this.getChildren().addAll(table, personalBox, border);
         loadingScreen.show();
+    }
+    
+    private Paint fillRect(String path){
+        return new ImagePattern(new Image(path));
     }
     
     public void show(){
@@ -210,7 +269,7 @@ public class GameView extends StackPane{
         //Primary hand
         primaryHand = new HandView(player, WIDTH, HEIGHT);
         
-        playZone = new Rectangle(WIDTH, HEIGHT * 2 / 3);
+        playZone = new Rectangle(WIDTH, HEIGHT /2);//* 2 / 3);
         GameView.setAlignment(playZone, Pos.TOP_CENTER);
         playZone.setOpacity(0);
         
@@ -281,6 +340,7 @@ public class GameView extends StackPane{
         }
         
         tableGUI.show();
+        modeText.setText(gameModes.get(id).toString());
     }
     
     public void showWinner(int id){
@@ -309,6 +369,7 @@ public class GameView extends StackPane{
         });
         
         VBox alertBox = new VBox(text, exitButton);
+        alertBox.setAlignment(Pos.CENTER);
         
         this.getChildren().addAll(rect, alertBox);
         String msg = "Player " + playerId + " left the game! Connection Lost!";
@@ -324,6 +385,48 @@ public class GameView extends StackPane{
     
     public HandView getHandView(){
         return primaryHand;
+    }
+    
+    private void showMenu(){
+        Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.GREY);
+        rect.setOpacity(0.2);
+        
+        final double menuHeight = HEIGHT / 2;
+        final double menuWidth = WIDTH / 4;
+        final double spacing = menuHeight / 10;
+        
+        VBox menu = new VBox();
+        menu.setSpacing(spacing);
+        menu.setMinSize(menuWidth, menuHeight);
+        menu.setMaxSize(menuWidth, menuHeight);
+        menu.setBackground(GameUtils.loadBackground(
+                "images/menu_bcgr.png", menuWidth, menuHeight
+        ));
+        menu.setAlignment(Pos.CENTER);
+        
+        final double buttonWidth = menuWidth * 2 / 3;
+        final double buttonheight = menuHeight / 10;
+
+        ToggleButton exitButton = new Design.Button(buttonWidth, buttonheight);
+        exitButton.setText("Exit");
+        exitButton.setOnAction(e -> {
+            exit();
+        });
+        
+        ToggleButton saveButton = new Design.Button(buttonWidth, buttonheight);
+        saveButton.setText("Save");
+        saveButton.setOnAction(e -> {
+            // save the game
+        });
+        
+        ToggleButton playButton = new Design.Button(buttonWidth, buttonheight);
+        playButton.setText("Continue");
+        playButton.setOnAction(e -> {
+            this.getChildren().removeAll(rect, menu);
+        });
+        
+        menu.getChildren().addAll(exitButton, saveButton, playButton);
+        this.getChildren().addAll(rect, menu);
     }
     
     private PerspectiveTransform perspection(double width, double height){

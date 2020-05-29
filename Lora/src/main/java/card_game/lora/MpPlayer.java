@@ -28,7 +28,7 @@ public class MpPlayer {
     private final int[] score = new int[NUM_OF_PLAYERS];
     protected final int HAND_SIZE = 8;
     
-    private int id;
+    private int id = -1;
     private boolean isPlaying = false;
     private final Deck hand = new Deck(HAND_SIZE);
     private ClientConnection connection;

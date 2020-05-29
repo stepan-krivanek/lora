@@ -19,7 +19,7 @@ public class CardUtils {
     private static final double CARD_WIDTH = GameUtils.getScreenWidth() / 6;
     private static boolean imagesLoaded = false;
     private static final Image BACK_IMAGE = loadCardImage(
-            cards + "card_back.png"
+            cards + "card_back3.png"
     );
     private static final HashMap<Suit, HashMap<Rank, Image>> FRONT_IMAGES =
             new HashMap();
