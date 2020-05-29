@@ -46,6 +46,9 @@ public class HandView extends GridPane{
         for (int i = 0; i < deck.size(); i++){
             Card card = deck.get(i);
             CardView cardView = new CardView(card.getFront());
+            cardView.setFitWidth(CARD_WIDTH);
+            cardView.setFitHeight(CARD_HEIGHT);
+            cardView.setPreserveRatio(true);
             
             cardView.setOnMouseClicked(e -> {
                 if (player.isPlaying()){
@@ -78,6 +81,9 @@ public class HandView extends GridPane{
         
         for (int i = 0; i < size; i++){
             CardView cardView = new CardView(CardUtils.getBackImage());
+            cardView.setFitWidth(CARD_WIDTH);
+            cardView.setFitHeight(CARD_HEIGHT);
+            cardView.setPreserveRatio(true);
             
             GridPane.setConstraints(cardView, i, 0);
             GridPane.setMargin(cardView, new Insets(0, -overlay, 0, 0));

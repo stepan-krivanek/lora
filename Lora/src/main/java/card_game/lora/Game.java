@@ -32,6 +32,7 @@ public class Game {
     private final int DECK_SIZE = 32;
     private final int NUM_OF_PLAYERS = 4;
     private final int NUM_OF_ROUNDS = 4;
+    private final int MAX_NUM_OF_GAMES = 40;
     private final Deck mainDeck = new Deck(DECK_SIZE, true);
     private final Player[] players = new Player[NUM_OF_PLAYERS];
     private final int[] score = new int[NUM_OF_PLAYERS];
@@ -45,6 +46,7 @@ public class Game {
     private int round = 0;
     private int gamesPlayedInRound = 0;
     private int graduationAttempt = 0;
+    private int gamesToPlay = MAX_NUM_OF_GAMES;
     
     public Game(Server server){
         this.server = server;
@@ -56,9 +58,16 @@ public class Game {
         forehand = players[0];
     }
     
-    public void start(){
+    public void start(int gameModeId){
+        if ((gameModeId < 0) || (gameModeId >= GameModes.values().length)){
+            gamesToPlay = MAX_NUM_OF_GAMES;
+            gameModeId = 0;
+        } else {
+            gamesToPlay = 1;
+        }
+        
         cardDealing();
-        setGameMode(gameModes.indexOf(GameModes.RED_KING));
+        setGameMode(gameModeId);
         gameMode.start();
     }
     
@@ -98,7 +107,10 @@ public class Game {
         }
         
         gamesPlayedInRound += 1;
-        if (gamesPlayedInRound >= gameModes.size()){
+        if (gamesPlayedInRound >= gamesToPlay){
+            addScore(penalties);
+            exit();
+        } else if (gamesPlayedInRound >= gameModes.size()){
             graduation(penalties);
         } else {
             addScore(penalties);

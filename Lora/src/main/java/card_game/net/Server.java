@@ -31,10 +31,13 @@ public class Server implements Runnable{
     private final int MSG_SIZE = 10;
     private final int port = 1341;
     private final Connection[] players = new Connection[NUM_OF_PLAYERS];
+    private final int gameModeId;
     
     private ServerSocket socket;
     
-    public Server(){
+    public Server(int gameModeId){
+        this.gameModeId = gameModeId;
+        
         try {
             socket = new ServerSocket(port);
         } catch (IOException ex) {
@@ -98,7 +101,7 @@ public class Server implements Runnable{
     
     private void start(){
         broadcast(initMessage(ServerMessage.START));
-        game.start();
+        game.start(gameModeId);
     }
     
     public void exit(){

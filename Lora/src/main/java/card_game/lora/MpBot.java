@@ -109,6 +109,8 @@ public class MpBot extends MpPlayer{
     
     private interface Tactic {
         
+        public String getName();
+        
         public Card playReds();
         
         public Card playSuperiors();
@@ -127,6 +129,10 @@ public class MpBot extends MpPlayer{
     private class RandomTactic implements Tactic {
         
         private final Random r = new Random();
+        
+        public String getName(){
+            return "Random";
+        }
         
         public Card playReds(){
             return getHand().get(r.nextInt(getHand().size()));
@@ -174,6 +180,9 @@ public class MpBot extends MpPlayer{
         public void run() {
             Tactic tactic = new RandomTactic();
             
+            String msg = "Bot " + getId() + " joins the game.";
+            Logger.getLogger(MpBot.class.getName()).log(Level.INFO, msg);
+            
             while(true){
                 if (exit){
                     break;
@@ -181,7 +190,7 @@ public class MpBot extends MpPlayer{
                 
                 if (!isPlaying() || awaitingResponse || getHand().isEmpty()){
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(100);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MpBot.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -228,6 +237,9 @@ public class MpBot extends MpPlayer{
                     }
                 }
             }
+            
+            msg = "Bot " + getId() + " finished the game with " + tactic.getName() + " tactic.";
+            Logger.getLogger(MpBot.class.getName()).log(Level.INFO, msg);
         }
     }
 }

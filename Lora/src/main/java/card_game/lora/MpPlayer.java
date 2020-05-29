@@ -7,7 +7,6 @@ package card_game.lora;
 
 import card_game.card.Card;
 import card_game.card.Deck;
-import card_game.lora.game_modes.GameModes;
 import card_game.net.ClientConnection;
 import card_game.net.ClientMessage;
 import card_game.net.ServerMessage;

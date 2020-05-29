@@ -13,9 +13,9 @@ import card_game.lora.game_modes.GameModes;
 import java.util.List;
 import java.util.Random;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.PerspectiveTransform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -26,13 +26,19 @@ import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 
 /**
  *
@@ -50,7 +56,10 @@ public class GameView extends StackPane{
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
     private final LoadingScreen loadingScreen = new LoadingScreen();
-    private final StackPane table = new StackPane();
+    private final StackPane playGround;
+    private final StackPane table;
+    private final GridPane topBar;
+    private final HBox botBar;
     private final HandView[] otherHands = new HandView[NUM_OF_PLAYERS - 1];
     private final Main program;
     private final MpPlayer player;
@@ -71,18 +80,16 @@ public class GameView extends StackPane{
         
         this.player = player;
         this.program = program;
-        program.getScene().setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ESCAPE){
-                exit();
-            }
-        });
         
+        // Background
         //Background bcgr = GameUtils.loadBackground(path, WIDTH, HEIGHT);
         Background bcgr = new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY));
         this.setBackground(bcgr);
         this.setHeight(HEIGHT);
         this.setWidth(WIDTH);
 
+        // Table
+        table = new StackPane();
         Background tableBcgr = new Background(new BackgroundImage(
                 new Image("/images/table.png", WIDTH / 5, 0, true, true),
                 BackgroundRepeat.REPEAT,
@@ -94,8 +101,54 @@ public class GameView extends StackPane{
         table.setPrefSize(WIDTH, HEIGHT);
         table.setEffect(perspection(WIDTH, HEIGHT));
         GameView.setAlignment(table, Pos.CENTER);
-        this.getChildren().add(table);
         
+        // Game mode
+        Text modeText = new Text(GameModes.RED_KING.toString());
+        
+        Circle circle = new Circle(HEIGHT / 100, Design.BROWN);
+        Text info = new Text("i");
+        info.setFont(Design.Font(HEIGHT / 100));
+        info.setFill(Design.BLUE);
+        info.setBoundsType(TextBoundsType.VISUAL); 
+        StackPane iStack = new StackPane();
+        iStack.getChildren().addAll(circle, info);
+        
+        HBox modeBox = new HBox(modeText, iStack);
+        
+        // Pause button
+        Button pauseButton = new Button("Pause");
+        pauseButton.setAlignment(Pos.TOP_RIGHT);
+        pauseButton.setOnAction(e -> {
+            exit();
+        });
+
+        // Bottom bar
+        botBar = new HBox();
+        botBar.setBackground(tableBcgr);
+        
+        
+        // Playground
+        playGround = new StackPane();
+        
+        
+        // Top bar
+        topBar = new GridPane();
+        topBar.setAlignment(Pos.CENTER);
+        topBar.setHgap(10);
+        topBar.setVgap(1);
+        topBar.setPrefWidth(WIDTH);
+        //topBar.setPrefHeight();
+        
+        topBar.add(modeBox, 0, 0, 1, 1);
+        topBar.add(pauseButton, 9, 0, 1, 1);
+        
+        // Border
+        BorderPane border = new BorderPane();
+        border.setBottom(botBar);
+        border.setCenter(playGround);
+        border.setTop(topBar);
+        
+        this.getChildren().addAll(table, border);
         loadingScreen.show();
     }
     
@@ -132,8 +185,8 @@ public class GameView extends StackPane{
         );
         
         newCardHeight = otherHands[0].getCardHeight() * 5 / 4;
-        rightX = WIDTH/2 + (otherHands[1].getCardWidth() * 8 * 5 / 9 / 2);   //(WIDTH / 2) + (WIDTH * 2 / 9);
-        leftX = WIDTH/2 - otherHands[1].getCardWidth() * 8 * 5 / 9 / 2;    //(WIDTH / 2) - (WIDTH * 2 / 9);
+        rightX = (WIDTH / 2) + (WIDTH * 2 / 9);
+        leftX = (WIDTH / 2) - (WIDTH * 2 / 9);
         botY = HEIGHT / 4;
         topY = botY - newCardHeight;
         PerspectiveTransform topHand = new PerspectiveTransform(
@@ -150,6 +203,7 @@ public class GameView extends StackPane{
         for (HandView hand : otherHands){
             this.getChildren().remove(hand);
             this.getChildren().add(hand);
+            hand.toBack();
         }
         
         //Primary hand
@@ -168,8 +222,8 @@ public class GameView extends StackPane{
             primaryHand.setTranslateY(0);
         });
         
-        this.getChildren().removeAll(primaryHand, playZone);
-        this.getChildren().addAll(primaryHand, playZone);
+        playGround.getChildren().removeAll(primaryHand, playZone);
+        playGround.getChildren().addAll(primaryHand, playZone);
     }
     
     public void updateScore(int[] score){
@@ -186,10 +240,10 @@ public class GameView extends StackPane{
         quarts.setOnAction(e -> {
             primaryHand.setTranslateY(0);
             player.chooseGameMode(GameModes.QUARTS.ordinal());
-            this.getChildren().removeAll(rect, quarts);
+            playGround.getChildren().removeAll(rect, quarts);
         });
         
-        this.getChildren().addAll(rect, quarts);
+        playGround.getChildren().addAll(rect, quarts);
     }
     
     public void cardDealing(){
