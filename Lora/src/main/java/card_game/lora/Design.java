@@ -22,7 +22,8 @@ import javafx.scene.text.Font;
 public class Design {
     
     private enum Colour {
-        BLUE("#7997A0"), GREY("#AAAFA1"), ORANGE("#B07437"), BROWN("#46362F");
+        BLUE("#7997A0"), GREY("#AAAFA1"), YELLOW("#B07437"),
+        BROWN("#46362F"), ORANGE("#965629");
         
         private final String name;
         private Colour(String name){
@@ -37,6 +38,7 @@ public class Design {
     
     public static final Paint BLUE = Color.web(Colour.BLUE.toString());
     public static final Paint GREY = Color.web(Colour.GREY.toString());
+    public static final Paint YELLOW = Color.web(Colour.YELLOW.toString());
     public static final Paint ORANGE = Color.web(Colour.ORANGE.toString());
     public static final Paint BROWN = Color.web(Colour.BROWN.toString());
     
@@ -65,7 +67,7 @@ public class Design {
    
             this.setStyle("-fx-text-fill: " + Colour.GREY.toString());
             this.setOnMouseEntered(e -> {
-                this.setStyle("-fx-text-fill: " + Colour.ORANGE.toString());
+                this.setStyle("-fx-text-fill: " + Colour.YELLOW.toString());
             });
             this.setOnMouseExited(e -> {
                 this.setStyle("-fx-text-fill: " + Colour.GREY.toString());

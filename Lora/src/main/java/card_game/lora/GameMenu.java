@@ -13,8 +13,12 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -160,40 +164,72 @@ public class GameMenu extends StackPane{
     }
     
     private void chooseGameMode(){
-        int length = GameModes.values().length;
+        final int numOfModes = GameModes.values().length;
+        final int topModes = numOfModes / 2;
 
-        GridPane gameModes = new GridPane();
-        gameModes.setAlignment(Pos.CENTER);
-        gameModes.setHgap(length);
-        gameModes.setVgap(2);
-
-        double windowWidth = WIDTH / (length + SPACING);
-        double windowHeight = HEIGHT / 2;
-        Insets margin = new Insets(0, SPACING / 2, SPACING, SPACING / 2);
+        final double windowHeight = HEIGHT / 3;
+        final double windowWidth = windowHeight * 2 / 3;
+        final double vSpacing = windowHeight / 3;
+        final double hSpacing = windowWidth / 2;
         
-        for (int i = 0; i < length; i++){
+        HBox topBox = new HBox();
+        topBox.setSpacing(hSpacing);
+        topBox.setAlignment(Pos.CENTER);
+        
+        HBox botBox = new HBox();
+        botBox.setSpacing(hSpacing);
+        botBox.setAlignment(Pos.CENTER);
+        
+        BackgroundFill onFill = new BackgroundFill(
+                    Design.YELLOW, new CornerRadii(15), Insets.EMPTY
+        );
+        BackgroundFill offFill = new BackgroundFill(
+                Design.GREY, new CornerRadii(15), Insets.EMPTY
+        );
+        
+        for (int i = 0; i < numOfModes; i++){
             GameModes gameMode = GameModes.values()[i];
-            ImageView windowView = new ImageView(
+            //-----------------Icon--------------------
+            ImageView modeIcon = new ImageView(
                     GameUtils.getModeImage(gameMode)
             );
+            modeIcon.setFitWidth(windowWidth * 2 / 3);
+            modeIcon.setFitHeight(windowHeight * 2 / 3);
+            modeIcon.setPreserveRatio(true);
             
-            windowView.setFitWidth(windowWidth);
-            windowView.setFitHeight(windowHeight);
-            windowView.setPreserveRatio(true);
+            //-----------------Text---------------------
+            Text modeText = new Text(gameMode.toString());
+            modeText.setFont(Design.Font(windowHeight / 10));
             
+            //----------------Mode box------------------
+            VBox modeBox = new VBox(modeIcon, modeText);
+            modeBox.setSpacing(windowHeight / 8);
+            modeBox.setAlignment(Pos.CENTER);
+            modeBox.setMinSize(windowWidth, windowHeight);
+            modeBox.setMaxSize(windowWidth, windowHeight);
+            
+            modeBox.setBackground(new Background(offFill));
+            modeBox.setOnMouseEntered(e -> {
+                modeBox.setBackground(new Background(onFill));
+            });
+            modeBox.setOnMouseExited(e -> {
+                modeBox.setBackground(new Background(offFill));
+            });
             final int num = i;
-            windowView.setOnMouseClicked(e -> {
+            modeBox.setOnMouseClicked(e -> {
                 createGame(num);
             });
             
-            GridPane.setConstraints(windowView, i, 0);
-            GridPane.setMargin(windowView, margin);
-            
-            Text windowName = new Text(gameMode.toString());
-            GridPane.setConstraints(windowName, i, 0);
-            
-            gameModes.getChildren().addAll(windowView, windowName);
+            if (i < topModes){
+                topBox.getChildren().add(modeBox);
+            } else {
+                botBox.getChildren().add(modeBox);
+            }
         }
+        
+        VBox gameModes = new VBox(topBox, botBox);
+        gameModes.setSpacing(vSpacing);
+        gameModes.setAlignment(Pos.CENTER);
         
         this.getChildren().clear();
         this.getChildren().add(gameModes);

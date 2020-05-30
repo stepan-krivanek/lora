@@ -144,7 +144,7 @@ public class GameUtils {
     }
     
     private static void initModeImages(){
-        final String modes = "/images/mode_icons/";
+        final String modes = "/images/modes/";
         MODES_IMAGES.put(GameModes.REDS, loadModeImage(modes + "reds.png"));
         MODES_IMAGES.put(GameModes.SUPERIORS, loadModeImage(modes + "superiors.png"));
         MODES_IMAGES.put(GameModes.FRLA, loadModeImage(modes + "fr-la.png"));

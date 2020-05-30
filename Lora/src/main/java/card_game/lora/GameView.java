@@ -98,6 +98,7 @@ public class GameView extends StackPane{
         
         //--------------------------Score---------------------------
         playerScore = new Text("123");
+        playerScore.setFill(Design.ORANGE);
         playerScore.setFont(Design.Font(HEIGHT / 20));
         playerScore.setBoundsType(TextBoundsType.VISUAL);
         
@@ -124,16 +125,18 @@ public class GameView extends StackPane{
         //----------------------Personal info-----------------------
         //BETA
         Text name = new Text("Ututu halabala");
-        name.setFont(Design.Font(HEIGHT / 20));
+        name.setFont(Design.Font(HEIGHT / 15));
         
         ImageView goldView = new ImageView("/images/gold.png");
-        goldView.setFitWidth(WIDTH / 20);
-        goldView.setFitHeight(HEIGHT / 15);
+        goldView.setFitWidth(WIDTH / 15);
+        goldView.setFitHeight(HEIGHT / 10);
+        goldView.setPreserveRatio(true);
         StackPane gold = new StackPane(goldView, playerScore);
-        gold.setMinSize(WIDTH / 20, HEIGHT / 15);
-        gold.setMaxSize(WIDTH / 20, HEIGHT / 15);
+        gold.setMinSize(WIDTH / 15, HEIGHT / 10);
+        gold.setMaxSize(WIDTH / 15, HEIGHT / 10);
         
-        HBox personalBox = new HBox(name, gold);
+        HBox personalBox = new HBox(gold, name);
+        personalBox.setSpacing(WIDTH / 100);
         personalBox.setAlignment(Pos.BOTTOM_LEFT);
         personalBox.setPadding(new Insets(10, WIDTH / 100, 10, WIDTH / 100));
         
