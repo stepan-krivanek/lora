@@ -45,30 +45,21 @@ public class ExitAlertBox {
         label.setText(message);
         
         //Save Button
-        Button save = new Button("Yes");
-        save.setOnAction(e -> {
-            program.setToBeSaved(true);
+        Button yes = new Button("Yes");
+        yes.setOnAction(e -> {
             toBeClosed = true;
             exitStage.close();
         });
         
         //No Save Button
-        Button noSave = new Button("No");
-        noSave.setOnAction(e -> {
-            program.setToBeSaved(false);
-            toBeClosed = true;
-            exitStage.close();
-        });
-        
-        //Cancel Button
-        Button cancel = new Button("Cancel");
-        cancel.setOnAction(e -> {
+        Button no = new Button("No");
+        no.setOnAction(e -> {
             toBeClosed = false;
             exitStage.close();
         });
         
         HBox hBox = new HBox();
-        hBox.getChildren().addAll(save, noSave, cancel);
+        hBox.getChildren().addAll(yes, no);
         hBox.setSpacing(SPACING);
         hBox.setAlignment(Pos.CENTER);
         

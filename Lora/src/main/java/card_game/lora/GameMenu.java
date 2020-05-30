@@ -11,20 +11,15 @@ import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -37,13 +32,12 @@ import javafx.util.Duration;
 public class GameMenu extends StackPane{
     
     private final int MAX_PLAYERS = 4;
-    private final int SPACING = 20;
     private final Rectangle2D bounds = Screen.getPrimary().getBounds();
     private final double WIDTH = bounds.getWidth();
     private final double HEIGHT = bounds.getHeight();
-    private final double buttonWidth = WIDTH / 5;
-    private final double buttonHeight = HEIGHT / 10;
-    private final String bcgrPath = "/images/main_menu_bcgr.png";
+    private final double BUTTON_WIDTH = WIDTH / 5;
+    private final double BUTTON_HEIGHT = HEIGHT / 10;
+    private final String bcgrPath = "/images/main_menu_bcgr2.png";
     private final Main program;
     private final Stage stage;
 
@@ -53,10 +47,11 @@ public class GameMenu extends StackPane{
         this.program = program;
         this.stage = stage;
         
+        setWidth(WIDTH);
+        setHeight(HEIGHT);
+       
         Background bcgr = GameUtils.loadBackground(bcgrPath, WIDTH, HEIGHT);
-        setBackground(bcgr);
-        setPrefHeight(HEIGHT);
-        setPrefWidth(WIDTH);
+        setBackground(bcgr); 
         
         setMainButtons();
     }
@@ -71,11 +66,12 @@ public class GameMenu extends StackPane{
         buttonsPane.setAlignment(Pos.BOTTOM_CENTER);
         buttonsPane.setHgap(hBoxes);
         buttonsPane.setVgap(vBoxes);
-        buttonsPane.setPrefWidth(gridPaneWidth);
-        buttonsPane.setPrefHeight(gridPaneHeight);
+        buttonsPane.setMaxSize(gridPaneWidth, gridPaneHeight);
+        buttonsPane.setMinSize(gridPaneWidth, gridPaneHeight);
+        GameMenu.setAlignment(buttonsPane, Pos.BOTTOM_CENTER);
         
-        double hMargin = (gridPaneWidth - hBoxes * buttonWidth) / (2 * hBoxes);
-        double vMargin = (gridPaneHeight - vBoxes * buttonHeight) / (2 * vBoxes);
+        double hMargin = (gridPaneWidth - hBoxes * BUTTON_WIDTH) / (2 * hBoxes);
+        double vMargin = (gridPaneHeight - vBoxes * BUTTON_HEIGHT) / (2 * vBoxes);
         Insets insets = new Insets(vMargin, hMargin, vMargin, hMargin);
         
         for (int i = 0; i < 4; i++){
@@ -89,30 +85,30 @@ public class GameMenu extends StackPane{
     
     private void setMainButtons(){
         //Play
-        ToggleButton playButton = new Design.Button(buttonWidth, buttonHeight);
+        ToggleButton playButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         playButton.setText("Play");
         playButton.setOnAction(e -> {
             chooseGame();
         });
         
         //Saved games
-        ToggleButton savesButton = new Design.Button(buttonWidth, buttonHeight);
+        ToggleButton savesButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         savesButton.setText("Saved games");
         savesButton.setOnAction(e -> {
             savedGames();
         });
         
         //Rules
-        ToggleButton rulesButton = new Design.Button(buttonWidth, buttonHeight);
+        ToggleButton rulesButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         rulesButton.setText("Rules");
         rulesButton.setOnAction(e -> {
             rules();
         });
         
         //Exit Button
-        ToggleButton exitButton = new Design.Button(buttonWidth, buttonHeight);
+        ToggleButton exitButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         exitButton.setText("Exit");
-        exitButton.setOnAction(e -> program.closeProgram(stage));
+        exitButton.setOnAction(e -> program.close());
         
         ToggleButton[] buttons = {
             playButton, savesButton, rulesButton, exitButton
@@ -130,28 +126,28 @@ public class GameMenu extends StackPane{
     
     private void chooseGame(){
         //Training
-        ToggleButton trainingButton = new Design.Button(buttonWidth, buttonHeight);
+        ToggleButton trainingButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         trainingButton.setText("Training");
         trainingButton.setOnAction(e -> {
             chooseGameMode();
         });
         
         //Create game
-        ToggleButton serverButton = new Design.Button(buttonWidth, buttonHeight);
+        ToggleButton serverButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         serverButton.setText("Create game");
         serverButton.setOnAction(e -> {
             createGame(-1);
         });
         
         //Join game
-        ToggleButton clientButton = new Design.Button(buttonWidth, buttonHeight);
+        ToggleButton clientButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         clientButton.setText("Join game");
         clientButton.setOnAction(e -> {
             joinServer();
         });
         
         //Return
-        ToggleButton returnButton = new Design.Button(buttonWidth, buttonHeight);
+        ToggleButton returnButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         returnButton.setText("Return");
         returnButton.setOnAction(e -> {
             setMainButtons();
@@ -244,10 +240,12 @@ public class GameMenu extends StackPane{
     private void createGame(int gameModeId){
         numOfPlayers = -1;
 
+        final double boxWidth = WIDTH / 2;
+        final double boxHeight = HEIGHT * 2 / 5;
+        
         // Text
         Text text = new Text("Choose number of players");
-        text.setFont(Font.font ("Verdana", 30));
-        text.setFill(Color.WHITE);
+        text.setFont(Design.Font(boxHeight / 5));
         
         FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.1), text);
         fadeTransition.setFromValue(0);
@@ -255,14 +253,18 @@ public class GameMenu extends StackPane{
         fadeTransition.setCycleCount(2);
         
         //Number of players buttonsPane
+        final double numbersSize = boxWidth / 9;
+        
         HBox numbers = new HBox();
         numbers.setAlignment(Pos.CENTER);
-        numbers.setSpacing(SPACING);
+        numbers.setSpacing((boxWidth - numbersSize) / 15);
+        numbers.setMinSize(boxWidth, boxHeight / 4);
+        numbers.setMaxSize(boxWidth, boxHeight / 4);
         
         ToggleButton[] numOfPlayersButtons = new ToggleButton[MAX_PLAYERS];
         for (int i = 1; i <= MAX_PLAYERS; i++){
-            ToggleButton button = new ToggleButton(Integer.toString(i));
-            button.setStyle("-fx-focus-color: transparent;");
+            ToggleButton button = new Design.Button(numbersSize, numbersSize);
+            button.setText(Integer.toString(i));
             
             final int num = i;
             button.setOnAction(e -> {
@@ -271,13 +273,16 @@ public class GameMenu extends StackPane{
                 numOfPlayers = num;
             });
             
-            numOfPlayersButtons[i - 1] = button;
+            numOfPlayersButtons[i-1] = button;
             numbers.getChildren().add(button);
         }
         
+        final double buttonWidth = boxWidth / 3;
+        final double buttonHeight = boxHeight / 5;
+        
         //Play button
-        Button playButton = new Button("Play");
-        playButton.setStyle("-fx-focus-color: transparent;");
+        ToggleButton playButton = new Design.Button(buttonWidth, buttonHeight);
+        playButton.setText("Play");
         playButton.setOnAction(e -> {
             if (numOfPlayers > 0 && numOfPlayers <= 4){
                 startServer(gameModeId);
@@ -287,19 +292,24 @@ public class GameMenu extends StackPane{
         });
         
         //Cancel button
-        Button cancelButton = new Button("Cancel");
-        cancelButton.setStyle("-fx-focus-color: transparent;");
+        ToggleButton cancelButton = new Design.Button(buttonWidth, buttonHeight);
+        cancelButton.setText("Cancel");
         cancelButton.setOnAction(e -> {
             setMainButtons();
         });
         
         HBox buttons = new HBox(playButton, cancelButton);
         buttons.setAlignment(Pos.CENTER);
-        buttons.setSpacing(SPACING);
+        buttons.setSpacing(buttonWidth / 3);
+        buttons.setMinSize(boxWidth, boxHeight / 4);
+        buttons.setMaxSize(boxWidth, boxHeight / 4);
         
         VBox vBox = new VBox(text, numbers, buttons);
         vBox.setAlignment(Pos.CENTER);
-        vBox.setSpacing(SPACING);
+        vBox.setSpacing(boxHeight / 15);
+        vBox.setMinSize(boxWidth, boxHeight);
+        vBox.setMaxSize(boxWidth, boxHeight);
+        GameMenu.setAlignment(vBox, Pos.BOTTOM_CENTER);
         
         this.getChildren().clear();
         this.getChildren().addAll(vBox);
@@ -312,8 +322,9 @@ public class GameMenu extends StackPane{
         t.setName("Thread: server");
         t.start();
         
-        joinServer();
+        
         addBots(numOfPlayers);
+        joinServer();
     }
     
     private void addBots(int numOfPlayers){
@@ -327,7 +338,7 @@ public class GameMenu extends StackPane{
         MpPlayer player = new MpPlayer(program);
         
         if (player.connectToServer()){
-            this.setVisible(false);
+            program.getRoot().getChildren().remove(this);
         }
     }
 }

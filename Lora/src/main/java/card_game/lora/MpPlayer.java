@@ -32,7 +32,6 @@ public class MpPlayer {
     private boolean isPlaying = false;
     private final Deck hand = new Deck(HAND_SIZE);
     private ClientConnection connection;
-    private boolean isConnected = false;
     
     public MpPlayer(Main program){
         gameView = new GameView(program, this);
@@ -74,12 +73,9 @@ public class MpPlayer {
         byte[] data = new byte[MSG_SIZE];
         data[0] = (byte)ClientMessage.DISCONNECT.ordinal();
         sendToServer(data);
-        
-        isConnected = false;
     }
     
     public boolean connectToServer(){
-        isConnected = true;
         connection = new ClientConnection(this);
         
         try {
@@ -215,9 +211,5 @@ public class MpPlayer {
                 
                 break;
         }
-    }
-    
-    public boolean isConnected(){
-        return isConnected;
     }
 }

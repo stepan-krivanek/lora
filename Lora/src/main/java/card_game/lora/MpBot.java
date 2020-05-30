@@ -192,11 +192,7 @@ public class MpBot extends MpPlayer{
             String msg = "Bot " + getId() + " joins the game.";
             Logger.getLogger(MpBot.class.getName()).log(Level.INFO, msg);
             
-            while(true){
-                if (exit){
-                    break;
-                }
-                
+            while(!exit){
                 if (!isPlaying() || awaitingResponse || getHand().isEmpty()){
                     try {
                         Thread.sleep(100);

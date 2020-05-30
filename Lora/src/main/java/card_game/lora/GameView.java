@@ -41,6 +41,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
+import javafx.stage.Stage;
 
 /**
  *
@@ -57,7 +58,7 @@ public class GameView extends StackPane{
     private final List<Suit> suits = GameUtils.getOrderedSuits();
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
-    private final LoadingScreen loadingScreen = new LoadingScreen();
+    private final LoadingScreen loadingScreen;
     private final StackPane playGround = new StackPane();
     private final StackPane table;
     private final Text modeText, playerScore;
@@ -66,6 +67,7 @@ public class GameView extends StackPane{
     private final Main program;
     private final MpPlayer player;
     
+    private boolean saved = false;
     private boolean soundOn = true;
     private TableGUI tableGUI = null;
     private HandView primaryHand;
@@ -84,6 +86,12 @@ public class GameView extends StackPane{
         this.player = player;
         this.program = program;
         
+        program.getStage().setOnCloseRequest(e -> {
+            e.consume();
+            closeProgram();
+        });
+        
+        loadingScreen = new LoadingScreen(WIDTH, HEIGHT);
         //-----------------------Background-------------------------
         Background bcgr = GameUtils.loadBackground(
                 "/images/game_bcgr.png", WIDTH, HEIGHT
@@ -211,6 +219,15 @@ public class GameView extends StackPane{
         loadingScreen.show();
     }
     
+    private void closeProgram(){
+        String msg = "Do you really want to exit?";
+        msg = saved ? msg : msg + "\nThe progress will be lost!";
+        if (ExitAlertBox.display(program, msg)){
+            player.disconnect();
+            program.close();
+        }
+    }
+    
     private Paint fillRect(String path){
         return new ImagePattern(new Image(path));
     }
@@ -272,7 +289,7 @@ public class GameView extends StackPane{
         //Primary hand
         primaryHand = new HandView(player, WIDTH, HEIGHT);
         
-        playZone = new Rectangle(WIDTH, HEIGHT /2);//* 2 / 3);
+        playZone = new Rectangle(WIDTH, HEIGHT / 2);
         GameView.setAlignment(playZone, Pos.TOP_CENTER);
         playZone.setOpacity(0);
         
@@ -359,10 +376,11 @@ public class GameView extends StackPane{
     }
     
     public void connectionLost(int playerId){
-        Rectangle rect = new Rectangle(WIDTH, HEIGHT);
-        rect.setOpacity(0);
+        Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.GREY);
+        rect.setOpacity(0.2);
         
-        Text text = new Text("Connection lost! Player " + playerId + " left the game.");
+        String msg = "Player " + playerId + " has left the game, connection Lost!";
+        Text text = new Text(msg);
         text.setFont(Design.Font(40));
         
         ToggleButton exitButton = new Design.Button(WIDTH / 5, HEIGHT / 10);
@@ -373,21 +391,60 @@ public class GameView extends StackPane{
         
         VBox alertBox = new VBox(text, exitButton);
         alertBox.setAlignment(Pos.CENTER);
+        alertBox.setSpacing(HEIGHT / 5);
         
-        this.getChildren().addAll(rect, alertBox);
-        String msg = "Player " + playerId + " left the game! Connection Lost!";
         Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, msg);
+        this.getChildren().addAll(rect, alertBox);
     }
     
     public void exit(){
         player.disconnect();
-        program.getMainMenu().setVisible(true);
-        this.setVisible(false);
+        program.setMainMenu();
         program.getRoot().getChildren().remove(this);
     }
     
     public HandView getHandView(){
         return primaryHand;
+    }
+    
+    private void showExitAlert(){
+        Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.GREY);
+        rect.setOpacity(0.2);
+        
+        final double alertHeight = HEIGHT / 4;
+        final double alertWidth = WIDTH / 2;
+        
+        VBox alertBox = new VBox();
+        alertBox.setAlignment(Pos.CENTER);
+        alertBox.setMinSize(alertWidth, alertHeight);
+        alertBox.setMaxSize(alertWidth, alertHeight);
+        alertBox.setBackground(GameUtils.loadBackground(
+                "images/menu_bcgr.png", alertWidth, alertHeight
+        ));
+        alertBox.setSpacing(alertHeight / 6);
+        
+        Text alert = new Text("Do you really want to exit without saving?");
+        alert.setFont(Design.Font(HEIGHT / 25));
+
+        ToggleButton yes = new Design.Button(WIDTH / 10, HEIGHT / 20);
+        yes.setText("Yes");
+        yes.setOnAction(e -> {
+            exit();
+        });
+
+        ToggleButton no = new Design.Button(WIDTH / 10, HEIGHT / 20);
+        no.setText("No");
+        no.setOnAction(e -> {
+            this.getChildren().removeAll(rect, alertBox);
+            showMenu();
+        });
+
+        HBox alertButtons = new HBox(yes, no);
+        alertButtons.setAlignment(Pos.CENTER);
+        alertButtons.setSpacing(alertWidth / 6);
+        
+        alertBox.getChildren().addAll(alert, alertButtons);
+        this.getChildren().addAll(rect, alertBox);
     }
     
     private void showMenu(){
@@ -408,21 +465,36 @@ public class GameView extends StackPane{
         menu.setAlignment(Pos.CENTER);
         
         final double buttonWidth = menuWidth * 2 / 3;
-        final double buttonheight = menuHeight / 10;
-
-        ToggleButton exitButton = new Design.Button(buttonWidth, buttonheight);
+        final double buttonHeight = menuHeight / 10;
+        
+        //Rules button
+        ToggleButton rulesButton = new Design.Button(buttonWidth, buttonHeight);
+        rulesButton.setText("Rules");
+        rulesButton.setOnAction(e -> {
+            //showRules();
+        });
+        
+        //Exit button
+        ToggleButton exitButton = new Design.Button(buttonWidth, buttonHeight);
         exitButton.setText("Exit");
         exitButton.setOnAction(e -> {
-            exit();
+            if (saved){
+                exit();
+            } else {
+                this.getChildren().removeAll(rect, menu);
+                showExitAlert();
+            }
         });
         
-        ToggleButton saveButton = new Design.Button(buttonWidth, buttonheight);
+        //Save button
+        ToggleButton saveButton = new Design.Button(buttonWidth, buttonHeight);
         saveButton.setText("Save");
         saveButton.setOnAction(e -> {
-            // save the game
+            saved = true;
         });
         
-        ToggleButton playButton = new Design.Button(buttonWidth, buttonheight);
+        //Play button
+        ToggleButton playButton = new Design.Button(buttonWidth, buttonHeight);
         playButton.setText("Continue");
         playButton.setOnAction(e -> {
             this.getChildren().removeAll(rect, menu);
@@ -448,14 +520,27 @@ public class GameView extends StackPane{
     
     private class LoadingScreen {
         
-        private final Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.CORAL);
+        private final StackPane loadingScreen;
+        
+        public LoadingScreen(double width, double height){
+            Text text = new Text("Waiting for other players to connect");
+            text.setFont(Design.Font(height / 15));
+            
+            loadingScreen = new StackPane(text);
+            loadingScreen.setAlignment(Pos.CENTER);
+            loadingScreen.setMinSize(width, height);
+            loadingScreen.setMaxSize(width, height);
+            loadingScreen.setBackground(GameUtils.loadBackground(
+                    "/images/loadingscreen.png", width, height)
+            );
+        }
         
         public void show(){
-            program.getRoot().getChildren().add(rect);
+            program.getRoot().getChildren().add(loadingScreen);
         }
 
         public void hide(){
-            program.getRoot().getChildren().remove(rect);
+            program.getRoot().getChildren().remove(loadingScreen);
         }
     }
     

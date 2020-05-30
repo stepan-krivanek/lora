@@ -19,36 +19,33 @@ import javafx.stage.StageStyle;
  */
 public class Main extends Application {
 
-    private boolean toBeSaved = true;
     private StackPane root;
-    private GameMenu mainMenu;
     private Scene mainScene;
     private Stage stage;
     
     @Override
     public void start(Stage stage) throws Exception {
+        this.stage = stage;
+        
         CardUtils.preloadImages();
         root = new StackPane();
+        
         setStage(stage, "Lora");
-        
-        mainMenu = new GameMenu(this, stage);
-        
-        root.getChildren().add(mainMenu);
+        setMainMenu();
         
         mainScene = new Scene(root);
         stage.setScene(mainScene);
         stage.show();
-        
-        this.stage = stage;
     }
     
-    public void closeProgram(Stage stage){
-        if (ExitAlertBox.display(this, "Do you want to save the game?")){
-            if (toBeSaved == true){
-                save();
-            }
-            stage.close();
-        }
+    public void setMainMenu(){
+        GameMenu mainMenu = new GameMenu(this, stage);
+        stage.setOnCloseRequest(e -> {});
+        root.getChildren().add(mainMenu);
+    }
+    
+    public void close(){
+        stage.close();
     }
     
     public Stage getStage(){
@@ -59,16 +56,8 @@ public class Main extends Application {
         return mainScene;
     }
     
-    public GameMenu getMainMenu(){
-        return mainMenu;
-    }
-    
     public StackPane getRoot(){
         return root;
-    }
-    
-    private void save(){
-        //TBA
     }
     
     private void setStage(Stage stage, String title){
@@ -78,14 +67,6 @@ public class Main extends Application {
         stage.setFullScreen(true);
         stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         stage.initStyle(StageStyle.UTILITY);
-        stage.setOnCloseRequest(e -> {
-            e.consume();
-            closeProgram(stage);
-        });
-    }
-    
-    public void setToBeSaved(boolean toBeSaved){
-        this.toBeSaved = toBeSaved;
     }
     
     public static void main(String[] args) {

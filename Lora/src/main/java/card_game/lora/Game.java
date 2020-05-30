@@ -260,6 +260,6 @@ public class Game {
     }
     
     private void exit(){
-        
+        server.exit();
     }
 }

@@ -70,5 +70,11 @@ public class ClientConnection implements Runnable {
                 Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        
+        try {
+            socket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

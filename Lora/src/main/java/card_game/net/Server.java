@@ -34,14 +34,13 @@ public class Server implements Runnable{
     private final int gameModeId;
     
     private boolean exit = false;
-    
-    private ServerSocket socket;
+    private ServerSocket serverSocket;
     
     public Server(int gameModeId){
         this.gameModeId = gameModeId;
         
         try {
-            socket = new ServerSocket(port);
+            serverSocket = new ServerSocket(port);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         } 
@@ -52,7 +51,7 @@ public class Server implements Runnable{
         
         while (connectedPlayers < NUM_OF_PLAYERS){
             try {
-                Socket s = socket.accept();
+                Socket s = serverSocket.accept();
                 Connection connection = new Connection(s, connectedPlayers);
                 players[connectedPlayers] = connection;
                 
@@ -65,6 +64,12 @@ public class Server implements Runnable{
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, null, ex);
             }
+        }
+        
+        try {
+            serverSocket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         System.out.println("Game is ready to start.");
@@ -86,12 +91,12 @@ public class Server implements Runnable{
         if (playerId >= NUM_OF_PLAYERS){
             return;
         }
-        
+
         try {
             players[playerId].output.write(data);
             players[playerId].output.flush();
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "player: " + Integer.toString(playerId), ex);
         }
     }
     
@@ -215,7 +220,7 @@ public class Server implements Runnable{
                 output.writeInt(playerId);
                 output.flush();
                 
-                while(true){
+                while(!exit){
                     byte data[] = new byte[MSG_SIZE];
                     input.read(data);
                     
@@ -239,6 +244,12 @@ public class Server implements Runnable{
                 }
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, null, ex);
+            }
+            
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
