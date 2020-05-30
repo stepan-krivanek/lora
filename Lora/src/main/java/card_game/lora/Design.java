@@ -21,7 +21,7 @@ import javafx.scene.text.Font;
  */
 public class Design {
     
-    private enum Colour {
+    public static enum Colour {
         BLUE("#7997A0"), GREY("#AAAFA1"), YELLOW("#B07437"),
         BROWN("#46362F"), ORANGE("#965629");
         

@@ -36,12 +36,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
-import javafx.stage.Stage;
 
 /**
  *
@@ -59,6 +57,7 @@ public class GameView extends StackPane{
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
     private final LoadingScreen loadingScreen;
+    private final StackPane hands;
     private final StackPane playGround = new StackPane();
     private final StackPane table;
     private final Text modeText, playerScore;
@@ -99,7 +98,12 @@ public class GameView extends StackPane{
         this.setBackground(bcgr);
         this.setHeight(HEIGHT);
         this.setWidth(WIDTH);
-         
+        
+        //--------------------------Hands---------------------------
+        hands = new StackPane();
+        hands.setMinSize(WIDTH, HEIGHT);
+        hands.setMaxSize(WIDTH, HEIGHT);
+        
         ////////////////////////////////////////////////////////////
         //--------------------------Table-------------------------//
         ////////////////////////////////////////////////////////////
@@ -215,7 +219,7 @@ public class GameView extends StackPane{
         border.setCenter(playGround);
         border.setTop(topBar);
         
-        this.getChildren().addAll(table, personalBox, border);
+        this.getChildren().addAll(hands, table, personalBox, border);
         loadingScreen.show();
     }
     
@@ -238,6 +242,12 @@ public class GameView extends StackPane{
     }
     
     public void showHands(){
+        playGround.getChildren().removeAll(primaryHand, playZone);
+        hands.getChildren().clear();
+        if (tableGUI != null){
+            tableGUI.hide();
+        }
+        
         //Other hands
         int handSize = MAX_CARDS / NUM_OF_PLAYERS;
         for (int i = 0; i < NUM_OF_PLAYERS - 1; i++){
@@ -281,9 +291,7 @@ public class GameView extends StackPane{
         otherHands[2].setEffect(rightHand);
         
         for (HandView hand : otherHands){
-            this.getChildren().remove(hand);
-            this.getChildren().add(hand);
-            hand.toBack();
+            hands.getChildren().add(hand);
         }
         
         //Primary hand
@@ -293,16 +301,13 @@ public class GameView extends StackPane{
         GameView.setAlignment(playZone, Pos.TOP_CENTER);
         playZone.setOpacity(0);
         
-        double handShift = CARD_HEIGHT / 2;
-        primaryHand.setTranslateY(handShift);
         playZone.setOnMouseEntered(e -> {
-            primaryHand.setTranslateY(handShift);
+            primaryHand.setTranslateY(CARD_HEIGHT / 2);
         });
         playZone.setOnMouseExited(e -> {
             primaryHand.setTranslateY(0);
         });
         
-        playGround.getChildren().removeAll(primaryHand, playZone);
         playGround.getChildren().addAll(primaryHand, playZone);
     }
     
@@ -311,19 +316,21 @@ public class GameView extends StackPane{
     }
     
     public void showGameModeSelection(MpPlayer player){
-        primaryHand.setTranslateY(CARD_HEIGHT / 2);
-        Rectangle rect = new Rectangle(WIDTH, HEIGHT);
-        rect.setOpacity(0);
-        //cards are too low
-        Button quarts = new Button("Quarts");
-        quarts.setAlignment(Pos.CENTER);
-        quarts.setOnAction(e -> {
-            primaryHand.setTranslateY(0);
-            player.chooseGameMode(GameModes.QUARTS.ordinal());
-            playGround.getChildren().removeAll(rect, quarts);
-        });
+        Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.GREY);
+        rect.setOpacity(0.2);
         
-        playGround.getChildren().addAll(rect, quarts);
+        ModesView modesBox = new ModesView(playGround.getHeight());
+        
+        GameModes[] modes = GameModes.values();
+        for (int i = 0; i < modes.length; i++){
+            final int num = i;
+            modesBox.getModeBox(modes[i]).setOnMouseClicked(e -> {
+                player.chooseGameMode(num);
+                this.getChildren().removeAll(rect, modesBox);
+            });
+        }
+        
+        this.getChildren().addAll(rect, modesBox);
     }
     
     public void cardDealing(){
@@ -341,10 +348,6 @@ public class GameView extends StackPane{
     }
     
     public void setGameMode(int id){
-        if (tableGUI != null){
-            tableGUI.hide();
-        }
-        
         switch (gameModes.get(id)){
             case TENS:
                 tableGUI = new TensGUI();
@@ -401,6 +404,7 @@ public class GameView extends StackPane{
         player.disconnect();
         program.setMainMenu();
         program.getRoot().getChildren().remove(this);
+        System.gc();
     }
     
     public HandView getHandView(){

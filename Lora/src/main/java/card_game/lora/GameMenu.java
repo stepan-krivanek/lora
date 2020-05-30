@@ -12,10 +12,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -39,13 +36,11 @@ public class GameMenu extends StackPane{
     private final double BUTTON_HEIGHT = HEIGHT / 10;
     private final String bcgrPath = "/images/main_menu_bcgr2.png";
     private final Main program;
-    private final Stage stage;
 
     private int numOfPlayers = -1;
     
-    public GameMenu(Main program, Stage stage){
+    public GameMenu(Main program){
         this.program = program;
-        this.stage = stage;
         
         setWidth(WIDTH);
         setHeight(HEIGHT);
@@ -160,80 +155,23 @@ public class GameMenu extends StackPane{
     }
     
     private void chooseGameMode(){
-        final int numOfModes = GameModes.values().length;
-        final int topModes = numOfModes / 2;
-
-        final double windowHeight = HEIGHT / 3;
-        final double windowWidth = windowHeight * 2 / 3;
-        final double vSpacing = windowHeight / 3;
-        final double hSpacing = windowWidth / 2;
+        ModesView modesBox = new ModesView(HEIGHT);
         
-        HBox topBox = new HBox();
-        topBox.setSpacing(hSpacing);
-        topBox.setAlignment(Pos.CENTER);
-        
-        HBox botBox = new HBox();
-        botBox.setSpacing(hSpacing);
-        botBox.setAlignment(Pos.CENTER);
-        
-        BackgroundFill onFill = new BackgroundFill(
-                    Design.YELLOW, new CornerRadii(15), Insets.EMPTY
-        );
-        BackgroundFill offFill = new BackgroundFill(
-                Design.GREY, new CornerRadii(15), Insets.EMPTY
-        );
-        
-        for (int i = 0; i < numOfModes; i++){
-            GameModes gameMode = GameModes.values()[i];
-            //-----------------Icon--------------------
-            ImageView modeIcon = new ImageView(
-                    GameUtils.getModeImage(gameMode)
-            );
-            modeIcon.setFitWidth(windowWidth * 2 / 3);
-            modeIcon.setFitHeight(windowHeight * 2 / 3);
-            modeIcon.setPreserveRatio(true);
-            
-            //-----------------Text---------------------
-            Text modeText = new Text(gameMode.toString());
-            modeText.setFont(Design.Font(windowHeight / 10));
-            
-            //----------------Mode box------------------
-            VBox modeBox = new VBox(modeIcon, modeText);
-            modeBox.setSpacing(windowHeight / 8);
-            modeBox.setAlignment(Pos.CENTER);
-            modeBox.setMinSize(windowWidth, windowHeight);
-            modeBox.setMaxSize(windowWidth, windowHeight);
-            
-            modeBox.setBackground(new Background(offFill));
-            modeBox.setOnMouseEntered(e -> {
-                modeBox.setBackground(new Background(onFill));
-            });
-            modeBox.setOnMouseExited(e -> {
-                modeBox.setBackground(new Background(offFill));
-            });
+        GameModes[] modes = GameModes.values();
+        for (int i = 0; i < modes.length; i++){
             final int num = i;
-            modeBox.setOnMouseClicked(e -> {
+            modesBox.getModeBox(modes[i]).setOnMouseClicked(e -> {
                 createGame(num);
             });
-            
-            if (i < topModes){
-                topBox.getChildren().add(modeBox);
-            } else {
-                botBox.getChildren().add(modeBox);
-            }
         }
         
-        VBox gameModes = new VBox(topBox, botBox);
-        gameModes.setSpacing(vSpacing);
-        gameModes.setAlignment(Pos.CENTER);
-        
         this.getChildren().clear();
-        this.getChildren().add(gameModes);
+        this.getChildren().add(modesBox);
     }
     
     private void unselectAll(ToggleButton[] buttons){
         for (ToggleButton button : buttons){
-            button.setSelected(false);
+            button.setStyle("-fx-text-fill: " + Design.Colour.GREY.toString());
         }
     }    
     
@@ -266,10 +204,15 @@ public class GameMenu extends StackPane{
             ToggleButton button = new Design.Button(numbersSize, numbersSize);
             button.setText(Integer.toString(i));
             
+            button.setOnMouseEntered(e -> {});
+            button.setOnMouseExited(e -> {});
+            
             final int num = i;
             button.setOnAction(e -> {
                 unselectAll(numOfPlayersButtons);
-                button.setSelected(true);
+                button.setStyle(
+                        "-fx-text-fill: " + Design.Colour.YELLOW.toString()
+                );
                 numOfPlayers = num;
             });
             
@@ -322,9 +265,8 @@ public class GameMenu extends StackPane{
         t.setName("Thread: server");
         t.start();
         
-        
-        addBots(numOfPlayers);
         joinServer();
+        addBots(numOfPlayers);
     }
     
     private void addBots(int numOfPlayers){

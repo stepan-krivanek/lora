@@ -39,7 +39,7 @@ public class Main extends Application {
     }
     
     public void setMainMenu(){
-        GameMenu mainMenu = new GameMenu(this, stage);
+        GameMenu mainMenu = new GameMenu(this);
         stage.setOnCloseRequest(e -> {});
         root.getChildren().add(mainMenu);
     }
