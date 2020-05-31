@@ -44,7 +44,7 @@ public class Game {
     private GameMode gameMode;
     private Player forehand;
     private int round = 0;
-    private int gamesPlayedInRound = 7;
+    private int gamesPlayedInRound = 0;
     private int graduationAttempt = 0;
     private int gamesToPlay = MAX_NUM_OF_GAMES;
     

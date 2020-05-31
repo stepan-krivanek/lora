@@ -32,6 +32,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import static javafx.scene.layout.StackPane.setAlignment;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
@@ -602,7 +603,7 @@ public class GameView extends StackPane{
         
         private final int NUM_OF_ROWS = 4;
         private final int NUM_OF_COLS = 8;
-        private final Button passButton = new Button("PASS");
+        private final VBox passBox;
         private final GridPane cards;
         
         public TensGUI(){
@@ -631,16 +632,23 @@ public class GameView extends StackPane{
                 }
             }
             
-            setAlignment(passButton, Pos.BOTTOM_RIGHT);
+            ToggleButton passButton = new Design.Button(WIDTH / 10, HEIGHT / 15);
+            passButton.setText("Pass");
             passButton.setOnMouseClicked(e -> {
                 player.pass();
             });
+            
+            passBox = new VBox(passButton);
+            passBox.setPadding(new Insets(WIDTH / 100));
+            passBox.setMaxSize(WIDTH / 10, HEIGHT / 10);
+            passBox.setMaxSize(WIDTH / 10, HEIGHT / 10);
+            setAlignment(passBox, Pos.BOTTOM_RIGHT);
         }
         
         @Override
         public void show(){  
             table.getChildren().add(cards);
-            getChildren().add(passButton);
+            getChildren().add(passBox);
         }
 
         @Override
@@ -654,7 +662,7 @@ public class GameView extends StackPane{
         @Override
         public void hide(){
             table.getChildren().remove(cards);
-            getChildren().remove(passButton);
+            getChildren().remove(passBox);
         }
     }
     
