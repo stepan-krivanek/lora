@@ -27,13 +27,15 @@ public class MpPlayer {
     private final int NUM_OF_PLAYERS = 4;
     private final int[] score = new int[NUM_OF_PLAYERS];
     protected final int HAND_SIZE = 8;
+    private final String nickname;
     
     private int id = -1;
     private boolean isPlaying = false;
     private final Deck hand = new Deck(HAND_SIZE);
     private ClientConnection connection;
     
-    public MpPlayer(Main program){
+    public MpPlayer(String nickname, Main program){
+        this.nickname = nickname;
         gameView = new GameView(program, this);
     }
     
@@ -93,6 +95,10 @@ public class MpPlayer {
     
     public Deck getHand(){
         return hand;
+    }
+    
+    public String getNickname(){
+        return nickname;
     }
     
     public int getId(){

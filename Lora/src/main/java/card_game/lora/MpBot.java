@@ -29,8 +29,8 @@ public class MpBot extends MpPlayer{
     private boolean awaitingResponse = false;
     private boolean exit = false;
     
-    public MpBot(Main program) {
-        super(program);
+    public MpBot(String nickname, Main program) {
+        super(nickname, program);
         memory = new Deck[NUM_OF_PLAYERS];
         setMemory();
     }

@@ -8,9 +8,12 @@ package card_game.lora;
 import card_game.lora.game_modes.GameModes;
 import card_game.net.Server;
 import javafx.animation.FadeTransition;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.GridPane;
@@ -36,7 +39,8 @@ public class GameMenu extends StackPane{
     private final double BUTTON_HEIGHT = HEIGHT / 10;
     private final String bcgrPath = "/images/main_menu_bcgr2.png";
     private final Main program;
-
+     
+    private String nickname;
     private int numOfPlayers = -1;
     
     public GameMenu(Main program){
@@ -48,7 +52,87 @@ public class GameMenu extends StackPane{
         Background bcgr = GameUtils.loadBackground(bcgrPath, WIDTH, HEIGHT);
         setBackground(bcgr); 
         
-        setMainButtons();
+        setNameEntrance();
+    }
+    
+    private boolean isCorrectName(String s){
+        if (s.length() < 1){
+            return false;
+        }
+        
+        for (int i = 0; i < s.length(); i++){
+            char c = s.charAt(i);
+            
+            if (!(c >= 'a' && c <= 'z') &&
+                !(c >= 'A' && c <= 'Z') &&
+                !(c >= '0' && c <= '9'))
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private void setNameEntrance(){
+        final double nameGridWidth = WIDTH / 3;
+        final double nameGridHeight = HEIGHT / 5;
+        
+        Text title = new Text("Enter the name:");
+        title.setFont(Design.Font(nameGridHeight / 10));
+        
+        final int maxNameLength = 15;
+        TextField name = new TextField();
+        name.setFont(Design.Font(nameGridHeight / 10));
+        name.textProperty().addListener((
+            ObservableValue<? extends String> ov, String v1, String v2) -> {
+                if (name.getText().length() > maxNameLength) {
+                    String s = name.getText().substring(0, maxNameLength);
+                    name.setText(s);
+                }
+            }
+        );
+        
+        Text warning = new Text("Only numbers and english letters are allowed");
+        warning.setFont(Design.Font(nameGridHeight / 12));
+        warning.setOpacity(0);
+        
+        ToggleButton nextButton = new Design.Button(
+                nameGridWidth / 5, nameGridHeight / 5
+        );
+        nextButton.setText("Next");
+        nextButton.setOnAction(e -> {
+            if (isCorrectName(name.getText())){
+                nickname = name.getText();
+                setMainButtons();
+            } else {
+                warning.setOpacity(1);
+            }            
+        });
+        
+        GridPane nameGrid = new GridPane();
+        nameGrid.setAlignment(Pos.CENTER);
+        nameGrid.setMaxSize(nameGridWidth, nameGridHeight);
+        nameGrid.setMinSize(nameGridWidth, nameGridHeight);
+        nameGrid.setVgap(3);
+        nameGrid.setHgap(2);
+        nameGrid.setBackground(GameUtils.loadBackground(
+                "/images/menu_bcgr.png", nameGridWidth, nameGridHeight
+        ));
+        
+        nameGrid.add(title, 0, 0, 1, 1);
+        nameGrid.add(name, 0, 1, 1, 1);
+        nameGrid.add(warning, 0, 2, 2, 1);
+        nameGrid.add(nextButton, 1, 1, 1, 1);
+        GridPane.setMargin(nextButton, new Insets(0, 0, 0, nameGridWidth / 20));
+   
+        HBox capsule = new HBox(nameGrid);
+        capsule.setAlignment(Pos.CENTER);
+        capsule.setMaxSize(WIDTH, HEIGHT / 3);
+        capsule.setMinSize(WIDTH, HEIGHT / 3);
+        GameMenu.setAlignment(capsule, Pos.BOTTOM_CENTER);
+        
+        this.getChildren().add(capsule);
     }
     
     private void setFourButtons(ToggleButton[] buttons){
@@ -270,14 +354,14 @@ public class GameMenu extends StackPane{
     }
     
     private void addBots(int numOfPlayers){
-        for (int i = 4; i > numOfPlayers;  --i){
-            MpBot bot = new MpBot(program);
+        for (int i = 0; i < MAX_PLAYERS - numOfPlayers;  i++){
+            MpBot bot = new MpBot("Bot" + i, program);
             bot.connectToServer();
         }
     }
     
     private void joinServer(){
-        MpPlayer player = new MpPlayer(program);
+        MpPlayer player = new MpPlayer(nickname, program);
         
         if (player.connectToServer()){
             program.getRoot().getChildren().remove(this);
