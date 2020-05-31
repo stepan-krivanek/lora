@@ -7,7 +7,6 @@ package card_game.lora.game_modes;
 
 import card_game.card.Card;
 import card_game.card.Rank;
-import card_game.card.Suit;
 import card_game.lora.Game;
 
 /**
@@ -53,7 +52,7 @@ public class Superiors extends Minigame implements GameMode{
                 }
             }
             
-            penalties[i] = superiors;
+            penalties[i] = 2 * superiors;
         }
         
         super.end();

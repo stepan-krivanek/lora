@@ -6,19 +6,19 @@
 package card_game.lora;
 
 import card_game.lora.game_modes.GameModes;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -27,7 +27,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 /**
@@ -38,6 +40,7 @@ public class SavedGames extends VBox{
     
     private final int ROWS = 3;
     private final int COLS = 4;
+    private final SaveBox[] saveBoxes = new SaveBox[ROWS * COLS];
     private final StackPane stack;
     
     public SavedGames(double width, double height, StackPane stack){
@@ -51,19 +54,33 @@ public class SavedGames extends VBox{
         
         double saveBoxWidth = width / 5;
         double saveBoxHeight = height / 5;
+        double hMargin = saveBoxWidth / 10;
+        double vMargin = saveBoxHeight / 8;
         for (int i = 0; i < ROWS; i++){
             for (int j = 0; j < COLS; j++){
+                int index = i * COLS + j;
+                
                 SaveBox saveBox = new SaveBox(
-                        saveBoxWidth, saveBoxHeight, i * COLS + j
+                        saveBoxWidth, saveBoxHeight, index
+                );
+                GridPane.setMargin(saveBox, new Insets(
+                        vMargin, hMargin, vMargin, hMargin)
                 );
                 savesGrid.add(saveBox, j, i, 1, 1);
+                
+                saveBoxes[index] = saveBox;
             }
         }
         
-        //------------------Top bar-------------------
+        //-------------------Name--------------------
         Text name = new Text("Saved games");
-        name.setFont(Design.Font(height / 20));
+        name.setFont(Design.Font(height / 15));
         
+        HBox textBox = new HBox(name);
+        textBox.setPadding(new Insets(width / 100));
+        textBox.setAlignment(Pos.TOP_LEFT);
+        
+        //---------------Return button---------------
         ToggleButton returnButton = new Design.Button(
                 width / 10, height / 20
         );
@@ -72,25 +89,23 @@ public class SavedGames extends VBox{
             hide();
         });
         
-        HBox textBox = new HBox(name);
-        textBox.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(textBox, Priority.ALWAYS);
-        
         HBox returnBox = new HBox(returnButton);
-        returnBox.setAlignment(Pos.CENTER_RIGHT);
-        HBox.setHgrow(returnBox, Priority.ALWAYS);
-        
-        HBox topBar = new HBox(textBox, returnBox);
+        returnBox.setPadding(new Insets(width / 100));
+        returnBox.setAlignment(Pos.BOTTOM_RIGHT);
         
         //--------------------this--------------------
         
         this.setAlignment(Pos.CENTER);
         this.setMinSize(width, height);
         this.setMaxSize(width, height);
-        this.getChildren().addAll(topBar, savesGrid);
+        this.getChildren().addAll(textBox, savesGrid, returnBox);
         this.setBackground(new Background(new BackgroundFill(
                 Design.BLUE, CornerRadii.EMPTY, Insets.EMPTY
         )));
+    }
+    
+    public SaveBox[] getSaveBoxes(){
+        return saveBoxes;
     }
     
     public void show(){
@@ -101,7 +116,7 @@ public class SavedGames extends VBox{
         stack.getChildren().remove(this);
     }
     
-    public class SaveBox extends GridPane{
+    public class SaveBox extends HBox{
         
         private final int NUM_OF_PLAYERS = 4;
         private final Text[] names = new Text[NUM_OF_PLAYERS];
@@ -109,13 +124,17 @@ public class SavedGames extends VBox{
         private final Text gameMode = new Text("");
         private final Text round = new Text("");
         private final String path;
+        private final double width;
+        private final double height;
         
-        private boolean hasSaved = false;
+        private boolean isEmpty = true;
         
         public SaveBox(double width, double height, int index){
-            path = "/saves/save" + index + ".txt";
-            this.setVgap(5);
-            this.setHgap(2);
+            this.width = width;
+            this.height = height;
+            path = "src/main/resources/saves/save" + index + ".txt";
+            
+            this.setAlignment(Pos.CENTER);
             this.setMinSize(width, height);
             this.setMaxSize(width, height);
             this.setBackground(new Background(new BackgroundFill(
@@ -128,32 +147,37 @@ public class SavedGames extends VBox{
                 changeColor(false);
             });
             
-            double textSize = height / 6;
+            double textSize = height / 8;
+            Insets hMargin = new Insets(0, width / 15, 0, width / 15);
             
             gameMode.setFont(Design.Font(textSize));
             gameMode.setFill(Design.GREY);
-            this.add(gameMode, 0, 0, 1, 1);
+            GridPane.setMargin(gameMode, hMargin);
             
             round.setFont(Design.Font(textSize));
             round.setFill(Design.GREY);
-            this.add(round, 1, 0, 1, 1);
+            GridPane.setMargin(round, hMargin);
             
             for (int i = 0; i < NUM_OF_PLAYERS; i++){
                 names[i] = new Text("");
                 names[i].setFont(Design.Font(textSize));
                 names[i].setFill(Design.GREY);
-                this.add(names[i], 0, i+1, 1, 1);
+                GridPane.setMargin(names[i], hMargin);
                 
                 score[i] = new Text("");
                 score[i].setFont(Design.Font(textSize));
                 score[i].setFill(Design.GREY);
-                this.add(score[i], 1, i+1, 1, 1);
+                GridPane.setMargin(score[i], hMargin);
             }
             
-            loadFile();
+            if (!loadFile()){
+                setEmpty();
+            } else {
+                setData();
+            }
         }
         
-        public boolean delete(){
+        private boolean delete(){
             boolean ret = true;
             try {
                 PrintWriter writer = new PrintWriter(path);
@@ -164,16 +188,18 @@ public class SavedGames extends VBox{
                 ret = false;
             }
             
+            setEmpty();
             return ret;
         }
         
-        public void save(String[] names, String[] score, GameModes gameMode, int round){
+        public void save(String[] names, int[] score, GameModes gameMode, int round){
             for (int i = 0; i < NUM_OF_PLAYERS; i++){
                 this.names[i].setText(names[i]);
-                this.score[i].setText(score[i]);
+                this.score[i].setText(Integer.toString(score[i]));
             }
             this.gameMode.setText(gameMode.toString());
             this.round.setText(Integer.toString(round));
+            setData();
             
             File file = new File(path);
             if (!file.exists()){
@@ -188,7 +214,7 @@ public class SavedGames extends VBox{
                 FileWriter writer = new FileWriter(file);
                 BufferedWriter bufWriter = new BufferedWriter(writer);
                 
-                bufWriter.write(gameMode.toString());
+                bufWriter.write(Integer.toString(gameMode.ordinal()));
                 bufWriter.newLine();
                 bufWriter.write(Integer.toString(round));
                 bufWriter.newLine();
@@ -196,7 +222,7 @@ public class SavedGames extends VBox{
                 for (int i = 0; i < NUM_OF_PLAYERS; i++){
                     bufWriter.write(names[i]);
                     bufWriter.newLine();
-                    bufWriter.write(score[i]);
+                    bufWriter.write(Integer.toString(score[i]));
                     bufWriter.newLine();
                 }
                 
@@ -207,30 +233,96 @@ public class SavedGames extends VBox{
             }
         }
         
-        private void loadFile(){
+        public boolean isEmpty(){
+            return isEmpty;
+        }
+        
+        private void setData(){
+            GridPane info = new GridPane();
+            info.setMaxSize(width, height);
+            info.setAlignment(Pos.CENTER);
+            info.setHgap(3);
+            info.setVgap(5);
+            
+            info.add(gameMode, 0, 0, 1, 1);
+            info.add(round, 1, 0, 1, 1);
+            for (int i = 0; i < NUM_OF_PLAYERS; i++){
+                info.add(names[i], 0, i+1, 1, 1);
+                info.add(score[i], 1, i+1, 1, 1);
+            }
+            
+            Rectangle bin = new Rectangle(width / 10, width / 10);
+            bin.setFill(new ImagePattern(new Image(
+                "/images/icons/delete.png"
+            )));
+            bin.setOnMouseEntered(e -> {
+                bin.setFill(new ImagePattern(new Image(
+                    "/images/icons/delete_hover.png"
+                )));
+            });
+            bin.setOnMouseExited(e -> {
+                bin.setFill(new ImagePattern(new Image(
+                    "/images/icons/delete.png"
+                )));
+            });
+            bin.setOnMouseClicked(e -> {
+                delete();
+            });
+            
+            HBox binBox = new HBox(bin);
+            binBox.setAlignment(Pos.BOTTOM_RIGHT);
+            HBox.setHgrow(binBox, Priority.ALWAYS);
+            
+            HBox infoBox = new HBox(info);
+            infoBox.setAlignment(Pos.CENTER);
+            HBox.setHgrow(infoBox, Priority.ALWAYS);
+            
+            isEmpty = false;
+            this.getChildren().clear();
+            this.getChildren().addAll(infoBox, binBox);
+        }
+        
+        private void setEmpty(){
+            this.getChildren().clear();
+            
+            Text empty = new Text("Empty");
+            empty.setFont(Design.Font(height / 5));
+            empty.setFill(Design.GREY);
+            this.setOnMouseEntered(e -> {
+                empty.setFill(Design.YELLOW);
+            });
+            this.setOnMouseExited(e -> {
+                empty.setFill(Design.GREY);
+            });
+            
+            isEmpty = true;
+            this.getChildren().add(empty);
+        }
+        
+        private boolean loadFile(){
             File file = new File(path);
             if (!file.exists() || file.length() == 0){
-                return;
+                return false;
             }
             
             try {
-                FileReader reader = new FileReader(file);
-                BufferedReader bufReader = new BufferedReader(reader);
-                gameMode.setText(bufReader.readLine());
-                round.setText(bufReader.readLine());
+                Scanner scanner = new Scanner(file);
+                
+                int idx = Integer.parseInt(scanner.nextLine());
+                gameMode.setText(GameModes.values()[idx].toString());
+                round.setText(scanner.nextLine());
                 
                 for (int i = 0; i < NUM_OF_PLAYERS; i++){
-                    names[i].setText(bufReader.readLine());
-                    score[i].setText(bufReader.readLine());
+                    names[i].setText(scanner.nextLine());
+                    score[i].setText(scanner.nextLine());
                 }
                 
-                bufReader.close();
-                reader.close();
+                scanner.close();
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(SavedGames.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(SavedGames.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
             }
+            return true;
         }
        
         private void changeColor(boolean mouseOn){

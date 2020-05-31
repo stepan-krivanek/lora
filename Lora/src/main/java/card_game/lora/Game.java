@@ -123,6 +123,7 @@ public class Game {
     private void addScore(int[] penalties){
         String msg = "NEW SCORE:";
         for (int i = 0; i < score.length; i++){
+            penalties[i] = 4 - penalties[i];
             score[i] += penalties[i];
             msg += " Player " + i + ": " + score[i];
         }

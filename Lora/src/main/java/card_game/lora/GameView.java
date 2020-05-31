@@ -62,18 +62,20 @@ public class GameView extends StackPane{
     private final StackPane table;
     private final StackPane privatePane = new StackPane();
     private final String[] names = new String[NUM_OF_PLAYERS];
-    private final Text[] score = new Text[NUM_OF_PLAYERS];
+    private final Text[] scoreTexts = new Text[NUM_OF_PLAYERS];
     private final Text modeText;
     private final HandView[] otherHands = new HandView[NUM_OF_PLAYERS - 1];
     private final Main program;
     private final MpPlayer player;
     
-    
+    private int[] score = {100, 100, 100, 100};
     private boolean saved = false;
     private boolean soundOn = true;
     private TableGUI tableGUI = null;
     private HandView primaryHand;
     private Rectangle playZone;
+    private GameModes gameMode = GameModes.REDS;
+    private int round = 0;
     
     public GameView(Main program, MpPlayer player){
         ///For testing
@@ -113,10 +115,10 @@ public class GameView extends StackPane{
         
         //--------------------------Score---------------------------        
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
-            score[i] = new Text("0");
-            score[i].setFont(Design.Font(HEIGHT / 20));
-            score[i].setFill(Design.ORANGE);
-            score[i].setBoundsType(TextBoundsType.VISUAL);
+            scoreTexts[i] = new Text(Integer.toString(score[i]));
+            scoreTexts[i].setFont(Design.Font(HEIGHT / 20));
+            scoreTexts[i].setFill(Design.ORANGE);
+            scoreTexts[i].setBoundsType(TextBoundsType.VISUAL);
         }
         
         //--------------------------Table---------------------------
@@ -297,8 +299,9 @@ public class GameView extends StackPane{
     }
     
     public void updateScore(int[] score){
+        this.score = score;
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
-            this.score[i].setText(Integer.toString(score[i]));
+            this.scoreTexts[i].setText(Integer.toString(score[i]));
         }
     }
     
@@ -335,7 +338,10 @@ public class GameView extends StackPane{
     }
     
     public void setGameMode(int id){
-        switch (gameModes.get(id)){
+        gameMode = gameModes.get(id);
+        saved = false;
+        
+        switch (gameMode){
             case TENS:
                 tableGUI = new TensGUI();
                 break;
@@ -395,7 +401,7 @@ public class GameView extends StackPane{
         goldView.setFitWidth(WIDTH / 15);
         goldView.setFitHeight(HEIGHT / 10);
         goldView.setPreserveRatio(true);
-        StackPane gold = new StackPane(goldView, score[playerId]);
+        StackPane gold = new StackPane(goldView, scoreTexts[playerId]);
         gold.setMinSize(WIDTH / 15, HEIGHT / 10);
         gold.setMaxSize(WIDTH / 15, HEIGHT / 10);
         
@@ -534,7 +540,7 @@ public class GameView extends StackPane{
         ToggleButton saveButton = new Design.Button(buttonWidth, buttonHeight);
         saveButton.setText("Save");
         saveButton.setOnAction(e -> {
-            saved = true;
+            saveGame();
         });
         
         //Play button
@@ -544,8 +550,24 @@ public class GameView extends StackPane{
             this.getChildren().removeAll(rect, menu);
         });
         
-        menu.getChildren().addAll(exitButton, saveButton, playButton);
+        menu.getChildren().addAll(rulesButton, exitButton, saveButton, playButton);
         this.getChildren().addAll(rect, menu);
+    }
+    
+    private void saveGame(){
+        SavedGames savedGames = new SavedGames(WIDTH, HEIGHT, this);
+        SavedGames.SaveBox[] saveBoxes = savedGames.getSaveBoxes();
+        
+        for (int i = 0; i < saveBoxes.length; i++){
+            final int num = i;
+            saveBoxes[i].setOnMouseClicked(e -> {
+                if (saveBoxes[num].isEmpty()){
+                    saveBoxes[num].save(names, score, gameMode, round);
+                    saved = true;
+                }
+            });
+        }
+        savedGames.show();
     }
     
     private PerspectiveTransform perspection(double width, double height){
