@@ -60,13 +60,15 @@ public class GameView extends StackPane{
     private final StackPane hands;
     private final StackPane playGround = new StackPane();
     private final StackPane table;
-    private final Text modeText, playerScore;
-    private final Text[] score;
+    private final StackPane privatePane = new StackPane();
+    private final String[] names = new String[NUM_OF_PLAYERS];
+    private final Text[] score = new Text[NUM_OF_PLAYERS];
+    private final Text modeText;
     private final HandView[] otherHands = new HandView[NUM_OF_PLAYERS - 1];
     private final Main program;
     private final MpPlayer player;
     
-    private String[] names;
+    
     private boolean saved = false;
     private boolean soundOn = true;
     private TableGUI tableGUI = null;
@@ -109,16 +111,12 @@ public class GameView extends StackPane{
         //--------------------------Table-------------------------//
         ////////////////////////////////////////////////////////////
         
-        //--------------------------Score---------------------------
-        playerScore = new Text("123");
-        playerScore.setFill(Design.ORANGE);
-        playerScore.setFont(Design.Font(HEIGHT / 20));
-        playerScore.setBoundsType(TextBoundsType.VISUAL);
-        
-        score = new Text[NUM_OF_PLAYERS];
-        for (Text text : score){
-            text = new Text("0");
-            text.setFont(Design.Font(HEIGHT / 10));
+        //--------------------------Score---------------------------        
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            score[i] = new Text("0");
+            score[i].setFont(Design.Font(HEIGHT / 20));
+            score[i].setFill(Design.ORANGE);
+            score[i].setBoundsType(TextBoundsType.VISUAL);
         }
         
         //--------------------------Table---------------------------
@@ -135,24 +133,6 @@ public class GameView extends StackPane{
         table.setMaxSize(WIDTH, HEIGHT);
         table.setEffect(perspection(WIDTH, HEIGHT));
         GameView.setAlignment(table, Pos.CENTER);
-        
-        //----------------------Personal info-----------------------
-        //BETA
-        Text name = new Text(player.getNickname());
-        name.setFont(Design.Font(HEIGHT / 15));
-        
-        ImageView goldView = new ImageView("/images/gold.png");
-        goldView.setFitWidth(WIDTH / 15);
-        goldView.setFitHeight(HEIGHT / 10);
-        goldView.setPreserveRatio(true);
-        StackPane gold = new StackPane(goldView, playerScore);
-        gold.setMinSize(WIDTH / 15, HEIGHT / 10);
-        gold.setMaxSize(WIDTH / 15, HEIGHT / 10);
-        
-        HBox personalBox = new HBox(gold, name);
-        personalBox.setSpacing(WIDTH / 100);
-        personalBox.setAlignment(Pos.BOTTOM_LEFT);
-        personalBox.setPadding(new Insets(10, WIDTH / 100, 10, WIDTH / 100));
         
         /////////////////////////////////////////////////////////////
         //--------------------------Top bar------------------------//
@@ -221,7 +201,7 @@ public class GameView extends StackPane{
         border.setCenter(playGround);
         border.setTop(topBar);
         
-        this.getChildren().addAll(hands, table, personalBox, border);
+        this.getChildren().addAll(hands, table, privatePane, border);
         loadingScreen.show();
     }
     
@@ -317,7 +297,9 @@ public class GameView extends StackPane{
     }
     
     public void updateScore(int[] score){
-        
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            this.score[i].setText(Integer.toString(score[i]));
+        }
     }
     
     public void showGameModeSelection(MpPlayer player){
@@ -405,9 +387,37 @@ public class GameView extends StackPane{
         this.getChildren().addAll(rect, alertBox);
     }
     
-    public void showNames(String[] names){
-        this.names = names;
+    private HBox getPersonalBox(int playerId){
+        Text name = new Text(names[playerId]);
+        name.setFont(Design.Font(HEIGHT / 15));
         
+        ImageView goldView = new ImageView("/images/gold.png");
+        goldView.setFitWidth(WIDTH / 15);
+        goldView.setFitHeight(HEIGHT / 10);
+        goldView.setPreserveRatio(true);
+        StackPane gold = new StackPane(goldView, score[playerId]);
+        gold.setMinSize(WIDTH / 15, HEIGHT / 10);
+        gold.setMaxSize(WIDTH / 15, HEIGHT / 10);
+        
+        HBox personalBox = new HBox(gold, name);
+        personalBox.setSpacing(WIDTH / 100);
+        personalBox.setAlignment(Pos.BOTTOM_LEFT);
+        personalBox.setPadding(new Insets(10, WIDTH / 100, 10, WIDTH / 100));
+        
+        return personalBox;
+    }
+    
+    public void showNames(String[] names){
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            this.names[i] = names[i];
+        }
+        
+        //------------------Own personal box---------------------
+        HBox privateBox = getPersonalBox(player.getId());
+        privateBox.setAlignment(Pos.BOTTOM_LEFT);
+        privatePane.getChildren().add(privateBox);
+        
+        //----------------Other personal boxes-------------------
         final double translate = WIDTH / 15;
         final double boxWidth = WIDTH / 3;
         final double boxHeight = HEIGHT / 10;
@@ -418,10 +428,7 @@ public class GameView extends StackPane{
         for (int i = 1; i < NUM_OF_PLAYERS; i++){
             int playerId = (player.getId() + i) % NUM_OF_PLAYERS;
             
-            Text name = new Text(names[playerId]);
-            name.setFont(Design.Font(boxHeight));
-            
-            HBox personalBox = new HBox(name);
+            HBox personalBox = getPersonalBox(playerId);
             personalBox.setMinSize(boxWidth, boxHeight);
             personalBox.setMaxSize(boxWidth, boxHeight);
             personalBox.setRotate(90 * i + 180);
@@ -639,8 +646,8 @@ public class GameView extends StackPane{
         public TensGUI(){
             cards = new GridPane();
             cards.setAlignment(Pos.CENTER);
-            cards.setPrefWidth(WIDTH);
-            cards.setPrefHeight(HEIGHT);
+            cards.setMinSize(WIDTH, HEIGHT);
+            cards.setMaxSize(WIDTH, HEIGHT);
             cards.setHgap(NUM_OF_COLS);
             cards.setVgap(NUM_OF_ROWS);
 
@@ -656,7 +663,9 @@ public class GameView extends StackPane{
                     cardView.setPreserveRatio(true);
 
                     GridPane.setConstraints(cardView, col, row);
-                    GridPane.setMargin(cardView, new Insets(5, 10, 5 ,10));
+                    GridPane.setMargin(cardView, new Insets(
+                            HEIGHT / 200, WIDTH / 200, HEIGHT / 200, WIDTH / 200
+                    ));
 
                     cards.getChildren().add(cardView);
                 }
@@ -678,6 +687,7 @@ public class GameView extends StackPane{
         @Override
         public void show(){  
             table.getChildren().add(cards);
+            cards.toBack();
             getChildren().add(passBox);
         }
 
