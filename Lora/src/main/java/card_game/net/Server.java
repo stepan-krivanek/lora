@@ -13,6 +13,7 @@ import card_game.lora.game_modes.GameModes;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Callable;
@@ -31,6 +32,7 @@ public class Server implements Runnable{
     private final int MSG_SIZE = 10;
     private final int port = 1341;
     private final Connection[] players = new Connection[NUM_OF_PLAYERS];
+    private final String[] names = {"Temp1", "Temp2", "Temp3", "Temp4"};
     private final int gameModeId;
     
     private boolean exit = false;
@@ -52,7 +54,11 @@ public class Server implements Runnable{
         while (connectedPlayers < NUM_OF_PLAYERS){
             try {
                 Socket s = serverSocket.accept();
+                
                 Connection connection = new Connection(s, connectedPlayers);
+                connection.getOutput().writeInt(connectedPlayers);
+                connection.getOutput().flush();
+                names[connectedPlayers] = connection.getInput().readUTF();
                 players[connectedPlayers] = connection;
                 
                 Thread t = new Thread(connection);
@@ -65,6 +71,19 @@ public class Server implements Runnable{
                 logger.log(Level.SEVERE, null, ex);
             }
         }
+        
+        System.out.println("Sending names");
+        for (Connection player : players){
+            for (int i = 0; i < NUM_OF_PLAYERS; i++){
+                try {
+                    player.getOutput().writeUTF(names[i]);
+                    player.getOutput().flush();
+                } catch (IOException ex) {
+                    logger.log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        System.out.println("Names sent");
         
         try {
             serverSocket.close();
@@ -217,9 +236,6 @@ public class Server implements Runnable{
         
         public void run(){
             try {
-                output.writeInt(playerId);
-                output.flush();
-                
                 while(!exit){
                     byte data[] = new byte[MSG_SIZE];
                     input.read(data);
@@ -251,6 +267,14 @@ public class Server implements Runnable{
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+        
+        public DataOutputStream getOutput(){
+            return output;
+        }
+        
+        public DataInputStream getInput(){
+            return input;
         }
     }
 }

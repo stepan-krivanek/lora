@@ -8,7 +8,6 @@ package card_game.lora;
 import card_game.lora.game_modes.GameModes;
 import card_game.net.Server;
 import javafx.animation.FadeTransition;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -22,7 +21,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
@@ -40,10 +38,9 @@ public class GameMenu extends StackPane{
     private final String bcgrPath = "/images/main_menu_bcgr2.png";
     private final Main program;
      
-    private String nickname;
     private int numOfPlayers = -1;
     
-    public GameMenu(Main program){
+    public GameMenu(Main program, String nickname){
         this.program = program;
         
         setWidth(WIDTH);
@@ -52,7 +49,11 @@ public class GameMenu extends StackPane{
         Background bcgr = GameUtils.loadBackground(bcgrPath, WIDTH, HEIGHT);
         setBackground(bcgr); 
         
-        setNameEntrance();
+        if (nickname == null){
+            setNameEntrance();
+        } else {
+            setMainButtons();
+        }
     }
     
     private boolean isCorrectName(String s){
@@ -103,7 +104,7 @@ public class GameMenu extends StackPane{
         nextButton.setText("Next");
         nextButton.setOnAction(e -> {
             if (isCorrectName(name.getText())){
-                nickname = name.getText();
+                program.setNickname(name.getText());
                 setMainButtons();
             } else {
                 warning.setOpacity(1);
@@ -361,7 +362,7 @@ public class GameMenu extends StackPane{
     }
     
     private void joinServer(){
-        MpPlayer player = new MpPlayer(nickname, program);
+        MpPlayer player = new MpPlayer(program.getNickname(), program);
         
         if (player.connectToServer()){
             program.getRoot().getChildren().remove(this);

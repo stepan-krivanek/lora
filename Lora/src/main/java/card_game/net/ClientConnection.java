@@ -21,6 +21,7 @@ import java.util.logging.Logger;
  */
 public class ClientConnection implements Runnable {
 
+    private final int NUM_OF_PLAYERS = 4;
     private final int MSG_SIZE = 10;
     private final MpPlayer player;
     private InetAddress ipAddress;
@@ -56,6 +57,16 @@ public class ClientConnection implements Runnable {
 
     @Override
     public void run() {
+        String[] names = new String[NUM_OF_PLAYERS];
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            try {
+                names[i] = input.readUTF();
+            } catch (IOException ex) {
+                Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        player.setNames(names);
+        
         while (true){
             try {
                 byte[] data = new byte[MSG_SIZE];

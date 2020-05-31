@@ -42,6 +42,11 @@ public class MpBot extends MpPlayer{
     }
     
     @Override
+    public void setNames(String[] names){
+        // No use for it yet
+    }
+    
+    @Override
     public void action(byte[] data){
         ServerMessage msg = ServerMessage.values()[data[0]];
         

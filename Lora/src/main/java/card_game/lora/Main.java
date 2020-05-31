@@ -22,6 +22,7 @@ public class Main extends Application {
     private StackPane root;
     private Scene mainScene;
     private Stage stage;
+    private String nickname = null;
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -39,9 +40,17 @@ public class Main extends Application {
     }
     
     public void setMainMenu(){
-        GameMenu mainMenu = new GameMenu(this);
+        GameMenu mainMenu = new GameMenu(this, nickname);
         stage.setOnCloseRequest(e -> {});
         root.getChildren().add(mainMenu);
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+    
+    public String getNickname(){
+        return nickname;
     }
     
     public void close(){

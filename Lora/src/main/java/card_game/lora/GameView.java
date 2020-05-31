@@ -17,7 +17,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.PerspectiveTransform;
 import javafx.scene.image.Image;
@@ -67,6 +66,7 @@ public class GameView extends StackPane{
     private final Main program;
     private final MpPlayer player;
     
+    private String[] names;
     private boolean saved = false;
     private boolean soundOn = true;
     private TableGUI tableGUI = null;
@@ -131,13 +131,14 @@ public class GameView extends StackPane{
                 BackgroundSize.DEFAULT
         ));
         table.setBackground(tableBcgr);
-        table.setPrefSize(WIDTH, HEIGHT);
+        table.setMinSize(WIDTH, HEIGHT);
+        table.setMaxSize(WIDTH, HEIGHT);
         table.setEffect(perspection(WIDTH, HEIGHT));
         GameView.setAlignment(table, Pos.CENTER);
         
         //----------------------Personal info-----------------------
         //BETA
-        Text name = new Text("Ututu halabala");
+        Text name = new Text(player.getNickname());
         name.setFont(Design.Font(HEIGHT / 15));
         
         ImageView goldView = new ImageView("/images/gold.png");
@@ -255,12 +256,15 @@ public class GameView extends StackPane{
             otherHands[i] = new HandView(handSize, WIDTH, HEIGHT);
         }
         
+        double vectorX = WIDTH * 4 / 15;
+        double vectorY = HEIGHT * -3 / 4;
+        double shiftFactor = 10;
         double newCardHeight = otherHands[0].getCardHeight() * 50 / 23;
         double rightX, leftX, topY, botY;
-        rightX = WIDTH / 6;
-        leftX = - WIDTH / 10;
-        botY = HEIGHT;
-        topY = HEIGHT / 4;
+        rightX = WIDTH / 6 + (vectorX / shiftFactor);
+        leftX = - WIDTH / 10 + (vectorX / shiftFactor);
+        botY = HEIGHT + (vectorY / shiftFactor);
+        topY = HEIGHT / 4 + (vectorY / shiftFactor);
         PerspectiveTransform leftHand = new PerspectiveTransform(
                 leftX, botY - newCardHeight,
                 rightX, topY - newCardHeight,
@@ -401,6 +405,34 @@ public class GameView extends StackPane{
         this.getChildren().addAll(rect, alertBox);
     }
     
+    public void showNames(String[] names){
+        this.names = names;
+        
+        final double translate = WIDTH / 15;
+        final double boxWidth = WIDTH / 3;
+        final double boxHeight = HEIGHT / 10;
+        final Pos[] positions = {
+            Pos.CENTER_LEFT, Pos.TOP_CENTER, Pos.CENTER_RIGHT
+        };
+        
+        for (int i = 1; i < NUM_OF_PLAYERS; i++){
+            int playerId = (player.getId() + i) % NUM_OF_PLAYERS;
+            
+            Text name = new Text(names[playerId]);
+            name.setFont(Design.Font(boxHeight));
+            
+            HBox personalBox = new HBox(name);
+            personalBox.setMinSize(boxWidth, boxHeight);
+            personalBox.setMaxSize(boxWidth, boxHeight);
+            personalBox.setRotate(90 * i + 180);
+            personalBox.setAlignment(Pos.CENTER);
+            personalBox.setTranslateX((translate * i) - (translate * 2));
+            
+            table.setAlignment(personalBox, positions[i-1]);
+            table.getChildren().add(personalBox);
+        }
+    }
+    
     public void exit(){
         player.disconnect();
         program.setMainMenu();
@@ -523,29 +555,27 @@ public class GameView extends StackPane{
         return perspection;
     }
     
-    private class LoadingScreen {
-        
-        private final StackPane loadingScreen;
+    private class LoadingScreen extends StackPane{
         
         public LoadingScreen(double width, double height){
             Text text = new Text("Waiting for other players to connect");
             text.setFont(Design.Font(height / 15));
             
-            loadingScreen = new StackPane(text);
-            loadingScreen.setAlignment(Pos.CENTER);
-            loadingScreen.setMinSize(width, height);
-            loadingScreen.setMaxSize(width, height);
-            loadingScreen.setBackground(GameUtils.loadBackground(
+            this.getChildren().add(text);
+            this.setAlignment(Pos.CENTER);
+            this.setMinSize(width, height);
+            this.setMaxSize(width, height);
+            this.setBackground(GameUtils.loadBackground(
                     "/images/loadingscreen.png", width, height)
             );
         }
         
         public void show(){
-            program.getRoot().getChildren().add(loadingScreen);
+            program.getRoot().getChildren().add(this);
         }
 
         public void hide(){
-            program.getRoot().getChildren().remove(loadingScreen);
+            program.getRoot().getChildren().remove(this);
         }
     }
     

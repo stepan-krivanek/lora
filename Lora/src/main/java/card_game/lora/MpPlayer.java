@@ -82,6 +82,8 @@ public class MpPlayer {
         
         try {
             id = connection.getInput().readInt();
+            connection.getOutput().writeUTF(nickname);
+            connection.getOutput().flush();
         } catch (IOException ex) {
             Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
             return false;
@@ -91,6 +93,12 @@ public class MpPlayer {
         t.setName("Thread: connection to server " + id);
         t.start();
         return true;
+    }
+    
+    public void setNames(String[] names){
+        Platform.runLater(() -> {
+            gameView.showNames(names);
+        });
     }
     
     public Deck getHand(){
