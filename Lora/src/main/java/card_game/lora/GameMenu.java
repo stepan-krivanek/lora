@@ -197,7 +197,8 @@ public class GameMenu extends StackPane{
     }
     
     private void savedGames(){
-        
+        SavedGames savedGames = new SavedGames(WIDTH, HEIGHT, this);
+        savedGames.show();
     }
     
     private void rules(){
