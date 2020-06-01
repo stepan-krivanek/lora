@@ -35,7 +35,7 @@ public class Game {
     private final int MAX_NUM_OF_GAMES = 40;
     private final Deck mainDeck = new Deck(DECK_SIZE, true);
     private final Player[] players = new Player[NUM_OF_PLAYERS];
-    private final int[] score = new int[NUM_OF_PLAYERS];
+    private final int[] score;
     private final List<Suit> suits = GameUtils.getOrderedSuits();
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
@@ -46,10 +46,12 @@ public class Game {
     private int round = 0;
     private int gamesPlayedInRound = 0;
     private int graduationAttempt = 0;
-    private int gamesToPlay = MAX_NUM_OF_GAMES;
+    private boolean singleGame = false;
     
-    public Game(Server server){
+    public Game(Server server, int[] score, int round){
         this.server = server;
+        this.score = score;
+        this.round = round;
         
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             players[i] = new Player(this, i);
@@ -58,13 +60,8 @@ public class Game {
         forehand = players[0];
     }
     
-    public void start(int gameModeId){
-        if ((gameModeId < 0) || (gameModeId >= GameModes.values().length)){
-            gamesToPlay = MAX_NUM_OF_GAMES;
-            gameModeId = 0;
-        } else {
-            gamesToPlay = 1;
-        }
+    public void start(int gameModeId, boolean singleGame){
+        this.singleGame = singleGame;
         
         cardDealing();
         setGameMode(gameModeId);
@@ -107,7 +104,7 @@ public class Game {
         }
         
         gamesPlayedInRound += 1;
-        if (gamesPlayedInRound >= gamesToPlay){
+        if (singleGame){
             addScore(penalties);
             exit();
         } else if (gamesPlayedInRound >= gameModes.size()){
@@ -175,6 +172,7 @@ public class Game {
             round = 0;
             exit();
         } else {
+            server.newRound(round);
             forehand = getNextPlayer(forehand);
             cardDealing();
             setGameMode(0);

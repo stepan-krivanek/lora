@@ -13,7 +13,6 @@ import card_game.lora.game_modes.GameModes;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Callable;
@@ -27,20 +26,27 @@ import java.util.logging.Logger;
 public class Server implements Runnable{
     
     private static final Logger logger = Logger.getLogger(Server.class.getName());
-    private final Game game = new Game(this);
+    private final Game game;
     private final int NUM_OF_PLAYERS = 4;
     private final int MSG_SIZE = 10;
     private final int port = 1341;
     private final Connection[] players = new Connection[NUM_OF_PLAYERS];
-    private final String[] names = {"Temp1", "Temp2", "Temp3", "Temp4"};
+    private final String[] names = new String[NUM_OF_PLAYERS];
+    private final int[] score;
     private final int gameModeId;
+    private final int round;
+    private final boolean singleGame;
     
     private boolean exit = false;
     private ServerSocket serverSocket;
     
-    public Server(int gameModeId){
+    public Server(int[] score, int gameModeId, int round, boolean singleGame){
         this.gameModeId = gameModeId;
+        this.round = round;
+        this.score = score;
+        this.singleGame = singleGame;
         
+        game = new Game(this, score, round);
         try {
             serverSocket = new ServerSocket(port);
         } catch (IOException ex) {
@@ -72,18 +78,21 @@ public class Server implements Runnable{
             }
         }
         
-        System.out.println("Sending names");
         for (Connection player : players){
-            for (int i = 0; i < NUM_OF_PLAYERS; i++){
-                try {
+            try {
+                newRound(round);
+                for (int i = 0; i < NUM_OF_PLAYERS; i++){
+                    player.getOutput().writeInt(score[i]);
+                    player.getOutput().flush();
+                }
+                for (int i = 0; i < NUM_OF_PLAYERS; i++){
                     player.getOutput().writeUTF(names[i]);
                     player.getOutput().flush();
-                } catch (IOException ex) {
-                    logger.log(Level.SEVERE, null, ex);
                 }
+            } catch (IOException ex) {
+                logger.log(Level.SEVERE, "Failed to send game info", ex);
             }
         }
-        System.out.println("Names sent");
         
         try {
             serverSocket.close();
@@ -127,12 +136,18 @@ public class Server implements Runnable{
     
     private void start(){
         broadcast(initMessage(ServerMessage.START));
-        game.start(gameModeId);
+        game.start(gameModeId, singleGame);
     }
     
     public void exit(){
         exit = true;
         broadcast(initMessage(ServerMessage.EXIT));
+    }
+    
+    public void newRound(int round){
+        byte[] data = initMessage(ServerMessage.ROUND);
+        data[1] = (byte)round;
+        broadcast(data);
     }
     
     public void graduation(int playerId){

@@ -225,6 +225,10 @@ public class GameView extends StackPane{
         program.getRoot().getChildren().add(this);
     }
     
+    public void newRound(int round){
+        this.round = round;
+    }
+    
     public void showHands(){
         playGround.getChildren().removeAll(primaryHand, playZone);
         hands.getChildren().clear();

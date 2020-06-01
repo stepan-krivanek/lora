@@ -198,6 +198,16 @@ public class GameMenu extends StackPane{
     
     private void savedGames(){
         SavedGames savedGames = new SavedGames(WIDTH, HEIGHT, this);
+        
+        SavedGames.SaveBox[] saveBoxes = savedGames.getSaveBoxes();
+        for (SavedGames.SaveBox b : saveBoxes){
+            b.setOnMouseClicked(e -> {
+                if (!b.isEmpty()){
+                    startServer(b.getScore(), b.getMode(), b.getRound(), false);
+                }               
+            });
+        }
+            
         savedGames.show();
     }
     
@@ -214,10 +224,11 @@ public class GameMenu extends StackPane{
         });
         
         //Create game
+        int[] score = new int[MAX_PLAYERS];
         ToggleButton serverButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         serverButton.setText("Create game");
         serverButton.setOnAction(e -> {
-            createGame(-1);
+            createGame(score, 0, 0, false);
         });
         
         //Join game
@@ -242,12 +253,13 @@ public class GameMenu extends StackPane{
     
     private void chooseGameMode(){
         ModesView modesBox = new ModesView(HEIGHT);
+        int score[] = new int[MAX_PLAYERS];
         
         GameModes[] modes = GameModes.values();
         for (int i = 0; i < modes.length; i++){
             final int num = i;
             modesBox.getModeBox(modes[i]).setOnMouseClicked(e -> {
-                createGame(num);
+                createGame(score, num, 0, true);
             });
         }
         
@@ -261,7 +273,7 @@ public class GameMenu extends StackPane{
         }
     }    
     
-    private void createGame(int gameModeId){
+    private void createGame(int[] score, int gameModeId, int round, boolean singleGame){
         numOfPlayers = -1;
 
         final double boxWidth = WIDTH / 2;
@@ -314,7 +326,7 @@ public class GameMenu extends StackPane{
         playButton.setText("Play");
         playButton.setOnAction(e -> {
             if (numOfPlayers > 0 && numOfPlayers <= 4){
-                startServer(gameModeId);
+                startServer(score, gameModeId, round, singleGame);
             } else {
                 fadeTransition.play();
             }
@@ -344,8 +356,8 @@ public class GameMenu extends StackPane{
         this.getChildren().addAll(vBox);
     }
     
-    private void startServer(int gameModeId){
-        Server server = new Server(gameModeId);
+    private void startServer(int[] score, int gameModeId, int round, boolean singleGame){
+        Server server = new Server(score, gameModeId, round, singleGame);
         
         Thread t = new Thread(server);
         t.setName("Thread: server");

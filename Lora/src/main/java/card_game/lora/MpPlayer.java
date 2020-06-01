@@ -224,6 +224,12 @@ public class MpPlayer {
                 }
                 
                 break;
+                
+            case ROUND:
+                Platform.runLater(() -> {
+                    gameView.newRound(data[1]);
+                });
+                break;
         }
     }
 }

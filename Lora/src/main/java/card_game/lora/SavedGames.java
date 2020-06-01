@@ -128,6 +128,7 @@ public class SavedGames extends VBox{
         private final double height;
         
         private boolean isEmpty = true;
+        private int gameModeId = 0;
         
         public SaveBox(double width, double height, int index){
             this.width = width;
@@ -140,12 +141,6 @@ public class SavedGames extends VBox{
             this.setBackground(new Background(new BackgroundFill(
                     Design.BROWN, new CornerRadii(15), Insets.EMPTY
             )));
-            this.setOnMouseEntered(e -> {
-                changeColor(true);
-            });
-            this.setOnMouseExited(e -> {
-                changeColor(false);
-            });
             
             double textSize = height / 8;
             Insets hMargin = new Insets(0, width / 15, 0, width / 15);
@@ -177,20 +172,6 @@ public class SavedGames extends VBox{
             }
         }
         
-        private boolean delete(){
-            boolean ret = true;
-            try {
-                PrintWriter writer = new PrintWriter(path);
-                writer.write("");
-                writer.close();
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(SavedGames.class.getName()).log(Level.SEVERE, null, ex);
-                ret = false;
-            }
-            
-            setEmpty();
-            return ret;
-        }
         
         public void save(String[] names, int[] score, GameModes gameMode, int round){
             for (int i = 0; i < NUM_OF_PLAYERS; i++){
@@ -233,8 +214,39 @@ public class SavedGames extends VBox{
             }
         }
         
+        public int getRound(){
+            return Integer.parseInt(round.getText());
+        }
+        
+        public int getMode(){
+            return gameModeId;
+        }
+        
+        public int[] getScore(){
+            int[] intScore = new int[NUM_OF_PLAYERS];
+            for (int i = 0; i < NUM_OF_PLAYERS; i++){
+                intScore[i] = Integer.parseInt(score[i].getText());
+            }
+            return intScore;
+        }
+        
         public boolean isEmpty(){
             return isEmpty;
+        }
+        
+        private boolean delete(){
+            boolean ret = true;
+            try {
+                PrintWriter writer = new PrintWriter(path);
+                writer.write("");
+                writer.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(SavedGames.class.getName()).log(Level.SEVERE, null, ex);
+                ret = false;
+            }
+            
+            setEmpty();
+            return ret;
         }
         
         private void setData(){
@@ -277,6 +289,13 @@ public class SavedGames extends VBox{
             infoBox.setAlignment(Pos.CENTER);
             HBox.setHgrow(infoBox, Priority.ALWAYS);
             
+            this.setOnMouseEntered(e -> {
+                changeColor(true);
+            });
+            this.setOnMouseExited(e -> {
+                changeColor(false);
+            });
+            
             isEmpty = false;
             this.getChildren().clear();
             this.getChildren().addAll(infoBox, binBox);
@@ -308,8 +327,8 @@ public class SavedGames extends VBox{
             try {
                 Scanner scanner = new Scanner(file);
                 
-                int idx = Integer.parseInt(scanner.nextLine());
-                gameMode.setText(GameModes.values()[idx].toString());
+                gameModeId = Integer.parseInt(scanner.nextLine());
+                gameMode.setText(GameModes.values()[gameModeId].toString());
                 round.setText(scanner.nextLine());
                 
                 for (int i = 0; i < NUM_OF_PLAYERS; i++){

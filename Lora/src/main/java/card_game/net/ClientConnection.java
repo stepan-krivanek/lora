@@ -58,18 +58,25 @@ public class ClientConnection implements Runnable {
     @Override
     public void run() {
         String[] names = new String[NUM_OF_PLAYERS];
-        for (int i = 0; i < NUM_OF_PLAYERS; i++){
-            try {
-                names[i] = input.readUTF();
-            } catch (IOException ex) {
-                Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
+        int[] score = new int[NUM_OF_PLAYERS];
+        byte[] data = new byte[MSG_SIZE];
+        
+        try{
+            player.action(data);
+            for (int i = 0; i < NUM_OF_PLAYERS; i++){
+                score[i] = input.readInt();
             }
+            for (int i = 0; i < NUM_OF_PLAYERS; i++){
+                names[i] = input.readUTF();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
         player.setNames(names);
         
         while (true){
             try {
-                byte[] data = new byte[MSG_SIZE];
+                data = new byte[MSG_SIZE];
                 input.read(data);
                 player.action(data);
                 
