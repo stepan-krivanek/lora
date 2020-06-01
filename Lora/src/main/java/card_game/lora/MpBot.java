@@ -47,6 +47,11 @@ public class MpBot extends MpPlayer{
     }
     
     @Override
+    public void setScore(int[] score){
+        // No use for it yet
+    }
+    
+    @Override
     public void action(byte[] data){
         ServerMessage msg = ServerMessage.values()[data[0]];
         
@@ -72,7 +77,7 @@ public class MpBot extends MpPlayer{
                 break;
                 
             case SCORE:
-                //TBA
+                // No use for it yet
                 break;
                 
             case PLAY:
@@ -117,6 +122,10 @@ public class MpBot extends MpPlayer{
                 }
                 
                 awaitingResponse = false;
+                break;
+                
+            case ROUND:
+                // No use for it yet
                 break;
         }
     }

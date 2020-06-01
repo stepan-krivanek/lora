@@ -101,6 +101,12 @@ public class MpPlayer {
         });
     }
     
+    public void setScore(int[] score){
+        Platform.runLater(() -> {
+            gameView.updateScore(score);
+        });
+    }
+    
     public Deck getHand(){
         return hand;
     }

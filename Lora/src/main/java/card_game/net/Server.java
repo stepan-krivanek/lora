@@ -15,6 +15,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,10 +30,10 @@ public class Server implements Runnable{
     private final Game game;
     private final int NUM_OF_PLAYERS = 4;
     private final int MSG_SIZE = 10;
-    private final int port = 1341;
+    private final int port = 7473;
     private final Connection[] players = new Connection[NUM_OF_PLAYERS];
     private final String[] names = new String[NUM_OF_PLAYERS];
-    private final int[] score;
+    private final int[] score = new int[NUM_OF_PLAYERS];
     private final int gameModeId;
     private final int round;
     private final boolean singleGame;
@@ -43,8 +44,8 @@ public class Server implements Runnable{
     public Server(int[] score, int gameModeId, int round, boolean singleGame){
         this.gameModeId = gameModeId;
         this.round = round;
-        this.score = score;
         this.singleGame = singleGame;
+        System.arraycopy(score, 0, this.score, 0, NUM_OF_PLAYERS);
         
         game = new Game(this, score, round);
         try {
@@ -62,9 +63,9 @@ public class Server implements Runnable{
                 Socket s = serverSocket.accept();
                 
                 Connection connection = new Connection(s, connectedPlayers);
-                connection.getOutput().writeInt(connectedPlayers);
-                connection.getOutput().flush();
-                names[connectedPlayers] = connection.getInput().readUTF();
+                connection.output.writeInt(connectedPlayers);
+                connection.output.flush();
+                names[connectedPlayers] = connection.input.readUTF();
                 players[connectedPlayers] = connection;
                 
                 Thread t = new Thread(connection);
@@ -77,17 +78,18 @@ public class Server implements Runnable{
                 logger.log(Level.SEVERE, null, ex);
             }
         }
-        
+
+        newRound(round);
         for (Connection player : players){
             try {
-                newRound(round);
                 for (int i = 0; i < NUM_OF_PLAYERS; i++){
-                    player.getOutput().writeInt(score[i]);
-                    player.getOutput().flush();
+                    player.output.writeInt(score[i]);
+                    System.out.println("Server" + i + " " + score[i]);
+                    player.output.flush();
                 }
                 for (int i = 0; i < NUM_OF_PLAYERS; i++){
-                    player.getOutput().writeUTF(names[i]);
-                    player.getOutput().flush();
+                    player.output.writeUTF(names[i]);
+                    player.output.flush();
                 }
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, "Failed to send game info", ex);
@@ -97,7 +99,7 @@ public class Server implements Runnable{
         try {
             serverSocket.close();
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "Failed to close server socket", ex);
         }
         
         System.out.println("Game is ready to start.");
@@ -254,6 +256,9 @@ public class Server implements Runnable{
                 while(!exit){
                     byte data[] = new byte[MSG_SIZE];
                     input.read(data);
+                    if (data[0] >= ServerMessage.values().length || data[0] < 0){
+                        continue;
+                    }
                     
                     ClientMessage msg = ClientMessage.values()[data[0]];
                     if (msg.equals(ClientMessage.DISCONNECT)){
@@ -282,14 +287,6 @@ public class Server implements Runnable{
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-        
-        public DataOutputStream getOutput(){
-            return output;
-        }
-        
-        public DataInputStream getInput(){
-            return input;
         }
     }
 }

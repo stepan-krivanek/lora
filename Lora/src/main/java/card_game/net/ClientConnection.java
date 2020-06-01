@@ -39,7 +39,7 @@ public class ClientConnection implements Runnable {
         }       
 
         try {
-            socket = new Socket(ipAddress, 1341);
+            socket = new Socket(ipAddress, 7473);
             input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
         } catch (IOException ex) {
@@ -62,6 +62,7 @@ public class ClientConnection implements Runnable {
         byte[] data = new byte[MSG_SIZE];
         
         try{
+            input.read(data);
             player.action(data);
             for (int i = 0; i < NUM_OF_PLAYERS; i++){
                 score[i] = input.readInt();
@@ -72,12 +73,17 @@ public class ClientConnection implements Runnable {
         } catch (IOException ex) {
             Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
+        player.setScore(score);
         player.setNames(names);
         
         while (true){
             try {
                 data = new byte[MSG_SIZE];
                 input.read(data);
+                if (data[0] >= ServerMessage.values().length || data[0] < 0){
+                    continue;
+                }
+                
                 player.action(data);
                 
                 ServerMessage msg = ServerMessage.values()[data[0]];
