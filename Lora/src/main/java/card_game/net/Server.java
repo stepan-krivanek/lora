@@ -15,7 +15,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +29,7 @@ public class Server implements Runnable{
     private final Game game;
     private final int NUM_OF_PLAYERS = 4;
     private final int MSG_SIZE = 10;
-    private final int port = 7473;
+    private final int port = 7472;
     private final Connection[] players = new Connection[NUM_OF_PLAYERS];
     private final String[] names = new String[NUM_OF_PLAYERS];
     private final int[] score = new int[NUM_OF_PLAYERS];
@@ -158,7 +157,9 @@ public class Server implements Runnable{
     
     public void cardPlayed(Card card, int playerId){
         if (card == null) return;
-        logger.log(Level.INFO, "Card {0} played by {1}", new Object[]{card.toString(), playerId});
+        logger.log(Level.INFO, "Card {0} played by {1}",
+                new Object[]{card.toString(), playerId}
+        );
         
         byte[] data = initMessage(ServerMessage.CARD_PLAYED);
         data[1] = card.toByte();

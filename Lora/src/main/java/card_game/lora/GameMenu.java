@@ -204,7 +204,7 @@ public class GameMenu extends StackPane{
         for (SavedGames.SaveBox b : saveBoxes){
             b.setOnMouseClicked(e -> {
                 if (!b.isEmpty()){
-                    startServer(b.getScore(), b.getMode(), b.getRound(), false);
+                    createGame(b.getScore(), b.getMode(), b.getRound(), false);
                 }               
             });
         }

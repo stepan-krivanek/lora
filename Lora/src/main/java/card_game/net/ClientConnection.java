@@ -39,7 +39,7 @@ public class ClientConnection implements Runnable {
         }       
 
         try {
-            socket = new Socket(ipAddress, 7473);
+            socket = new Socket(ipAddress, 7472);
             input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
         } catch (IOException ex) {
