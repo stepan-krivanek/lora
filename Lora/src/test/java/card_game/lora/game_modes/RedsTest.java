@@ -9,7 +9,6 @@ import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.card.Suit;
-import card_game.lora.GameUtils;
 import card_game.net.Server;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,17 +24,20 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author stepa
  */
-public class QuartsTest {
+public class RedsTest {
     
     private final int NUM_OF_PLAYERS = 4;
     private final int[] score = {0,0,0,0};
-    private final int gameMode = GameModes.QUARTS.ordinal();
+    private final int gameMode = GameModes.REDS.ordinal();
     private final int round = 0;
     private final boolean singleGame = true;
     private final TestBot[] testBots = new TestBot[NUM_OF_PLAYERS];
     private final Deck allCards = new Deck(32, true);
+    private final Card[] lastPlayedCards = new Card[NUM_OF_PLAYERS];
     
-    public QuartsTest() {
+    private Suit leadSuit;
+    
+    public RedsTest() {
     }
     
     @BeforeAll
@@ -84,66 +86,108 @@ public class QuartsTest {
             testBot.disconnect();
         }
     }
-    
+
     /**
-     * Test of checkRules method, of class Quarts.
+     * Test of checkRules method, of class Reds.
      */
     @Test
     public void testCheckRules() {
-        System.out.println("Testing check rules of Quarts");
+        System.out.println("Testing check rules of Reds");
         
-        Card card;
-        boolean result;
-        
-        for (int i = 0; i < allCards.size(); i++){
-            setUp();
-            
-            card = allCards.get(i % allCards.size());
-            result = testBots[0].getHand().contains(card);
-            assertEquals(result, playCard(card), "Card sample " + i);
-            if (result){
-                testFollowingCards(card);
+        setUp();
+        int playerId = 0;
+        while(!testBots[0].getHand().isEmpty()){
+            Deck hand = testBots[playerId].getHand();
+
+            for (Card card : allCards){
+                if (!hand.contains(card)){
+                    assertEquals(false, playCard(card), "Tests correct player to play");
+                }
             }
-            
-            tearDown();
+
+            if (!hasOnlyReds(hand)){
+                for (Card card : hand){
+                    if (card.getSuit().equals(Suit.HEART)){
+                        assertEquals(false, playCard(card),
+                                "Reds must be played last. " + printCardsPlayed()
+                        );
+                    }
+                }
+            }
+
+            Card card = playAnyCard(playerId);
+            leadSuit = card.getSuit();
+            testSuit(playerId, leadSuit);
+            playerId = getNextPlayer();
         }
         
+        tearDown();
     }
     
-    private void testFollowingCards(Card card){
-        Deck cardsToPlay = getCardsToPlay(card);
+    private int getNextPlayer(){
+        int max = -1;
+        int playerId = -1;
         
-        // Tests all cards that can not be played
-        for (int i = 0; i < allCards.size(); i++){
-            Card tmp = allCards.get(i);
-            if (!cardsToPlay.contains(tmp)){
-                assertEquals(false, playCard(tmp), "Cards not to play");
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            Card card = lastPlayedCards[i];
+            if(card.getSuit() == leadSuit && card.getRank().ordinal() > max){
+                max = card.getRank().ordinal();
+                playerId = i;
             }
         }
         
-        // Tests cards supposed to play
-        for (Card tmp : cardsToPlay){
-            assertEquals(true, playCard(tmp), "Cards to play");
+        return playerId;
+    }
+    
+    private void testSuit(int playerId, Suit suit){
+        for (int i = 1; i < NUM_OF_PLAYERS; i++){
+            int index = (playerId + i) % NUM_OF_PLAYERS;
+            Deck hand = testBots[index].getHand();
+            
+            if (hand.contains(suit)){
+                for (Card card : hand){
+                    if (!card.getSuit().equals(suit)){
+                        assertEquals(false, playCard(card), "Testing suit");
+                    }
+                }
+            }
+            
+            playAnyCard(index);
         }
     }
     
-    private Deck getCardsToPlay(Card card){
-        Deck cardsToPlay = new Deck(3);
-        for (int i = 1; i < 4; i++){
-            int rankIndex = card.getRank().ordinal() + i;
-            if (rankIndex >= Rank.values().length){
+    private Card playAnyCard(int playerId){
+        Deck hand = testBots[playerId].getHand();
+        
+        int idx = 0; 
+        Card card = hand.get(idx++);
+        while(!playCard(card)){
+            card = hand.get(idx++);
+        }
+
+        lastPlayedCards[playerId] = card;
+        return card;
+    }
+    
+    private String printCardsPlayed(){
+        String s = "Cards played: ";
+        for (Card card : testBots[0].getCardsPlayed()){
+            s += card.toString() + ", ";
+        }
+        return s;
+    }
+    
+    private boolean hasOnlyReds(Deck deck){
+        boolean ret = true;
+        
+        for (Card card : deck){
+            if (!card.getSuit().equals(Suit.HEART)){
+                ret = false;
                 break;
             }
-            
-            Card tmp = new Card(card.getSuit(), Rank.values()[rankIndex]);
-            if (testBots[0].getCardsPlayed().contains(tmp)){
-                break;
-            }
-            
-            cardsToPlay.addTopCard(tmp);
         }
         
-        return cardsToPlay;
+        return ret;
     }
     
     private boolean playCard(Card card){

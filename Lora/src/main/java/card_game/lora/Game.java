@@ -32,7 +32,6 @@ public class Game {
     private final int DECK_SIZE = 32;
     private final int NUM_OF_PLAYERS = 4;
     private final int NUM_OF_ROUNDS = 4;
-    private final int MAX_NUM_OF_GAMES = 40;
     private final Deck mainDeck = new Deck(DECK_SIZE, true);
     private final Player[] players = new Player[NUM_OF_PLAYERS];
     private final int[] score;

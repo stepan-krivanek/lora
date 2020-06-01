@@ -7,10 +7,13 @@ package card_game.lora;
 
 import card_game.card.Card;
 import card_game.card.Deck;
+import card_game.lora.tactics.RandomTactic;
+import card_game.lora.tactics.Tactic;
 import card_game.lora.game_modes.GameModes;
+import card_game.net.ClientConnection;
+import card_game.net.ClientMessage;
 import card_game.net.ServerMessage;
-import java.util.List;
-import java.util.Random;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,21 +21,111 @@ import java.util.logging.Logger;
  *
  * @author stepa
  */
-public class MpBot extends MpPlayer{
+public class MpBot {
     
+    private final int MSG_SIZE = 10;
     private final int NUM_OF_PLAYERS = 4;
-    private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
-    private final Deck[] memory;
+    protected final Deck[] memory;
+    private final String nickname;
+    protected final int HAND_SIZE = 8;
+    private final Deck hand = new Deck(HAND_SIZE);
     
+    private int id = -1;
+    private boolean isPlaying = false;
     private GameModes gameMode = GameModes.REDS;
-    private Brain brain;
     private boolean awaitingResponse = false;
     private boolean exit = false;
+    private ClientConnection connection;
+    private int round = 0;
     
-    public MpBot(String nickname, Main program) {
-        super(nickname, program);
+    public MpBot(String nickname) {
+        this.nickname = nickname;
         memory = new Deck[NUM_OF_PLAYERS];
         setMemory();
+    }
+    
+    public void play(){
+        isPlaying = true;
+    }
+    
+    public void stopPlaying(){
+        isPlaying = false;
+    }
+    
+    public void playCard(Card card){
+        byte[] data = new byte[MSG_SIZE];
+        data[0] = (byte)ClientMessage.PLAY_CARD.ordinal();
+        data[1] = card.toByte();
+        sendToServer(data);
+    }
+    
+    public void pass(){
+        byte[] data = new byte[MSG_SIZE];
+        data[0] = (byte)ClientMessage.PASS.ordinal();
+        sendToServer(data);
+    }
+    
+    public void chooseGameMode(int id){
+        byte[] data = new byte[MSG_SIZE];
+        data[0] = (byte)ClientMessage.GAME_MODE.ordinal();
+        data[1] = (byte)id;
+        sendToServer(data);
+    }
+    
+    public boolean isPlaying(){
+        return isPlaying;
+    }
+    
+    public void disconnect(){
+        byte[] data = new byte[MSG_SIZE];
+        data[0] = (byte)ClientMessage.DISCONNECT.ordinal();
+        sendToServer(data);
+    }
+    
+    public boolean connectToServer(){
+        connection = new ClientConnection(this);
+        
+        try {
+            id = connection.getInput().readInt();
+            connection.getOutput().writeUTF(nickname);
+            connection.getOutput().flush();
+        } catch (IOException ex) {
+            Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        
+        Thread t = new Thread(connection);
+        t.setName("Thread: connection to server " + id);
+        t.start();
+        return true;
+    }
+    
+    public int getRound(){
+        return round;
+    }
+    
+    public Deck getHand(){
+        return hand;
+    }
+    
+    public String getNickname(){
+        return nickname;
+    }
+    
+    public int getId(){
+        return id;
+    }
+    
+    public void setId(int id){
+        this.id = id;
+    }
+    
+    private void sendToServer(byte[] data){
+        try {
+            connection.getOutput().write(data);
+        } catch (IOException ex) {
+            Logger.getLogger(MpPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private void setMemory(){
@@ -41,23 +134,20 @@ public class MpBot extends MpPlayer{
         }
     }
     
-    @Override
     public void setNames(String[] names){
         // No use for it yet
     }
     
-    @Override
     public void setScore(int[] score){
         // No use for it yet
     }
     
-    @Override
     public void action(byte[] data){
         ServerMessage msg = ServerMessage.values()[data[0]];
         
         switch(msg){
             case START:
-                brain = new Brain();
+                Brain brain = new Brain();
                 Thread t = new Thread(brain);
                 t.setName("Thread: Bot " + getId());
                 t.start();
@@ -97,7 +187,7 @@ public class MpBot extends MpPlayer{
                
             case GAME_MODE:
                 setMemory();
-                gameMode = gameModes.get(data[1]);
+                gameMode = GameModes.values()[data[1]];
                 break;
                 
             case GRADUATION:
@@ -125,83 +215,16 @@ public class MpBot extends MpPlayer{
                 break;
                 
             case ROUND:
-                // No use for it yet
+                round = data[1];
                 break;
         }
-    }
-    
-    private interface Tactic {
-        
-        public String getName();
-        
-        public Card playReds();
-        
-        public Card playSuperiors();
-        
-        public Card playFrla();
-        
-        public Card playAll();
-        
-        public Card playRedking();
-        
-        public Card playTens();
-        
-        public Card playQuarts();
-    }
-    
-    private class RandomTactic implements Tactic {
-        
-        private final Random r = new Random();
-        
-        public String getName(){
-            return "Random";
-        }
-        
-        public Card playReds(){
-            return getHand().get(r.nextInt(getHand().size()));
-        }
-
-        @Override
-        public Card playSuperiors() {
-            return getHand().get(r.nextInt(getHand().size()));
-        }
-
-        @Override
-        public Card playFrla() {
-            return getHand().get(r.nextInt(getHand().size()));
-        }
-
-        @Override
-        public Card playAll() {
-            return getHand().get(r.nextInt(getHand().size()));
-        }
-
-        @Override
-        public Card playRedking() {
-            return getHand().get(r.nextInt(getHand().size()));
-        }
-
-        @Override
-        public Card playTens() {
-            if (r.nextInt(4) == 0){
-                return null;
-            }
-            
-            return getHand().get(r.nextInt(getHand().size()));
-        }
-
-        @Override
-        public Card playQuarts() {
-            return getHand().get(r.nextInt(getHand().size()));
-        }
-        
     }
     
     private class Brain implements Runnable{
 
         @Override
         public void run() {
-            Tactic tactic = new RandomTactic();
+            Tactic tactic = new RandomTactic(MpBot.this);
             
             String msg = "Bot " + getId() + " joins the game.";
             Logger.getLogger(MpBot.class.getName()).log(Level.INFO, msg);

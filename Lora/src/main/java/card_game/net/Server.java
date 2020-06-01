@@ -39,6 +39,7 @@ public class Server implements Runnable{
     
     private boolean exit = false;
     private ServerSocket serverSocket;
+    private int waitTime = 2000;
     
     public Server(int[] score, int gameModeId, int round, boolean singleGame){
         this.gameModeId = gameModeId;
@@ -54,7 +55,7 @@ public class Server implements Runnable{
         } 
     }
     
-    public void acceptConnections(){
+    private void acceptConnections(){
         int connectedPlayers = 0;
         
         while (connectedPlayers < NUM_OF_PLAYERS){
@@ -217,7 +218,7 @@ public class Server implements Runnable{
     }
     
     public void play(int id){
-        GameUtils.wait(2000, (Callable) () -> {
+        GameUtils.wait(waitTime, (Callable) () -> {
             send(initMessage(ServerMessage.PLAY), id);
             return null;
         });
@@ -225,6 +226,10 @@ public class Server implements Runnable{
     
     public void stopPlaying(int id){
         send(initMessage(ServerMessage.STOP_PLAYING), id);
+    }
+    
+    public void setWaitTime(int ms){
+        waitTime = ms;
     }
     
     private void connectionLost(int playerId){

@@ -5,6 +5,7 @@
  */
 package card_game.net;
 
+import card_game.lora.MpBot;
 import card_game.lora.MpPlayer;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -23,13 +24,13 @@ public class ClientConnection implements Runnable {
 
     private final int NUM_OF_PLAYERS = 4;
     private final int MSG_SIZE = 10;
-    private final MpPlayer player;
+    private final MpBot player;
     private InetAddress ipAddress;
     private Socket socket;
     private DataInputStream input;
     private DataOutputStream output;
 
-    public ClientConnection(MpPlayer player){
+    public ClientConnection(MpBot player){
         this.player = player;
 
         try {

@@ -3,41 +3,74 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package card_game.lora;
+package card_game.lora.game_modes;
 
 import card_game.card.Card;
 import card_game.card.Deck;
+import card_game.lora.MpBot;
 import card_game.net.ServerMessage;
-import javafx.application.Platform;
-import javafx.scene.paint.Color;
 
 /**
  *
  * @author stepa
  */
-public class MpPlayer extends MpBot{
+public class TestBot extends MpBot{
     
-    private final GameView gameView;
     private final int NUM_OF_PLAYERS = 4;
+    private final int MAX_CARDS = 32;
+    private final String[] names = new String[NUM_OF_PLAYERS];
     private final int[] score = new int[NUM_OF_PLAYERS];
+    private final Deck cardsPlayed = new Deck(MAX_CARDS);
     
-    public MpPlayer(String nickname, Main program){
+    private GameModes gameMode = GameModes.REDS;
+    private boolean awaitingResponse = false;
+    private int round = 0;
+    private int response = -1;
+    private boolean isReady = false;
+    
+    public TestBot(String nickname) {
         super(nickname);
-        gameView = new GameView(program, this);
     }
-
+    
+    public Deck getCardsPlayed(){
+        return cardsPlayed;
+    }
+    
+    public boolean isReady(){
+        return isReady;
+    }
+    
+    public GameModes getGameMode(){
+        return gameMode;
+    }
+    
+    @Override
+    public int getRound(){
+        return round;
+    }
+    
+    public boolean isAwaitingResponse(){
+        return awaitingResponse;
+    }
+    
+    public int getResponse(){
+        return response;
+    }
+    
+    @Override
+    public void playCard(Card card){
+        awaitingResponse = true;
+        super.playCard(card);
+    }
+    
     @Override
     public void setNames(String[] names){
-        Platform.runLater(() -> {
-            gameView.showNames(names);
-        });
+        System.arraycopy(names, 0, this.names, 0, names.length);
     }
     
     @Override
     public void setScore(int[] score){
-        Platform.runLater(() -> {
-            gameView.updateScore(score);
-        });
+        System.arraycopy(score, 0, this.score, 0, score.length);
     }
     
     @Override
@@ -46,25 +79,17 @@ public class MpPlayer extends MpBot{
         
         switch(msg){
             case START:
-                Platform.runLater(() -> {
-                    gameView.show();
-                });
+                isReady = true;
                 break;
                 
             case EXIT:
                 disconnect();
-                Platform.runLater(() -> {
-                    gameView.exit();
-                });
                 break;
                 
             case CONNECTION_LOST:
                 int pId = data[1];
                 if (pId != getId()){
                     disconnect();
-                    Platform.runLater(() -> {
-                        gameView.connectionLost(pId);
-                    });
                 }
                 break;
                 
@@ -72,10 +97,6 @@ public class MpPlayer extends MpBot{
                 for (int i = 0; i < NUM_OF_PLAYERS; i++){
                     score[i] += data[i+1];
                 }
-                
-                Platform.runLater(() -> {
-                    gameView.updateScore(score);
-                });
                 break;
                 
             case PLAY:
@@ -90,21 +111,16 @@ public class MpPlayer extends MpBot{
                 Card card1 = new Card(data[1]);
                 int playerId = data[2];
                         
-                Platform.runLater(() -> {
-                    gameView.showCard(card1, playerId);
-                });
+                memory[playerId].addTopCard(card1);
+                cardsPlayed.addTopCard(card1);
                 break;
                
             case GAME_MODE:
-                Platform.runLater(() -> {
-                    gameView.setGameMode(data[1]);
-                });
+                gameMode = GameModes.values()[data[1]];
                 break;
                 
             case GRADUATION:
-                Platform.runLater(() -> {
-                    gameView.showGameModeSelection(this);
-                });
+                chooseGameMode(GameModes.QUARTS.ordinal());
                 break;
                 
             case HAND:
@@ -114,37 +130,22 @@ public class MpPlayer extends MpBot{
                     Card card2 = new Card(data[i]);
                     getHand().addTopCard(card2);
                 }
-                
-                Platform.runLater(() -> {
-                    gameView.showHands();
-                });
                 break;
                 
             case PLAY_RESPONSE:
                 Card card3 = new Card(data[1]);
                 int index = getHand().indexOf(card3);
                 
-                if (index == -1){
-                    break;
-                }
-                
-                if (data[2] == 1){
+                if (index != -1 && data[2] == 1){
                     getHand().remove(index);
-                    Platform.runLater(() -> {
-                        gameView.getHandView().removeCard(index);
-                    });
-                } else {
-                    Platform.runLater(() -> {
-                        gameView.getHandView().glowCard(index, Color.RED);
-                    });
                 }
                 
+                response = data[2];
+                awaitingResponse = false;
                 break;
                 
             case ROUND:
-                Platform.runLater(() -> {
-                    gameView.newRound(data[1]);
-                });
+                round = data[1];
                 break;
         }
     }

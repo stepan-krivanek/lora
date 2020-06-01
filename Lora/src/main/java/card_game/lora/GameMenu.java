@@ -7,7 +7,6 @@ package card_game.lora;
 
 import card_game.lora.game_modes.GameModes;
 import card_game.net.Server;
-import java.util.Arrays;
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
@@ -225,7 +224,7 @@ public class GameMenu extends StackPane{
         });
         
         //Create game
-        int[] score = new int[MAX_PLAYERS];
+        int[] score = {100, 100, 100, 100};
         ToggleButton serverButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         serverButton.setText("Create game");
         serverButton.setOnAction(e -> {
@@ -254,7 +253,7 @@ public class GameMenu extends StackPane{
     
     private void chooseGameMode(){
         ModesView modesBox = new ModesView(HEIGHT);
-        int score[] = new int[MAX_PLAYERS];
+        int score[] = {100, 100, 100, 100};
         
         GameModes[] modes = GameModes.values();
         for (int i = 0; i < modes.length; i++){
@@ -370,7 +369,7 @@ public class GameMenu extends StackPane{
     
     private void addBots(int numOfPlayers){
         for (int i = 0; i < MAX_PLAYERS - numOfPlayers;  i++){
-            MpBot bot = new MpBot("Bot" + i, program);
+            MpBot bot = new MpBot("Bot" + i);
             bot.connectToServer();
         }
     }

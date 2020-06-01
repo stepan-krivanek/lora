@@ -16,7 +16,6 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.concurrent.Task;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
@@ -31,9 +30,6 @@ import javafx.stage.Screen;
  */
 public class GameUtils {
     
-    private static final Rectangle2D BOUNDS = Screen.getPrimary().getBounds();
-    private static final double SCREEN_WIDTH = BOUNDS.getWidth();
-    private static final double SCREEN_HEIGHT = BOUNDS.getHeight();
     private static final HashMap<GameModes, Image> MODES_IMAGES = new HashMap();
     private static final HashMap<Rank, Integer> rankValues = new HashMap(){
         {
@@ -128,11 +124,11 @@ public class GameUtils {
     }
     
     public static double getScreenWidth(){
-        return SCREEN_WIDTH;
+        return Screen.getPrimary().getBounds().getWidth();
     }
     
     public static double getScreenHeight(){
-        return SCREEN_HEIGHT;
+        return Screen.getPrimary().getBounds().getHeight();
     }
     
     public static int getRankValue(Rank rank){
@@ -140,7 +136,8 @@ public class GameUtils {
     }
     
     private static Image loadModeImage(String path){
-        return new Image(path, SCREEN_WIDTH / 7, 0, true, true);
+        double screen_width = Screen.getPrimary().getBounds().getWidth();
+        return new Image(path, screen_width / 7, 0, true, true);
     }
     
     private static void initModeImages(){
