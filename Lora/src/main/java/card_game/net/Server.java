@@ -9,7 +9,7 @@ import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.lora.Game;
 import card_game.lora.GameUtils;
-import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.GameMode;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -20,8 +20,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author stepa
+ * Server side communication framework
+ * to receive actions from players
+ * and sends data to them.
+ * 
+ * @author Štěpán Křivánek
  */
 public class Server implements Runnable{
     
@@ -41,10 +44,18 @@ public class Server implements Runnable{
     private ServerSocket serverSocket;
     private int waitTime = 2000;
     
-    public Server(int[] score, int gameModeId, int round, boolean singleGame){
+    /**
+     * Creates a new Server with specified initial settings.
+     * 
+     * @param score The initial score of the game
+     * @param gameModeId The initial game mode of the game
+     * @param round The initial round of the game 
+     * @param singleGameMode True if only one game mode should be played, false otherwise
+     */
+    public Server(int[] score, int gameModeId, int round, boolean singleGameMode){
         this.gameModeId = gameModeId;
         this.round = round;
-        this.singleGame = singleGame;
+        this.singleGame = singleGameMode;
         System.arraycopy(score, 0, this.score, 0, NUM_OF_PLAYERS);
         
         game = new Game(this, score, round);
@@ -141,21 +152,40 @@ public class Server implements Runnable{
         game.start(gameModeId, singleGame);
     }
     
+    /**
+     * Sends that the game is over to all players.
+     */
     public void exit(){
         exit = true;
         broadcast(initMessage(ServerMessage.EXIT));
     }
     
+    /**
+     * Sends a number of a new round to all players.
+     * 
+     * @param round The number of a new round
+     */
     public void newRound(int round){
         byte[] data = initMessage(ServerMessage.ROUND);
         data[1] = (byte)round;
         broadcast(data);
     }
     
+    /**
+     * Sends to a player, that it is graduating.
+     * 
+     * @param playerId Player, who is about to graduate
+     */
     public void graduation(int playerId){
         send(initMessage(ServerMessage.GRADUATION), playerId);
     }
     
+    /**
+     * Sends a card that was played to all players.
+     * 
+     * @param card The card played
+     * @param playerId Id of the player, who played the card
+     */
     public void cardPlayed(Card card, int playerId){
         if (card == null) return;
         logger.log(Level.INFO, "Card {0} played by {1}",
@@ -168,6 +198,14 @@ public class Server implements Runnable{
         broadcast(data);
     }
     
+    /**
+     * Sends a response to a player, if the card requested to
+     * play was played correctly or not.
+     * 
+     * @param card Card requested to play
+     * @param correct True if card was played correctly, false otherwise
+     * @param id Id of the player, who wanted to play the card
+     */
     public void response(Card card, boolean correct, int id){
         if (card == null) return;
         
@@ -177,6 +215,12 @@ public class Server implements Runnable{
         send(data, id);
     }
     
+    /**
+     * Sends the new cards handed over to a player specified.
+     * 
+     * @param deck Deck of cards handed over to the player
+     * @param playerId Id of the player to get the cards
+     */
     public void hand(Deck deck, int playerId){
         byte[] data = initMessage(ServerMessage.HAND);
         
@@ -192,6 +236,13 @@ public class Server implements Runnable{
         send(data, playerId);
     }
     
+    /**
+     * Sends penalties to each player after
+     * game mode is finished.
+     * 
+     * @param penalties An array of penalties
+     * @return False if the penalties array format is wrong, true otherwise
+     */
     public boolean score(int[] penalties){
         int length = penalties.length;
         if (penalties.length != 4){
@@ -208,15 +259,25 @@ public class Server implements Runnable{
         return true;
     }
     
+    /**
+     * Sends a next game mode to play.
+     * 
+     * @param id Id of the game mode
+     */
     public void gameMode(int id){
         byte[] data = initMessage(ServerMessage.GAME_MODE);
         data[1] = (new Integer(id)).byteValue();
         
-        String msg = "Starting game mode " + GameModes.values()[id].toString();
+        String msg = "Starting game mode " + GameMode.values()[id].toString();
         logger.log(Level.INFO, msg);
         broadcast(data);
     }
     
+    /**
+     * Sends to a player that it can play.
+     * 
+     * @param id Id of the player, who is about to play
+     */
     public void play(int id){
         GameUtils.wait(waitTime, (Callable) () -> {
             send(initMessage(ServerMessage.PLAY), id);
@@ -224,10 +285,20 @@ public class Server implements Runnable{
         });
     }
     
+    /**
+     * Sends to a player that it can not play anymore.
+     * 
+     * @param id Id of the player who must stop playing 
+     */
     public void stopPlaying(int id){
         send(initMessage(ServerMessage.STOP_PLAYING), id);
     }
     
+    /**
+     * Sets time to wait before next player can play.
+     * 
+     * @param ms Time to wait in milliseconds
+     */
     public void setWaitTime(int ms){
         waitTime = ms;
     }
@@ -277,7 +348,7 @@ public class Server implements Runnable{
                     }
                     
                     if(msg.equals(ClientMessage.GAME_MODE)){
-                        game.startMode(data[1]);
+                        game.startGraduationMode(data[1]);
                         continue;
                     }
                     

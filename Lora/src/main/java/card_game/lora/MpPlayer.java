@@ -6,14 +6,14 @@
 package card_game.lora;
 
 import card_game.card.Card;
-import card_game.card.Deck;
 import card_game.net.ServerMessage;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 
 /**
- *
- * @author stepa
+ * Communication node between a human player and a server.
+ * 
+ * @author Štěpán Křivánek
  */
 public class MpPlayer extends MpBot{
     
@@ -21,11 +21,22 @@ public class MpPlayer extends MpBot{
     private final int NUM_OF_PLAYERS = 4;
     private final int[] score = new int[NUM_OF_PLAYERS];
     
+    /**
+     * Creates a new MpPlayer with specified nickname.
+     * 
+     * @param nickname Nickname of the player
+     * @param program Application to run at
+     */
     public MpPlayer(String nickname, Main program){
         super(nickname);
         gameView = new GameView(program, this);
     }
 
+    /**
+     * Sets the names of the players in the game view.
+     *  
+     * @param names Names of the players
+     */
     @Override
     public void setNames(String[] names){
         Platform.runLater(() -> {
@@ -33,13 +44,26 @@ public class MpPlayer extends MpBot{
         });
     }
     
+    /**
+     * Sets the initial score of the game in the game view.
+     * 
+     * @param score The initial score
+     */
     @Override
     public void setScore(int[] score){
+        System.arraycopy(score, 0, this.score, 0, score.length);
         Platform.runLater(() -> {
             gameView.updateScore(score);
         });
     }
     
+    /**
+     * Calls a specific action according to the data received.
+     * 
+     * @param data The data received,
+     * must contain ServerMessage id at index 0
+     * @see card_game.net.ServerMessage
+     */
     @Override
     public void action(byte[] data){
         ServerMessage msg = ServerMessage.values()[data[0]];
@@ -103,7 +127,7 @@ public class MpPlayer extends MpBot{
                 
             case GRADUATION:
                 Platform.runLater(() -> {
-                    gameView.showGameModeSelection(this);
+                    gameView.showGameModeSelection();
                 });
                 break;
                 

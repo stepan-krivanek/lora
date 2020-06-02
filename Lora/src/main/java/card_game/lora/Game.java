@@ -13,7 +13,6 @@ import card_game.lora.game_modes.All;
 import card_game.lora.game_modes.FrLa;
 import java.util.List;
 import card_game.lora.game_modes.GameMode;
-import card_game.lora.game_modes.GameModes;
 import card_game.lora.game_modes.Quarts;
 import card_game.lora.game_modes.RedKing;
 import card_game.lora.game_modes.Reds;
@@ -22,35 +21,47 @@ import card_game.lora.game_modes.Tens;
 import card_game.net.Server;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import card_game.lora.game_modes.GameModeInterface;
 
 /**
- *
- * @author stepa
+ * Frame of the whole game that ensures communication
+ * between individual game modes and a server
+ * and applies the frame rules of the game.
+ * 
+ * @author Štěpán Křivánek
  */
 public class Game {
      
     private final int DECK_SIZE = 32;
     private final int NUM_OF_PLAYERS = 4;
     private final int NUM_OF_ROUNDS = 4;
-    private final Deck mainDeck = new Deck(DECK_SIZE, true);
+    private final Deck mainDeck = new Deck(true);
     private final Player[] players = new Player[NUM_OF_PLAYERS];
-    private final int[] score;
+    private final int[] score = new int[NUM_OF_PLAYERS];
     private final List<Suit> suits = GameUtils.getOrderedSuits();
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
-    private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
+    private final List<GameMode> gameModes = GameUtils.getOrderedGamemodes();
     private final Server server;
     
-    private GameMode gameMode;
+    private GameModeInterface gameMode;
     private Player forehand;
     private int round = 0;
     private int gamesPlayedInRound = 0;
     private int graduationAttempt = 0;
     private boolean singleGame = false;
     
+    /**
+     * Creates a new game.
+     * Each instance of the game should only be used once.
+     * 
+     * @param server Server to pass game data to
+     * @param score Initial score of the game
+     * @param round Initial round of the game
+     */
     public Game(Server server, int[] score, int round){
         this.server = server;
-        this.score = score;
         this.round = round;
+        System.arraycopy(score, 0, this.score, 0, score.length);
         
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             players[i] = new Player(this, i);
@@ -59,14 +70,28 @@ public class Game {
         forehand = players[0];
     }
     
-    public void start(int gameModeId, boolean singleGame){
-        this.singleGame = singleGame;
+    /**
+     * Starts a new game.
+     * 
+     * @param gameModeId Game mode to start with
+     * @param singleMode If only one mode should be played 
+     */
+    public void start(int gameModeId, boolean singleMode){
+        this.singleGame = singleMode;
         
         cardDealing();
         setGameMode(gameModeId);
         gameMode.start();
     }
     
+    /**
+     * Passes a card played to the game mode if possible
+     * and sends a message if the play was correct.
+     * Also sends a card played if play was correct.
+     * 
+     * @param card Card to be played
+     * @param playerId Id of a player that played the card
+     */
     public synchronized void playCard(Card card, int playerId){
         Player player = players[playerId];
 
@@ -84,6 +109,13 @@ public class Game {
         }
     }
     
+    /**
+     * Calls the next game mode in order.
+     * Order is specified by game utils.
+     * 
+     * @param deck Deck of ordered cards to play with
+     * @param penalties Penalties received by previous game mode
+     */
     public void nextGameMode(Deck deck, int[] penalties){  
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             players[i].stopPlaying();
@@ -91,12 +123,12 @@ public class Game {
         
         mainDeck.addAll(deck);
         if (mainDeck.size() != DECK_SIZE){
-            GameModes current = gameModes.get(gameMode.getId());
+            GameMode current = gameModes.get(gameMode.getId());
             String msg = "Main deck was corrupted by " + current + ", creating new one.";
             Logger.getLogger(Game.class.getName()).log(Level.WARNING, msg);
             
             mainDeck.clear();
-            Deck tmp = new Deck(DECK_SIZE, true);
+            Deck tmp = new Deck(true);
             for (int i = 0; i < DECK_SIZE; i++){
                 mainDeck.addTopCard(tmp.get(i));
             }
@@ -203,7 +235,12 @@ public class Game {
         }
     }
     
-    public void startMode(int id){
+    /**
+     * Starts a chosen mode for graduation.
+     * 
+     * @param id Id of the mode
+     */
+    public void startGraduationMode(int id){
         setGameMode(id);
         gameMode.start();
     }
@@ -227,7 +264,7 @@ public class Game {
             server.hand(players[i].getHand(), i);
         }
     }
-    
+
     public List<Suit> getSuits(){
         return suits;
     }
@@ -244,6 +281,12 @@ public class Game {
         return NUM_OF_PLAYERS;
     }
     
+    /**
+     * Gets player at specified index.
+     * 
+     * @param index Index of a player
+     * @return Player at index
+     */
     public Player getPlayer(int index){
         index = index % NUM_OF_PLAYERS;
         return players[index];
@@ -253,6 +296,12 @@ public class Game {
         return server;
     }
     
+    /**
+     * Gets the next player after current player.
+     * 
+     * @param player Current player
+     * @return Player after current player
+     */
     public Player getNextPlayer(Player player){
         return  players[(player.getId() + 1) % NUM_OF_PLAYERS];
     }

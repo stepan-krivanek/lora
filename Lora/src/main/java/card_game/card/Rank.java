@@ -6,8 +6,9 @@
 package card_game.card;
 
 /**
- *
- * @author stepa
+ * Enum of 8 different ranks
+ * 
+ * @author Štěpán Křivánek
  */
 public enum Rank {
     SEVEN, EIGHT, NINE, TEN, INFERIOR, SUPERIOR, KING, ACE;

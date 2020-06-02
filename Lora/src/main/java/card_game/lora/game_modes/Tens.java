@@ -13,15 +13,20 @@ import card_game.lora.Player;
 import java.util.List;
 
 /**
- *
- * @author stepa
+ * Game mode Tens in Lóra game.
+ * Player gets one point for each card
+ * left in his hand at the end of the game mode.
+ * The game mode ends when a player has no card
+ * left in his hand.
+ * 
+ * @author Štěpán Křivánek
  */
-public class Tens implements GameMode{
+public class Tens implements GameModeInterface{
     
     private final int NUM_OF_ROWS = 4;
     private final int NUM_OF_COLS = 8;
     private final int DECK_SIZE = 32;
-    private final int id = GameModes.TENS.ordinal();
+    private final int id = GameMode.TENS.ordinal();
     private final Deck cardsPlayed = new Deck(DECK_SIZE);
     private final int[] penalties;
     private final Game game;
@@ -29,6 +34,11 @@ public class Tens implements GameMode{
     private Player player;
     private int cardsPlayedByPlayer = 0;
     
+    /**
+     * Creates a new Tens game mode.
+     * 
+     * @param game Frame game of this mode
+     */
     public Tens(Game game){
         this.game = game;
         penalties = new int[game.getNumOfPlayers()];
@@ -39,7 +49,7 @@ public class Tens implements GameMode{
         player = game.getForehand();
         player.play();
     }
-    
+
     @Override
     public void playCard(Card card, int playerId){
         if (checkRules(card)){
@@ -57,7 +67,7 @@ public class Tens implements GameMode{
             }
         }
     }
-    
+
     @Override
     public boolean checkRules(Card card){
         if (card == null){

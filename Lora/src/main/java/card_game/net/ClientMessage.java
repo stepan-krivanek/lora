@@ -6,9 +6,32 @@
 package card_game.net;
 
 /**
- *
- * @author stepa
+ * Enum of messages to be possibly
+ * send from client to server.
+ * 
+ * @author Štěpán Křivánek
  */
 public enum ClientMessage {
-    PLAY_CARD, PASS, GAME_MODE, DISCONNECT;
+
+    /**
+     * Signals card, that player wants to play.
+     * The card follows.
+     */
+    PLAY_CARD,
+
+    /**
+     * Signals that the player finished its turn.
+     */
+    PASS,
+
+    /**
+     * Signals game mode chosen for graduation.
+     * The game mode id follows.
+     */
+    GAME_MODE,
+
+    /**
+     * Signals that player has exit the game.
+     */
+    DISCONNECT;
 }

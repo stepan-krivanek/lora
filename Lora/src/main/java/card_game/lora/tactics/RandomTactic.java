@@ -10,18 +10,25 @@ import card_game.lora.MpBot;
 import java.util.Random;
 
 /**
- *
- * @author stepa
+ * Tactic for a Lóra bot
+ * to play random cards.
+ * 
+ * @author Štěpán Křivánek
  */
-public class RandomTactic implements Tactic{
+public class RandomTactic implements TacticInterface{
     
     private final Random r = new Random();
     private final MpBot bot;    
     
+    /**
+     * Creates a new RandomTactic.
+     * 
+     * @param bot Bot which is about to use this tactic
+     */
     public RandomTactic(MpBot bot){
         this.bot = bot;
     }
-    
+
     @Override
     public String getName(){
         return "Random";

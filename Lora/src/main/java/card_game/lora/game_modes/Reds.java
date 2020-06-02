@@ -11,14 +11,22 @@ import card_game.card.Suit;
 import card_game.lora.Game;
 
 /**
- *
- * @author stepa
+ * Game mode Reds in Lóra game.
+ * Player gets a penalty point for each
+ * card of suit heart in a taken trick.
+ * 
+ * @author Štěpán Křivánek
  */
-public class Reds extends Minigame implements GameMode{
+public class Reds extends Minigame implements GameModeInterface{
 
     private final int NUM_OF_PLAYERS;
-    private final int id = GameModes.REDS.ordinal();
+    private final int id = GameMode.REDS.ordinal();
     
+    /**
+     * Creates a new Reds game mode.
+     * 
+     * @param game Frame game of this mode
+     */
     public Reds(Game game){
         super(game);
         NUM_OF_PLAYERS = game.getNumOfPlayers();
@@ -55,7 +63,7 @@ public class Reds extends Minigame implements GameMode{
     }
     
     @Override
-    public void end(){
+    protected void end(){
         for (int i = 0; i < penalties.length; i++){
             int reds = 0;
             for (Card card : game.getPlayer(i).getTable()){

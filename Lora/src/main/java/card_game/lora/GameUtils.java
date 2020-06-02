@@ -7,7 +7,7 @@ package card_game.lora;
 
 import card_game.card.Rank;
 import card_game.card.Suit;
-import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.GameMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,12 +25,13 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.stage.Screen;
 
 /**
- *
- * @author stepa
+ * Game utils to support the core needs of the game.
+ * 
+ * @author Štěpán Křivánek
  */
 public class GameUtils {
     
-    private static final HashMap<GameModes, Image> MODES_IMAGES = new HashMap();
+    private static final HashMap<GameMode, Image> MODES_IMAGES = new HashMap();
     private static final HashMap<Rank, Integer> rankValues = new HashMap(){
         {
             put(Rank.SEVEN, 0);
@@ -48,6 +49,14 @@ public class GameUtils {
     
     private GameUtils(){}
     
+    /**
+     * Loads a background with prespecified parameters.
+     * 
+     * @param path Path to load the background from
+     * @param width Width of the background
+     * @param height Height of the background
+     * @return Background
+     */
     public static Background loadBackground(
             String path, double width, double height)
     {
@@ -71,18 +80,34 @@ public class GameUtils {
         return new Background(bcgrImage);
     }
     
+    /**
+     * Preloads images when the speed doesn't matter
+     * to speed up the actual loading later on.
+     */
     public static void preloadImages(){
         initModeImages();
         imagesLoaded = true;
     }
     
-    public static Image getModeImage(GameModes gameMode){
+    /**
+     * Gets an image of a game mode.
+     * 
+     * @param gameMode Game mode to get image of
+     * @return Image of the game mode
+     */
+    public static Image getModeImage(GameMode gameMode){
         if (!imagesLoaded){
             preloadImages();
         }
         return MODES_IMAGES.get(gameMode);
     }
     
+    /**
+     * Calls a function after a delay.
+     * 
+     * @param ms Delay in milliseconds
+     * @param function Function to be called after the delay
+     */
     public static void wait(int ms, Callable function){
         Task<Void> wait = new Task<Void>() {
             @Override
@@ -107,8 +132,8 @@ public class GameUtils {
         t.start();
     }
     
-    public static List<GameModes> getOrderedGamemodes(){
-        return Collections.unmodifiableList(Arrays.asList(GameModes.values()));
+    public static List<GameMode> getOrderedGamemodes(){
+        return Collections.unmodifiableList(Arrays.asList(GameMode.values()));
     }
     
     public static List<Suit> getOrderedSuits(){
@@ -131,6 +156,12 @@ public class GameUtils {
         return Screen.getPrimary().getBounds().getHeight();
     }
     
+    /**
+     * Gets the value of a rank.
+     * 
+     * @param rank Rank to get value of
+     * @return Int value of the rank
+     */
     public static int getRankValue(Rank rank){
         return rankValues.get(rank);
     }
@@ -142,12 +173,12 @@ public class GameUtils {
     
     private static void initModeImages(){
         final String modes = "/images/modes/";
-        MODES_IMAGES.put(GameModes.REDS, loadModeImage(modes + "reds.png"));
-        MODES_IMAGES.put(GameModes.SUPERIORS, loadModeImage(modes + "superiors.png"));
-        MODES_IMAGES.put(GameModes.FRLA, loadModeImage(modes + "fr-la.png"));
-        MODES_IMAGES.put(GameModes.ALL, loadModeImage(modes + "all.png"));
-        MODES_IMAGES.put(GameModes.RED_KING, loadModeImage(modes + "red_king.png"));
-        MODES_IMAGES.put(GameModes.TENS, loadModeImage(modes + "tens.png"));
-        MODES_IMAGES.put(GameModes.QUARTS, loadModeImage(modes + "quarts.png"));
+        MODES_IMAGES.put(GameMode.REDS, loadModeImage(modes + "reds.png"));
+        MODES_IMAGES.put(GameMode.SUPERIORS, loadModeImage(modes + "superiors.png"));
+        MODES_IMAGES.put(GameMode.FRLA, loadModeImage(modes + "fr-la.png"));
+        MODES_IMAGES.put(GameMode.ALL, loadModeImage(modes + "all.png"));
+        MODES_IMAGES.put(GameMode.RED_KING, loadModeImage(modes + "red_king.png"));
+        MODES_IMAGES.put(GameMode.TENS, loadModeImage(modes + "tens.png"));
+        MODES_IMAGES.put(GameMode.QUARTS, loadModeImage(modes + "quarts.png"));
     }
 }

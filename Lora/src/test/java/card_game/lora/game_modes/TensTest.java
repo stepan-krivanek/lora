@@ -13,37 +13,39 @@ import card_game.net.Server;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- *
- * @author stepa
+ * Unit tests for game mode Tens.
+ * Tests all cards that can not be played;
+ * all cards that can be played;
+ * players that can not play;
+ * player that can play;
+ * players that can not pass;
+ * player that can pass
+ * 
+ * @author Štěpán Křivánek
  */
 public class TensTest {
     
     private final int NUM_OF_PLAYERS = 4;
     private final int[] score = {0,0,0,0};
-    private final int gameMode = GameModes.TENS.ordinal();
+    private final int gameMode = GameMode.TENS.ordinal();
     private final int round = 0;
     private final boolean singleGame = true;
     private final TestBot[] testBots = new TestBot[NUM_OF_PLAYERS];
-    private final Deck allCards = new Deck(32, true);
     
+    /**
+     * Creates a new Tens test.
+     */
     public TensTest() {
     }
     
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
+    /**
+     * Sets up a server with a game and 4 test bots to play the game.
+     */
     @BeforeEach
     public void setUp() {
         Server server = new Server(score, gameMode, round, singleGame);
@@ -76,6 +78,9 @@ public class TensTest {
         }
     }
     
+    /**
+     * Diconnects all bots from the game, which ends tha game and server too.
+     */
     @AfterEach
     public void tearDown() {
         for (TestBot testBot : testBots){

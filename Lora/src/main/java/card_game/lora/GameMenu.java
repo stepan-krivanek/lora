@@ -5,7 +5,7 @@
  */
 package card_game.lora;
 
-import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.GameMode;
 import card_game.net.Server;
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ObservableValue;
@@ -24,8 +24,9 @@ import javafx.stage.Screen;
 import javafx.util.Duration;
 
 /**
- *
- * @author stepan
+ * Main game menu for the game Lóra
+ * 
+ * @author Štěpán Křivánek
  */
 public class GameMenu extends StackPane{
     
@@ -40,6 +41,12 @@ public class GameMenu extends StackPane{
      
     private int numOfPlayers = -1;
     
+    /**
+     * Creates a game menu for the application program.
+     * 
+     * @param program Application to create menu for
+     * @param nickname Nickname of the player
+     */
     public GameMenu(Main program, String nickname){
         this.program = program;
         
@@ -255,7 +262,7 @@ public class GameMenu extends StackPane{
         ModesView modesBox = new ModesView(HEIGHT);
         int score[] = {100, 100, 100, 100};
         
-        GameModes[] modes = GameModes.values();
+        GameMode[] modes = GameMode.values();
         for (int i = 0; i < modes.length; i++){
             final int num = i;
             modesBox.getModeBox(modes[i]).setOnMouseClicked(e -> {

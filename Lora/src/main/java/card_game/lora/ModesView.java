@@ -5,7 +5,7 @@
  */
 package card_game.lora;
 
-import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.GameMode;
 import java.util.ArrayList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,15 +18,22 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 /**
- *
- * @author stepa
+ * View of all the game modes in the game.
+ * Can be used to pick a mode.
+ * 
+ * @author Štepán Křivánek
  */
 public class ModesView extends VBox{
     
     private final ArrayList<VBox> modeBoxes = new ArrayList<>();
     
+    /**
+     * Creates a table view of modes.
+     * 
+     * @param height Height of the table
+     */
     public ModesView(double height){
-        final int numOfModes = GameModes.values().length;
+        final int numOfModes = GameMode.values().length;
         final int topModes = numOfModes / 2;
 
         final double windowHeight = height / 3;
@@ -50,7 +57,7 @@ public class ModesView extends VBox{
         );
         
         for (int i = 0; i < numOfModes; i++){
-            GameModes gameMode = GameModes.values()[i];
+            GameMode gameMode = GameMode.values()[i];
             //-----------------Icon--------------------
             ImageView modeIcon = new ImageView(
                     GameUtils.getModeImage(gameMode)
@@ -92,7 +99,14 @@ public class ModesView extends VBox{
         this.setAlignment(Pos.CENTER);
     }
     
-    public VBox getModeBox(GameModes mode){
+    /**
+     * Returns the box of a specified game mode,
+     * so one can apply an action to it or edit it.
+     * 
+     * @param mode Game mode of the box wanted
+     * @return VBox of the game mode specified
+     */
+    public VBox getModeBox(GameMode mode){
         return modeBoxes.get(mode.ordinal());
     }
 }

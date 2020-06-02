@@ -5,7 +5,7 @@
  */
 package card_game.lora;
 
-import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.GameMode;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,8 +33,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 /**
- *
- * @author stepa
+ * GUI with the saved games.
+ * 
+ * @author Štěpán Křivánek
  */
 public class SavedGames extends VBox{
     
@@ -43,6 +44,13 @@ public class SavedGames extends VBox{
     private final SaveBox[] saveBoxes = new SaveBox[ROWS * COLS];
     private final StackPane stack;
     
+    /**
+     * Creates a new GUI with saved games.
+     * 
+     * @param width Width of the GUI
+     * @param height Height of the GUI
+     * @param stack StackPane to be placed
+     */
     public SavedGames(double width, double height, StackPane stack){
         this.stack = stack;
         
@@ -104,10 +112,19 @@ public class SavedGames extends VBox{
         )));
     }
     
+    /**
+     * Gets the save boxes to apply actions
+     * or for further editation.
+     * 
+     * @return Array of boxes with saved games
+     */
     public SaveBox[] getSaveBoxes(){
         return saveBoxes;
     }
     
+    /**
+     * Shows this GUI.
+     */
     public void show(){
         stack.getChildren().add(this);
     }
@@ -116,6 +133,10 @@ public class SavedGames extends VBox{
         stack.getChildren().remove(this);
     }
     
+    /**
+     * Box containing all information about a saved game,
+     * and button to delete the saved game.
+     */
     public class SaveBox extends HBox{
         
         private final int NUM_OF_PLAYERS = 4;
@@ -130,6 +151,13 @@ public class SavedGames extends VBox{
         private boolean isEmpty = true;
         private int gameModeId = 0;
         
+        /**
+         * Creates a new box with a saved game at specified index.
+         * 
+         * @param width Box width
+         * @param height Box height
+         * @param index Index of the saved game
+         */
         public SaveBox(double width, double height, int index){
             this.width = width;
             this.height = height;
@@ -172,8 +200,15 @@ public class SavedGames extends VBox{
             }
         }
         
-        
-        public void save(String[] names, int[] score, GameModes gameMode, int round){
+        /**
+         * Saves a game with the specified parameters.
+         * 
+         * @param names Names of the players in the game
+         * @param score Score of the player.
+         * @param gameMode Current game mode to play
+         * @param round Current round of the game
+         */
+        public void save(String[] names, int[] score, GameMode gameMode, int round){
             for (int i = 0; i < NUM_OF_PLAYERS; i++){
                 this.names[i].setText(names[i]);
                 this.score[i].setText(Integer.toString(score[i]));
@@ -214,14 +249,25 @@ public class SavedGames extends VBox{
             }
         }
         
+        /**
+         * @return Round of the saved game
+         */
         public int getRound(){
             return Integer.parseInt(round.getText());
         }
         
+        /**
+         *
+         * @return Game mode of the saved game
+         */
         public int getMode(){
             return gameModeId;
         }
         
+        /**
+         *
+         * @return Score of the saved game
+         */
         public int[] getScore(){
             int[] intScore = new int[NUM_OF_PLAYERS];
             for (int i = 0; i < NUM_OF_PLAYERS; i++){
@@ -230,6 +276,10 @@ public class SavedGames extends VBox{
             return intScore;
         }
         
+        /**
+         *
+         * @return True if no game is saved under the box' index, false otherwise
+         */
         public boolean isEmpty(){
             return isEmpty;
         }
@@ -328,7 +378,7 @@ public class SavedGames extends VBox{
                 Scanner scanner = new Scanner(file);
                 
                 gameModeId = Integer.parseInt(scanner.nextLine());
-                gameMode.setText(GameModes.values()[gameModeId].toString());
+                gameMode.setText(GameMode.values()[gameModeId].toString());
                 round.setText(scanner.nextLine());
                 
                 for (int i = 0; i < NUM_OF_PLAYERS; i++){

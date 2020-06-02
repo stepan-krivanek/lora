@@ -9,7 +9,7 @@ import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.card.Rank;
 import card_game.card.Suit;
-import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.GameMode;
 import card_game.net.ClientConnection;
 import java.util.List;
 import java.util.Random;
@@ -37,13 +37,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
 
 /**
- *
- * @author stepan
+ *  The view of the game Lóra.
+ * 
+ * @author Štěpán Křivánek
  */
 public class GameView extends StackPane{
     
@@ -55,7 +55,7 @@ public class GameView extends StackPane{
     private final double CARD_HEIGHT;// = HEIGHT / 5;
     private final List<Suit> suits = GameUtils.getOrderedSuits();
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
-    private final List<GameModes> gameModes = GameUtils.getOrderedGamemodes();
+    private final List<GameMode> gameModes = GameUtils.getOrderedGamemodes();
     private final LoadingScreen loadingScreen;
     private final StackPane hands;
     private final StackPane playGround = new StackPane();
@@ -74,9 +74,15 @@ public class GameView extends StackPane{
     private TableGUI tableGUI = null;
     private HandView primaryHand;
     private Rectangle playZone;
-    private GameModes gameMode = GameModes.REDS;
+    private GameMode gameMode = GameMode.REDS;
     private int round = 0;
     
+    /**
+     * Creates a new game view for the specified player.
+     * 
+     * @param program Application with this view
+     * @param player Player for whom the game view is
+     */
     public GameView(Main program, MpPlayer player){
         ///For testing
         
@@ -141,7 +147,7 @@ public class GameView extends StackPane{
         /////////////////////////////////////////////////////////////
         
         //-------------------------Game mode-------------------------
-        modeText = new Text(GameModes.REDS.toString());
+        modeText = new Text(GameMode.REDS.toString());
         modeText.setFont(Design.Font(HEIGHT / 10));
         
         HBox modeBox = new HBox(modeText);
@@ -220,15 +226,26 @@ public class GameView extends StackPane{
         return new ImagePattern(new Image(path));
     }
     
+    /**
+     * Shows the game view.
+     */
     public void show(){
         loadingScreen.hide();
         program.getRoot().getChildren().add(this);
     }
     
+    /**
+     * Shows a new round.
+     * 
+     * @param round Number of the round.
+     */
     public void newRound(int round){
         this.round = round;
     }
     
+    /**
+     * Shows hands of all players.
+     */
     public void showHands(){
         playGround.getChildren().removeAll(primaryHand, playZone);
         hands.getChildren().clear();
@@ -302,6 +319,11 @@ public class GameView extends StackPane{
         playGround.getChildren().addAll(primaryHand, playZone);
     }
     
+    /**
+     * Updates the score of the game.
+     * 
+     * @param score New score
+     */
     public void updateScore(int[] score){
         this.score = score;
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
@@ -309,13 +331,17 @@ public class GameView extends StackPane{
         }
     }
     
-    public void showGameModeSelection(MpPlayer player){
+    /**
+     * Show the game mode selection to the player.
+     * Used before graduation.
+     */
+    public void showGameModeSelection(){
         Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.GREY);
         rect.setOpacity(0.2);
         
         ModesView modesBox = new ModesView(playGround.getHeight());
         
-        GameModes[] modes = GameModes.values();
+        GameMode[] modes = GameMode.values();
         for (int i = 0; i < modes.length; i++){
             final int num = i;
             modesBox.getModeBox(modes[i]).setOnMouseClicked(e -> {
@@ -327,10 +353,19 @@ public class GameView extends StackPane{
         this.getChildren().addAll(rect, modesBox);
     }
     
+    /**
+     * Shows the animation of card dealing (Not implemented yet).
+     */
     public void cardDealing(){
-        
+        // Not implemented yet
     }
     
+    /**
+     * Shows the card played;
+     * 
+     * @param card The card played
+     * @param playerId Player, who played the card
+     */
     public void showCard(Card card, int playerId){
         if (playerId != player.getId()){
             int idx = playerId + NUM_OF_PLAYERS - player.getId();
@@ -341,6 +376,11 @@ public class GameView extends StackPane{
         tableGUI.showCard(card, playerId);
     }
     
+    /**
+     * Sets a new game mode.
+     * 
+     * @param id Id of teh game mode
+     */
     public void setGameMode(int id){
         gameMode = gameModes.get(id);
         saved = false;
@@ -363,33 +403,39 @@ public class GameView extends StackPane{
         modeText.setText(gameModes.get(id).toString());
     }
     
-    public void showWinner(int id){
-        Text winner = new Text("The winner is player number " + id);
-        Font font = new Font(40);
-        winner.setFont(font);
-        GameView.setAlignment(winner, Pos.TOP_CENTER);
-        
-        Rectangle rect = new Rectangle(WIDTH, HEIGHT);
-        rect.setOpacity(0);
-        
-        getChildren().addAll(rect, winner);
-    }
-    
+    /**
+     * Shows that connection was lost and the player must quit the game.
+     * 
+     * @param playerId Player who has been disconnected from the game.
+     */
     public void connectionLost(int playerId){
         Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.GREY);
         rect.setOpacity(0.2);
         
-        String msg = "Player " + playerId + " has left the game, connection Lost!";
+        String msg = names[playerId] + " has left the game, connection Lost!";
         Text text = new Text(msg);
         text.setFont(Design.Font(40));
         
-        ToggleButton exitButton = new Design.Button(WIDTH / 5, HEIGHT / 10);
+        final double buttonWidth = WIDTH / 5;
+        final double buttonHeight = HEIGHT / 10;
+        
+        ToggleButton saveButton = new Design.Button(buttonWidth, buttonHeight);
+        saveButton.setText("Save");
+        saveButton.setOnAction(e -> {
+            saveGame();
+        });
+        
+        ToggleButton exitButton = new Design.Button(buttonWidth, buttonHeight);
         exitButton.setText("Exit");
         exitButton.setOnAction(e -> {
             exit();
         });
         
-        VBox alertBox = new VBox(text, exitButton);
+        HBox buttonBox = new HBox(exitButton, saveButton);
+        buttonBox.setAlignment(Pos.CENTER);
+        buttonBox.setSpacing(buttonWidth / 2);
+        
+        VBox alertBox = new VBox(text, buttonBox);
         alertBox.setAlignment(Pos.CENTER);
         alertBox.setSpacing(HEIGHT / 5);
         
@@ -417,6 +463,11 @@ public class GameView extends StackPane{
         return personalBox;
     }
     
+    /**
+     * Shows the names of the players.
+     * 
+     * @param names Names of the players
+     */
     public void showNames(String[] names){
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             this.names[i] = names[i];
@@ -450,6 +501,9 @@ public class GameView extends StackPane{
         }
     }
     
+    /**
+     * Destroys the game view and sets back a game menu.
+     */
     public void exit(){
         player.disconnect();
         program.setMainMenu();
@@ -457,6 +511,10 @@ public class GameView extends StackPane{
         System.gc();
     }
     
+    /**
+     * @return Hand view of the player
+     * @see card_game.lora.HandView
+     */
     public HandView getHandView(){
         return primaryHand;
     }

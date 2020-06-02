@@ -17,8 +17,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author stepa
+ * Client side conection framework to connect to the server,
+ * reveive data from it and send data to it.
+ * 
+ * @author Štěpán Křivánek
  */
 public class ClientConnection implements Runnable {
 
@@ -30,6 +32,11 @@ public class ClientConnection implements Runnable {
     private DataInputStream input;
     private DataOutputStream output;
 
+    /**
+     * Creates new connection for the specified MpPlayer.
+     * 
+     * @param player Player to be connected to the server
+     */
     public ClientConnection(MpBot player){
         this.player = player;
 
@@ -48,10 +55,18 @@ public class ClientConnection implements Runnable {
         }
     }
 
+    /**
+     *
+     * @return Input stream to receive data
+     */
     public DataInputStream getInput(){
         return input;
     }
 
+    /**
+     *
+     * @return Output stream to send data
+     */
     public DataOutputStream getOutput(){
         return output;
     }

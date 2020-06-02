@@ -16,8 +16,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- *
- * @author stepa
+ * Alert box for message confirmation.
+ * 
+ * @author Štěpán Křivánek
  */
 public class ExitAlertBox {
     
@@ -28,6 +29,14 @@ public class ExitAlertBox {
     
     private ExitAlertBox(){}
     
+    /**
+     * Triggers the allert box and displays a message.
+     * Freezes a program until this alert box is finished.
+     * 
+     * @param program Program to be frozen
+     * @param message Message to display
+     * @return True on "yes" answer, false on "no" answer
+     */
     public static boolean display(Main program, String message){
         Stage exitStage = new Stage();
         exitStage.setTitle("Exit");

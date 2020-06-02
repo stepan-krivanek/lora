@@ -9,13 +9,20 @@ import card_game.card.Card;
 import card_game.lora.Game;
 
 /**
- *
- * @author stepa
+ * Game mode All in Lóra game.
+ * Player gets one penalty point for each trick taken.
+ * 
+ * @author Štěpán Křivánek
  */
-public class All extends Minigame implements GameMode{
+public class All extends Minigame implements GameModeInterface{
     
-    private final int id = GameModes.ALL.ordinal();
+    private final int id = GameMode.ALL.ordinal();
     
+    /**
+     * Creates the game mode All.
+     * 
+     * @param game Frame game of this mode
+     */
     public All(Game game){
         super(game);
     }
@@ -42,13 +49,14 @@ public class All extends Minigame implements GameMode{
     }
     
     @Override
-    public void end(){
-        for (int id : getTrickTakers()){
-            penalties[id] += 1;
+    protected void end(){
+        for (int playerId : getTrickTakers()){
+            penalties[playerId] += 1;
         }
         
         super.end();
     }
+
 
     @Override
     public int getId() {

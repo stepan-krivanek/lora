@@ -16,14 +16,19 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 
 /**
- *
- * @author stepa
+ * Class contaning the core design elements for the game.
+ * 
+ * @author Štěpán Křivánek
  */
 public class Design {
     
+    /**
+     * Enum of core colors used in the game.
+     */
     public static enum Colour {
-        BLUE("#7997A0"), GREY("#AAAFA1"), YELLOW("#B07437"),
-        BROWN("#46362F"), ORANGE("#965629");
+
+        BLUE("#7997A0"),GREY("#AAAFA1"),YELLOW("#B07437"),
+        BROWN("#46362F"),ORANGE("#965629");
         
         private final String name;
         private Colour(String name){
@@ -42,6 +47,12 @@ public class Design {
     public static final Paint ORANGE = Color.web(Colour.ORANGE.toString());
     public static final Paint BROWN = Color.web(Colour.BROWN.toString());
     
+    /**
+     * Gets the font used in the game.
+     * 
+     * @param size Size of the font
+     * @return Font
+     */
     public static Font Font(double size){
         try {
             File file = new File("src/main/resources/fonts/IMFellEnglish-Regular.ttf");
@@ -53,8 +64,17 @@ public class Design {
         return Font.font("Verdana", size);
     }
     
+    /**
+     * Predefined buttons for the game.
+     */
     public static class Button extends ToggleButton { 
         
+        /**
+         * Creates the predefined button.
+         * 
+         * @param width Width of the button
+         * @param height Height of the button
+         */
         public Button(double width, double height) {
             this.setBackground(GameUtils.loadBackground(
                     "/images/button4.png", width, height)
@@ -78,5 +98,4 @@ public class Design {
     }
     
     private Design(){}
-    
 }

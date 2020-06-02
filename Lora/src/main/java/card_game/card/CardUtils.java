@@ -10,8 +10,10 @@ import java.util.HashMap;
 import javafx.scene.image.Image;
 
 /**
- *
- * @author stepa
+ * Card utils to support the basic methods
+ * for cards.
+ * 
+ * @author Štěpán Křivánek
  */
 public class CardUtils {
     
@@ -26,6 +28,12 @@ public class CardUtils {
     
     private CardUtils(){}
     
+    /**
+     * Gets front image for a card.
+     * 
+     * @param card Card to get the front image of
+     * @return Front image of the card
+     */
     public static Image getFrontImage(Card card){
         if (!imagesLoaded){
             preloadImages();
@@ -33,10 +41,20 @@ public class CardUtils {
         return  FRONT_IMAGES.get(card.getSuit()).get(card.getRank());
     }
     
+    /**
+     * Gets the back image of a card.
+     * 
+     * @return Back image of a card
+     */
     public static Image getBackImage(){
         return BACK_IMAGE;
     }
     
+    /**
+     * Preloads images of all cards.
+     * Used to speed up the actual image
+     * loading when the speed doesn't matter.
+     */
     public static void preloadImages(){
         initFrontImages();
         imagesLoaded = true;

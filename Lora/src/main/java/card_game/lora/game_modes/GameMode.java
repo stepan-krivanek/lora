@@ -5,19 +5,23 @@
  */
 package card_game.lora.game_modes;
 
-import card_game.card.Card;
-
 /**
- *
- * @author stepa
+ * Enum of game modes in game Lóra.
+ *  
+ * @author Štěpán Křivánek
  */
-public interface GameMode {
+public enum GameMode {
+
+    REDS("Reds"), SUPERIORS("Superiors"), FRLA("First-Last"), ALL("All"),
+    RED_KING("Red King"), TENS("Tens"), QUARTS("Quarts");
     
-    public void start();
-    
-    public void playCard(Card card, int playerId);
- 
-    public boolean checkRules(Card card);
-    
-    public int getId();
+    private final String name;
+    private GameMode(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString(){
+        return name;
+    }
 }

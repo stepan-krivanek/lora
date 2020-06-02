@@ -9,13 +9,22 @@ import card_game.card.Card;
 import card_game.lora.Game;
 
 /**
- *
- * @author stepa
+ * Game mode First-Last in Lóra game.
+ * Player who takes the first trick gets
+ * four penalty points. The same goes for
+ * the player who takes the last trick.
+ * 
+ * @author Štěpán Křivánek
  */
-public class FrLa extends Minigame implements GameMode{
+public class FrLa extends Minigame implements GameModeInterface{
     
-    private final int id = GameModes.FRLA.ordinal();
+    private final int id = GameMode.FRLA.ordinal();
     
+    /**
+     * Creates a new First-Last game mode.
+     * 
+     * @param game Frame game of this mode
+     */
     public FrLa(Game game){
         super(game);
     }
@@ -42,7 +51,7 @@ public class FrLa extends Minigame implements GameMode{
     }
 
     @Override
-    public void end(){
+    protected void end(){
         int[] trickTakers = getTrickTakers();
         penalties[trickTakers[0]] += 4;
         penalties[trickTakers[trickTakers.length - 1]] += 4;

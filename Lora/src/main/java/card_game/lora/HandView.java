@@ -19,8 +19,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
 /**
- *
- * @author stepa
+ * Fancy view of the cards in a player's hand.
+ * 
+ * @author Štepán Křivánek
  */
 public class HandView extends GridPane{
     
@@ -29,6 +30,13 @@ public class HandView extends GridPane{
     private final double toRadians = (Math.PI / 180);
     private final ArrayList<CardView> cards;
     
+    /**
+     * Creates a fancy fan of cards with front images of player's cards.
+     * 
+     * @param player Player, whose hand view it is
+     * @param width Width of the hand view
+     * @param height Height of the hand view
+     */
     public HandView(MpPlayer player, double width, double height){
         Deck deck = player.getHand();
         CARD_WIDTH = width / 10;
@@ -66,6 +74,13 @@ public class HandView extends GridPane{
         this.applyRotation();
     }
     
+    /**
+     * Creates a fancy fan of cards with back images of cards.
+     * 
+     * @param size Number of cards in the fan
+     * @param width Width of the hand view
+     * @param height Height of the hand view
+     */
     public HandView(int size, double width, double height){
         CARD_WIDTH = width / 10;
         CARD_HEIGHT = height / 3;
@@ -95,6 +110,13 @@ public class HandView extends GridPane{
         this.applyRotation();
     }
     
+    /**
+     * Creates a glow around a card with specified color.
+     * 
+     * @param index Index of a card to glow
+     * @param color Color of the glow
+     * @return False if the index is out of bounds, otherwise true on success
+     */
     public boolean glowCard(int index, Color color){
         if (index >= cards.size() || index < 0){
             return false;
@@ -104,6 +126,13 @@ public class HandView extends GridPane{
         return true;
     }
     
+    /**
+     * Removes a card from hand view at specified index
+     * and recalculates the rotation of the fan.
+     * 
+     * @param index Index of a card to be removed
+     * @return False if the index is out of bounds, otherwise true on success
+     */
     public boolean removeCard(int index){
         if (index >= cards.size() || index < 0){
             return false;
@@ -182,11 +211,11 @@ public class HandView extends GridPane{
             return borderGlow;
         }
     }
-    
+
     public double getCardWidth(){
         return CARD_WIDTH;
     }
-    
+
     public double getCardHeight(){
         return CARD_HEIGHT;
     }

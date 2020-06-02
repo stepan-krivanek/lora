@@ -15,14 +15,19 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
- *
- * @author stepa
+ * Game mode Quarts in Lóra game.
+ * Player gets one penalty point for each
+ * card left in its hand.
+ * Game mode ends when a player has
+ * no card left in his hand.
+ * 
+ * @author Štěpán Křivánek
  */
-public class Quarts implements GameMode{
+public class Quarts implements GameModeInterface{
 
     private final int MAX_CARDS = 32;
     private final int DECK_SIZE = 4;
-    private final int id = GameModes.QUARTS.ordinal();
+    private final int id = GameMode.QUARTS.ordinal();
     private final List<Rank> ranks = GameUtils.getOrderedRanks();
     private final Deck cardsPlayed = new Deck(MAX_CARDS);
     private final Deck discardDeck = new Deck(DECK_SIZE);
@@ -32,10 +37,15 @@ public class Quarts implements GameMode{
     private Player first;
     private int cardsToPlay;
     
+    /**
+     * Creates a new Quarts game mode.
+     * 
+     * @param game Frame game of this mode
+     */
     public Quarts(Game game){
         this.game = game;
     }
-    
+
     @Override
     public void start() {
         first = game.getForehand();
@@ -156,7 +166,7 @@ public class Quarts implements GameMode{
         int leadCardIndex = game.getRanks().indexOf(leadCard.getRank());
         return cardIndex - leadCardIndex;
     }
-    
+
     @Override
     public int getId() {
         return id;

@@ -22,57 +22,101 @@ public class TestBot extends MpBot{
     private final int[] score = new int[NUM_OF_PLAYERS];
     private final Deck cardsPlayed = new Deck(MAX_CARDS);
     
-    private GameModes gameMode = GameModes.REDS;
+    private GameMode gameMode = GameMode.REDS;
     private boolean awaitingResponse = false;
     private int round = 0;
     private int response = -1;
     private boolean isReady = false;
     
+    /**
+     *
+     * @param nickname
+     */
     public TestBot(String nickname) {
         super(nickname);
     }
     
+    /**
+     *
+     * @return
+     */
     public Deck getCardsPlayed(){
         return cardsPlayed;
     }
     
+    /**
+     *
+     * @return
+     */
     public boolean isReady(){
         return isReady;
     }
     
-    public GameModes getGameMode(){
+    /**
+     *
+     * @return
+     */
+    public GameMode getGameMode(){
         return gameMode;
     }
     
+    /**
+     *
+     * @return
+     */
     @Override
     public int getRound(){
         return round;
     }
     
+    /**
+     *
+     * @return
+     */
     public boolean isAwaitingResponse(){
         return awaitingResponse;
     }
     
+    /**
+     *
+     * @return
+     */
     public int getResponse(){
         return response;
     }
     
+    /**
+     *
+     * @param card
+     */
     @Override
     public void playCard(Card card){
         awaitingResponse = true;
         super.playCard(card);
     }
     
+    /**
+     *
+     * @param names
+     */
     @Override
     public void setNames(String[] names){
         System.arraycopy(names, 0, this.names, 0, names.length);
     }
     
+    /**
+     *
+     * @param score
+     */
     @Override
     public void setScore(int[] score){
         System.arraycopy(score, 0, this.score, 0, score.length);
     }
     
+    /**
+     *
+     * @param data
+     */
     @Override
     public void action(byte[] data){
         ServerMessage msg = ServerMessage.values()[data[0]];
@@ -116,11 +160,11 @@ public class TestBot extends MpBot{
                 break;
                
             case GAME_MODE:
-                gameMode = GameModes.values()[data[1]];
+                gameMode = GameMode.values()[data[1]];
                 break;
                 
             case GRADUATION:
-                chooseGameMode(GameModes.QUARTS.ordinal());
+                chooseGameMode(GameMode.QUARTS.ordinal());
                 break;
                 
             case HAND:

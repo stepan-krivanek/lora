@@ -8,50 +8,68 @@ package card_game.lora;
 import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.lora.tactics.RandomTactic;
-import card_game.lora.tactics.Tactic;
-import card_game.lora.game_modes.GameModes;
+import card_game.lora.game_modes.GameMode;
 import card_game.net.ClientConnection;
 import card_game.net.ClientMessage;
 import card_game.net.ServerMessage;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import card_game.lora.tactics.TacticInterface;
 
 /**
- *
- * @author stepa
+ * Bot that can play the game Lóra with a tactic
+ * from {@link card_game.lora.tactics} chosen at random.
+ * 
+ * @author Štěpán Křivánek
  */
 public class MpBot {
     
     private final int MSG_SIZE = 10;
     private final int NUM_OF_PLAYERS = 4;
+    protected final int HAND_SIZE = 8;
     protected final Deck[] memory;
     private final String nickname;
-    protected final int HAND_SIZE = 8;
     private final Deck hand = new Deck(HAND_SIZE);
     
     private int id = -1;
     private boolean isPlaying = false;
-    private GameModes gameMode = GameModes.REDS;
+    private GameMode gameMode = GameMode.REDS;
     private boolean awaitingResponse = false;
     private boolean exit = false;
     private ClientConnection connection;
     private int round = 0;
     
+    /**
+     * Creates a new bot with nickname.
+     * 
+     * @param nickname Nickname of the bot
+     */
     public MpBot(String nickname) {
         this.nickname = nickname;
         memory = new Deck[NUM_OF_PLAYERS];
         setMemory();
     }
     
+    /**
+     * Called when the player can play.
+     */
     public void play(){
         isPlaying = true;
     }
     
+    /**
+     * Called when the player can not play anymore.
+     */
     public void stopPlaying(){
         isPlaying = false;
     }
     
+    /**
+     * Sends a card to play to the server.
+     * 
+     * @param card Card to play
+     */
     public void playCard(Card card){
         byte[] data = new byte[MSG_SIZE];
         data[0] = (byte)ClientMessage.PLAY_CARD.ordinal();
@@ -59,12 +77,20 @@ public class MpBot {
         sendToServer(data);
     }
     
+    /**
+     * Sends to the server that the player is finished playing.
+     */
     public void pass(){
         byte[] data = new byte[MSG_SIZE];
         data[0] = (byte)ClientMessage.PASS.ordinal();
         sendToServer(data);
     }
     
+    /**
+     * Sends a game mode chosen to graduate from to the server.
+     * 
+     * @param id Game mode id
+     */
     public void chooseGameMode(int id){
         byte[] data = new byte[MSG_SIZE];
         data[0] = (byte)ClientMessage.GAME_MODE.ordinal();
@@ -72,16 +98,27 @@ public class MpBot {
         sendToServer(data);
     }
     
+    /**
+     * @return True if player is playing, false otherwise
+     */
     public boolean isPlaying(){
         return isPlaying;
     }
     
+    /**
+     * Disonnects player from the server.
+     */
     public void disconnect(){
         byte[] data = new byte[MSG_SIZE];
         data[0] = (byte)ClientMessage.DISCONNECT.ordinal();
         sendToServer(data);
     }
     
+    /**
+     * Connects player to the server.
+     * 
+     * @return True if player was connected successfully, false otherwise
+     */
     public boolean connectToServer(){
         connection = new ClientConnection(this);
         
@@ -107,7 +144,7 @@ public class MpBot {
     public Deck getHand(){
         return hand;
     }
-    
+
     public String getNickname(){
         return nickname;
     }
@@ -115,7 +152,7 @@ public class MpBot {
     public int getId(){
         return id;
     }
-    
+
     public void setId(int id){
         this.id = id;
     }
@@ -134,14 +171,31 @@ public class MpBot {
         }
     }
     
+    /**
+     * Sets the names of the players in the game.  
+     *
+     * @param names
+     */
     public void setNames(String[] names){
         // No use for it yet
     }
     
+    /**
+     * Sets the initial score of the game.
+     * 
+     * @param score The initial score
+     */
     public void setScore(int[] score){
         // No use for it yet
     }
     
+    /**
+     * Calls an action according to the received message.
+     * 
+     * @param data Message with the data received,
+     * must contain the ServerMessage id at index 0
+     * @see card_game.net.ServerMessage
+     */
     public void action(byte[] data){
         ServerMessage msg = ServerMessage.values()[data[0]];
         
@@ -187,11 +241,11 @@ public class MpBot {
                
             case GAME_MODE:
                 setMemory();
-                gameMode = GameModes.values()[data[1]];
+                gameMode = GameMode.values()[data[1]];
                 break;
                 
             case GRADUATION:
-                chooseGameMode(GameModes.QUARTS.ordinal());
+                chooseGameMode(GameMode.QUARTS.ordinal());
                 break;
                 
             case HAND:
@@ -224,7 +278,7 @@ public class MpBot {
 
         @Override
         public void run() {
-            Tactic tactic = new RandomTactic(MpBot.this);
+            TacticInterface tactic = new RandomTactic(MpBot.this);
             
             String msg = "Bot " + getId() + " joins the game.";
             Logger.getLogger(MpBot.class.getName()).log(Level.INFO, msg);

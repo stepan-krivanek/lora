@@ -11,16 +11,24 @@ import card_game.card.Suit;
 import card_game.lora.Game;
 
 /**
- *
- * @author stepa
+ * Game mode Red King in Lóra game.
+ * Player who takes the trick with the red king
+ * gets eight penalty points.
+ * 
+ * @author Štěpán Křivánek
  */
-public class RedKing extends Reds implements GameMode{
+public class RedKing extends Reds implements GameModeInterface{
     
-    private final int id = GameModes.RED_KING.ordinal();
+    private final int id = GameMode.RED_KING.ordinal();
     private final Card RED_KING = new Card(Suit.HEART, Rank.KING);
     private boolean redKingPlayed = false;
     private int redKingPlayerId;
     
+    /**
+     * Creates a new Red King game mode.
+     * 
+     * @param game Frame game of this mode
+     */
     public RedKing(Game game){
         super(game);
     }
@@ -60,7 +68,7 @@ public class RedKing extends Reds implements GameMode{
     }
     
     @Override
-    public void end(){
+    protected void end(){
         penalties[redKingPlayerId] = 8;
         super.end();
     }

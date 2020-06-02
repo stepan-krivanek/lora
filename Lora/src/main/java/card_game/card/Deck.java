@@ -11,25 +11,44 @@ import java.util.Collections;
 import java.util.Random;
 
 /**
- *
- * @author stepan
+ * Improved ArrayList for the card storage needs.
+ * 
+ * @author Štěpán Křivánek
  */
-public class Deck extends ArrayList<Card> {
+public final class Deck extends ArrayList<Card> {
     
     private final int MAX_SIZE;
     
+    /**
+     * Creates the Deck for the maximum size of cards.
+     * 
+     * @param maxSize Max cards to store
+     */
     public Deck(int maxSize){
         MAX_SIZE = maxSize;
     }
     
-    public Deck(int maxSize, boolean fill){
-        MAX_SIZE = maxSize;
+    /**
+     * Creates the Deck for 32 cards and
+     * fills it by unique cards.
+     * 
+     * @param fill If the deck should be filled by 32 unique cards
+     */
+    public Deck(boolean fill){
+        MAX_SIZE = 32;
         
         if (fill == true){
             this.fill();
         }
     }
     
+    /**
+     * Merges two decks together.
+     * 
+     * @param deck2 Deck to be merged into this Deck
+     * @return False if the two of Decks are too large together to be merged, 
+     * true on success.
+     */
     public boolean addAll(Deck deck2){
         if (deck2.size() > MAX_SIZE - this.size()){
             return false;
@@ -41,6 +60,14 @@ public class Deck extends ArrayList<Card> {
         return true;
     }
     
+    /**
+     * Merges two decks together and cleares the second one.
+     * 
+     * @param clear If deck2 should be cleared
+     * @param deck2 Deck to be merged into this Deck
+     * @return False if the two of Decks are too large together to be merged, 
+     * true on success.
+     */
     public boolean addAll(Deck deck2, boolean clear){
         boolean ret = false;
         if (this.addAll(deck2) == true){
@@ -52,6 +79,12 @@ public class Deck extends ArrayList<Card> {
         return ret;
     }
     
+    /**
+     * Fills the deck with 32 unique cards.
+     * 
+     * @return False if the Deck is not empty or the max size is not 32,
+     * otherwise true on success.
+     */
     public boolean fill(){
         boolean ret = false;
         if (isEmpty() && MAX_SIZE == 32){
@@ -66,6 +99,11 @@ public class Deck extends ArrayList<Card> {
         return ret;
     }
     
+    /**
+     * Removes the top card of the Deck
+     * 
+     * @return The removed top card
+     */
     public Card removeTopCard(){
         if (!isEmpty()){
             return remove(this.size() - 1);
@@ -73,6 +111,12 @@ public class Deck extends ArrayList<Card> {
         return null;
     }
     
+    /**
+     * Adds a card to the top of the Deck.
+     * 
+     * @param card Cards to be added
+     * @return False if the deck is full, otherwise true on success
+     */
     public boolean addTopCard(Card card){
         if (!this.isFull()){
             add(card);
@@ -81,6 +125,12 @@ public class Deck extends ArrayList<Card> {
         return false;
     }
     
+    /**
+     * Adds a card to the bottom of the Deck.
+     * 
+     * @param card Card to be added
+     * @return False if the Deck is full, otherwise true on success
+     */
     public boolean addBotCard(Card card){
         if (!this.isFull()){
             add(0, card);
@@ -89,6 +139,9 @@ public class Deck extends ArrayList<Card> {
         return false;
     }
     
+    /**
+     * Simulates the real shuffle of a deck.
+     */
     public void shuffle(){
         int averageShuffle = this.size() / 8;
         int numOfRounds = (new Random().nextInt(averageShuffle)) + 3;
@@ -120,6 +173,13 @@ public class Deck extends ArrayList<Card> {
         }
     }
     
+    /**
+     * Gets the index of a card in the Deck.
+     * 
+     * @param card Card to get index of
+     * @return -1 if the card is not present in the Deck,
+     * otherwise the index of the card in the Deck
+     */
     public int indexOf(Card card){
         int ret = -1;
         
@@ -136,6 +196,12 @@ public class Deck extends ArrayList<Card> {
         return ret;
     }
     
+    /**
+     * Checks if the Deck contains the specified card.
+     * 
+     * @param card Card to check
+     * @return True if the card is present in the Deck, false otherwise
+     */
     public boolean contains(Card card){
         boolean contains = false;
         
@@ -152,6 +218,12 @@ public class Deck extends ArrayList<Card> {
         return contains;
     }
     
+    /**
+     * Checks if the Deck contains the suit specified.
+     * 
+     * @param suit Suit to check
+     * @return True if the suit is present in the Deck, false otherwise
+     */
     public boolean contains(Suit suit){
         boolean contains = false;
         
@@ -165,14 +237,25 @@ public class Deck extends ArrayList<Card> {
         return contains;
     }
     
+    /**
+     * Checks if the Deck is full.
+     * 
+     * @return True if Deck is full, false otherwise
+     */
     public boolean isFull(){
         return this.size() == MAX_SIZE;
     }
     
+    @Override
     public boolean isEmpty(){
         return this.size() == 0;
     }
     
+    /**
+     * Removes the specified card from the Deck.
+     * 
+     * @param card Card to remove from the Deck
+     */
     public void remove(Card card){
         remove(indexOf(card));
     }

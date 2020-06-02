@@ -8,44 +8,40 @@ package card_game.lora.game_modes;
 import card_game.card.Card;
 import card_game.card.Deck;
 import card_game.card.Rank;
-import card_game.card.Suit;
-import card_game.lora.GameUtils;
 import card_game.net.Server;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- *
- * @author stepa
+ * Unit test for the game mode Quarts.
+ * Tests all cards that can not be played
+ * and then all that can be played.
+ * 
+ * @author Štěpán Křivánek
  */
 public class QuartsTest {
     
     private final int NUM_OF_PLAYERS = 4;
     private final int[] score = {0,0,0,0};
-    private final int gameMode = GameModes.QUARTS.ordinal();
+    private final int gameMode = GameMode.QUARTS.ordinal();
     private final int round = 0;
     private final boolean singleGame = true;
     private final TestBot[] testBots = new TestBot[NUM_OF_PLAYERS];
-    private final Deck allCards = new Deck(32, true);
+    private final Deck allCards = new Deck(true);
     
+    /**
+     * Creates a new Quarts test.
+     */
     public QuartsTest() {
     }
     
-    @BeforeAll
-    public static void setUpClass() {
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
-    
+    /**
+     * Sets up a server with a game and 4 test bots to play the game.
+     */
     @BeforeEach
     public void setUp() {
         Server server = new Server(score, gameMode, round, singleGame);
@@ -78,6 +74,9 @@ public class QuartsTest {
         }
     }
     
+    /**
+     * Diconnects all bots from the game, which ends tha game and server too.
+     */
     @AfterEach
     public void tearDown() {
         for (TestBot testBot : testBots){

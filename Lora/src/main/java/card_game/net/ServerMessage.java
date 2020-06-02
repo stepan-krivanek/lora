@@ -6,10 +6,77 @@
 package card_game.net;
 
 /**
- *
- * @author stepa
+ * Enum of messages to be possibly
+ * send from server to client.
+ * 
+ * @author Štěpán Křivánek
  */
 public enum ServerMessage {
-    START, EXIT, SCORE, CARD_PLAYED, GAME_MODE, PLAY, ROUND,
-    STOP_PLAYING, GRADUATION, HAND, PLAY_RESPONSE, CONNECTION_LOST;
+
+    /**
+     * Signals start of a new game.
+     */
+    START,
+
+    /**
+     * Signals end of the game.
+     */
+    EXIT,
+
+    /**
+     * Signals score update.
+     * The score update follows.
+     */
+    SCORE,
+
+    /**
+     * Signals card that was played.
+     * The card and playerId, who played the card follow.
+     */
+    CARD_PLAYED,
+
+    /**
+     * Signals new game mode to be started.
+     * The game mode id follows.
+     */
+    GAME_MODE,
+
+    /**
+     * Signals that player can now play.
+     */
+    PLAY,
+
+    /**
+     * Signals a new round of the game.
+     * The number of the round follows.
+     */
+    ROUND,
+
+    /**
+     * Signals that player can not play anymore.
+     */
+    STOP_PLAYING,
+
+    /**
+     * Signals that player is about to graduate.
+     */
+    GRADUATION,
+
+    /**
+     * Signals new cards handed out.
+     * The cards follow.
+     */
+    HAND,
+
+    /**
+     * Signals response to the card that was requested to play.
+     * The card and response follow.
+     */
+    PLAY_RESPONSE,
+
+    /**
+     * Signals that a player disconnected from the game.
+     * Id of the player follows.
+     */
+    CONNECTION_LOST;
 }

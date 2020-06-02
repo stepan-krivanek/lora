@@ -10,13 +10,21 @@ import card_game.card.Rank;
 import card_game.lora.Game;
 
 /**
- *
- * @author stepa
+ * Game mode Superiors in Lóra game.
+ * Player gets two points for each superior
+ * in a taken trick.
+ *  
+ * @author Štěpán Křivánek
  */
-public class Superiors extends Minigame implements GameMode{
+public class Superiors extends Minigame implements GameModeInterface{
     
-    private final int id = GameModes.SUPERIORS.ordinal();
+    private final int id = GameMode.SUPERIORS.ordinal();
     
+    /**
+     *Creates a new Superiors game mode.
+     * 
+     * @param game Frame game of this mode
+     */
     public Superiors(Game game){
         super(game);
     }
@@ -43,7 +51,7 @@ public class Superiors extends Minigame implements GameMode{
     }
 
     @Override
-    public void end(){
+    protected void end(){
         for (int i = 0; i < penalties.length; i++){
             int superiors = 0;
             for (Card card : game.getPlayer(i).getTable()){

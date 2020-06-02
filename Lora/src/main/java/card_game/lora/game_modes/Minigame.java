@@ -14,8 +14,10 @@ import card_game.lora.Player;
 import java.util.List;
 
 /**
- *
- * @author stepa
+ * Minigame controls the common rules
+ * and flow of a game mode, which extends it.
+ * 
+ * @author Štěpán Křivánek
  */
 public class Minigame {
     
@@ -32,6 +34,13 @@ public class Minigame {
     private Player player;
     private Suit leadSuit;
     
+    /**
+     * Creates a new Minigame. 
+     * Should not be used only itself,
+     * but extended by other game mode.
+     * 
+     * @param game Frame game of this mode
+     */
     public Minigame(Game game){
         this.game = game;
         NUM_OF_PLAYERS = game.getNumOfPlayers();
@@ -39,12 +48,18 @@ public class Minigame {
         penalties = new int[NUM_OF_PLAYERS];
     }
     
+    /**
+     * @see card_game.lora.game_modes.GameModeInterface
+     */
     public void start() {
         first = game.getForehand();
         player = first;
         player.play();
     }
 
+    /**
+     * @see card_game.lora.game_modes.GameModeInterface
+     */
     public void playCard(Card card) {
         player.stopPlaying();
         player = game.getNextPlayer(player);
@@ -64,6 +79,9 @@ public class Minigame {
         }
     }
     
+    /**
+     * @see card_game.lora.game_modes.GameModeInterface
+     */
     public boolean checkRules(Suit suit){
         if (cardsPlayed % 4 == 0){
             return true;
@@ -78,7 +96,11 @@ public class Minigame {
         return true;
     }
     
-    public void end(){
+    /**
+     * Called at the end of the game mode
+     * to return results of the game mode to the Game.
+     */
+    protected void end(){
         Deck mainDeck = new Deck(MAX_CARDS);
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
             player = game.getNextPlayer(player);
@@ -129,6 +151,9 @@ public class Minigame {
         return cardsPlayed;
     }
     
+    /**
+     * @return Array of players's who had taken a trick at index
+     */
     public int[] getTrickTakers(){
         return trickTakers;
     }

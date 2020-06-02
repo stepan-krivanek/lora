@@ -6,8 +6,9 @@
 package card_game.card;
 
 /**
- *
- * @author stepa
+ * Enum of so-called German suits
+ * 
+ * @author Štěpán Křivánek
  */
 public enum Suit {
     HEART, BELL, ACCORN, LEAF;
