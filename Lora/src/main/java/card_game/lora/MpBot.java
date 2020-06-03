@@ -144,6 +144,10 @@ public class MpBot {
     public Deck getHand(){
         return hand;
     }
+    
+    public Deck[] getMemory(){
+        return memory;
+    }
 
     public String getNickname(){
         return nickname;
@@ -174,7 +178,7 @@ public class MpBot {
     /**
      * Sets the names of the players in the game.  
      *
-     * @param names
+     * @param names Players' names
      */
     public void setNames(String[] names){
         // No use for it yet
@@ -225,11 +229,15 @@ public class MpBot {
                 break;
                 
             case PLAY:
-                play();
+                if (data[1] == getId()){
+                    play();
+                }
                 break;
                 
             case STOP_PLAYING:
-                stopPlaying();
+                if (data[1] == getId()){
+                    stopPlaying();
+                }
                 break;
                 
             case CARD_PLAYED:

@@ -58,7 +58,10 @@ public class Quarts implements GameModeInterface{
             if (discardDeck.isEmpty()){
                 leadCard = card;
                 setCardsToPlay(card);
-                playAll();
+                
+                if (cardsToPlay > 1){
+                    playAll();
+                }
             }
             
             if (card.equals(highestCard)){

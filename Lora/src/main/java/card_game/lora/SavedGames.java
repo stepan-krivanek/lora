@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ToggleButton;
@@ -93,9 +94,7 @@ public class SavedGames extends VBox{
                 width / 10, height / 20
         );
         returnButton.setText("Return");
-        returnButton.setOnAction(e -> {
-            hide();
-        });
+        returnButton.addEventHandler(ActionEvent.ACTION, e -> hide());
         
         HBox returnBox = new HBox(returnButton);
         returnBox.setPadding(new Insets(width / 100));
@@ -161,7 +160,7 @@ public class SavedGames extends VBox{
         public SaveBox(double width, double height, int index){
             this.width = width;
             this.height = height;
-            path = "src/main/resources/saves/save" + index + ".txt";
+            path = "save" + index + ".txt";
             
             this.setAlignment(Pos.CENTER);
             this.setMinSize(width, height);

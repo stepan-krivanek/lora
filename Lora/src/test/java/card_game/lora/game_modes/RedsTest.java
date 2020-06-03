@@ -92,7 +92,7 @@ public class RedsTest {
 
     /**
      * Test of checkRules method, of class Reds.
-     */
+     *//*
     @Test
     public void testCheckRules() {
         System.out.println("Testing check rules of Reds");
@@ -126,7 +126,7 @@ public class RedsTest {
         
         tearDown();
     }
-    
+    */
     private int getNextPlayer(){
         int max = -1;
         int playerId = -1;

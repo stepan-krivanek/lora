@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ToggleButton;
@@ -61,9 +62,9 @@ public class GameView extends StackPane{
     private final StackPane playGround = new StackPane();
     private final StackPane table;
     private final StackPane privatePane = new StackPane();
-    private final String[] names = new String[NUM_OF_PLAYERS];
+    private final Text[] names = new Text[NUM_OF_PLAYERS];
     private final Text[] scoreTexts = new Text[NUM_OF_PLAYERS];
-    private final Text modeText;
+    private final Text modeText, roundText;
     private final HandView[] otherHands = new HandView[NUM_OF_PLAYERS - 1];
     private final Main program;
     private final MpPlayer player;
@@ -146,11 +147,16 @@ public class GameView extends StackPane{
         //--------------------------Top bar------------------------//
         /////////////////////////////////////////////////////////////
         
+        //---------------------------Round---------------------------
+        roundText = new Text("1");
+        roundText.setFont(Design.Font(HEIGHT / 10));
+        
         //-------------------------Game mode-------------------------
         modeText = new Text(GameMode.REDS.toString());
         modeText.setFont(Design.Font(HEIGHT / 10));
         
-        HBox modeBox = new HBox(modeText);
+        HBox modeBox = new HBox(modeText, roundText);
+        modeBox.setSpacing(WIDTH / 100);
         modeBox.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(modeBox, Priority.ALWAYS);
         
@@ -164,6 +170,7 @@ public class GameView extends StackPane{
             pause.setFill(fillRect("/images/icons/pause_grey.png"));
         });
         pause.setOnMouseClicked(e -> {
+            Design.playClick();
             showMenu();
         });
         
@@ -185,6 +192,7 @@ public class GameView extends StackPane{
             }
         });
         volume.setOnMouseClicked(e -> {
+            Design.playClick();
             soundOn = !soundOn;
             if (soundOn){
                 volume.setFill(fillRect("/images/icons/sound_on_orange.png"));
@@ -240,6 +248,7 @@ public class GameView extends StackPane{
      * @param round Number of the round.
      */
     public void newRound(int round){
+        roundText.setText(Integer.toString(round + 1));
         this.round = round;
     }
     
@@ -345,6 +354,7 @@ public class GameView extends StackPane{
         for (int i = 0; i < modes.length; i++){
             final int num = i;
             modesBox.getModeBox(modes[i]).setOnMouseClicked(e -> {
+                Design.playClick();
                 player.chooseGameMode(num);
                 this.getChildren().removeAll(rect, modesBox);
             });
@@ -367,6 +377,10 @@ public class GameView extends StackPane{
      * @param playerId Player, who played the card
      */
     public void showCard(Card card, int playerId){
+        if (soundOn){
+            Design.playCardPlay();
+        }
+        
         if (playerId != player.getId()){
             int idx = playerId + NUM_OF_PLAYERS - player.getId();
             idx = idx % NUM_OF_PLAYERS - 1;
@@ -412,39 +426,43 @@ public class GameView extends StackPane{
         Rectangle rect = new Rectangle(WIDTH, HEIGHT, Color.GREY);
         rect.setOpacity(0.2);
         
-        String msg = names[playerId] + " has left the game, connection Lost!";
-        Text text = new Text(msg);
-        text.setFont(Design.Font(40));
+        final double alertHeight = HEIGHT / 4;
+        final double alertWidth = WIDTH / 2;
+        final double buttonWidth = WIDTH / 10;
+        final double buttonHeight = HEIGHT / 20;
         
-        final double buttonWidth = WIDTH / 5;
-        final double buttonHeight = HEIGHT / 10;
+        VBox alertBox = new VBox();
+        alertBox.setAlignment(Pos.CENTER);
+        alertBox.setMinSize(alertWidth, alertHeight);
+        alertBox.setMaxSize(alertWidth, alertHeight);
+        alertBox.setBackground(GameUtils.loadBackground(
+                "images/menu_bcgr.png", alertWidth, alertHeight
+        ));
+        alertBox.setSpacing(alertHeight / 6);
         
+        String msg = names[playerId] + " has left the game, connection lost!";
+        Text alert = new Text(msg);
+        alert.setFont(Design.Font(HEIGHT / 25));
+
         ToggleButton saveButton = new Design.Button(buttonWidth, buttonHeight);
         saveButton.setText("Save");
-        saveButton.setOnAction(e -> {
-            saveGame();
-        });
+        saveButton.addEventHandler(ActionEvent.ACTION, e -> saveGame());
         
         ToggleButton exitButton = new Design.Button(buttonWidth, buttonHeight);
         exitButton.setText("Exit");
-        exitButton.setOnAction(e -> {
-            exit();
-        });
-        
+        exitButton.addEventHandler(ActionEvent.ACTION, e -> exit());
+
         HBox buttonBox = new HBox(exitButton, saveButton);
         buttonBox.setAlignment(Pos.CENTER);
-        buttonBox.setSpacing(buttonWidth / 2);
-        
-        VBox alertBox = new VBox(text, buttonBox);
-        alertBox.setAlignment(Pos.CENTER);
-        alertBox.setSpacing(HEIGHT / 5);
+        buttonBox.setSpacing(alertWidth / 6);
         
         Logger.getLogger(ClientConnection.class.getName()).log(Level.SEVERE, msg);
+        alertBox.getChildren().addAll(alert, buttonBox);
         this.getChildren().addAll(rect, alertBox);
     }
     
     private HBox getPersonalBox(int playerId){
-        Text name = new Text(names[playerId]);
+        Text name = names[playerId];
         name.setFont(Design.Font(HEIGHT / 15));
         
         ImageView goldView = new ImageView("/images/gold.png");
@@ -470,7 +488,7 @@ public class GameView extends StackPane{
      */
     public void showNames(String[] names){
         for (int i = 0; i < NUM_OF_PLAYERS; i++){
-            this.names[i] = names[i];
+            this.names[i] = new Text(names[i]);
         }
         
         //------------------Own personal box---------------------
@@ -499,6 +517,24 @@ public class GameView extends StackPane{
             table.setAlignment(personalBox, positions[i-1]);
             table.getChildren().add(personalBox);
         }
+    }
+    
+    /**
+     * Shows the player, who can play.
+     * 
+     * @param playerId Id of the player, who can play
+     */
+    public void showPlayingOne(int playerId){
+        names[playerId].setFill(Design.YELLOW);
+    }
+    
+    /**
+     * Shows that a player can not play anymore.
+     * 
+     * @param playerId Id of the player who can not play anymore
+     */
+    public void stopPlayingOne(int playerId){
+        names[playerId].setFill(Color.BLACK);
     }
     
     /**
@@ -540,13 +576,11 @@ public class GameView extends StackPane{
 
         ToggleButton yes = new Design.Button(WIDTH / 10, HEIGHT / 20);
         yes.setText("Yes");
-        yes.setOnAction(e -> {
-            exit();
-        });
+        yes.addEventHandler(ActionEvent.ACTION, e -> exit());
 
         ToggleButton no = new Design.Button(WIDTH / 10, HEIGHT / 20);
         no.setText("No");
-        no.setOnAction(e -> {
+        no.addEventHandler(ActionEvent.ACTION, e -> {
             this.getChildren().removeAll(rect, alertBox);
             showMenu();
         });
@@ -582,14 +616,12 @@ public class GameView extends StackPane{
         //Rules button
         ToggleButton rulesButton = new Design.Button(buttonWidth, buttonHeight);
         rulesButton.setText("Rules");
-        rulesButton.setOnAction(e -> {
-            //showRules();
-        });
+        rulesButton.addEventHandler(ActionEvent.ACTION, e -> showRules());
         
         //Exit button
         ToggleButton exitButton = new Design.Button(buttonWidth, buttonHeight);
         exitButton.setText("Exit");
-        exitButton.setOnAction(e -> {
+        exitButton.addEventHandler(ActionEvent.ACTION, e -> {
             if (saved){
                 exit();
             } else {
@@ -601,14 +633,12 @@ public class GameView extends StackPane{
         //Save button
         ToggleButton saveButton = new Design.Button(buttonWidth, buttonHeight);
         saveButton.setText("Save");
-        saveButton.setOnAction(e -> {
-            saveGame();
-        });
+        saveButton.addEventHandler(ActionEvent.ACTION, e -> saveGame());
         
         //Play button
         ToggleButton playButton = new Design.Button(buttonWidth, buttonHeight);
         playButton.setText("Continue");
-        playButton.setOnAction(e -> {
+        playButton.addEventHandler(ActionEvent.ACTION, e -> {
             this.getChildren().removeAll(rect, menu);
         });
         
@@ -616,15 +646,26 @@ public class GameView extends StackPane{
         this.getChildren().addAll(rect, menu);
     }
     
+    private void showRules(){
+        Rules rules = new Rules(this, WIDTH / 3, HEIGHT * 2 / 3);
+        rules.show(gameMode.ordinal());
+    }
+    
     private void saveGame(){
         SavedGames savedGames = new SavedGames(WIDTH, HEIGHT, this);
         SavedGames.SaveBox[] saveBoxes = savedGames.getSaveBoxes();
+        String[] nameStrings = new String[NUM_OF_PLAYERS];
+        for (int i = 0; i < NUM_OF_PLAYERS; i++){
+            nameStrings[i] = names[i].getText();
+        }
         
         for (int i = 0; i < saveBoxes.length; i++){
             final int num = i;
             saveBoxes[i].setOnMouseClicked(e -> {
+                Design.playClick();
+                
                 if (saveBoxes[num].isEmpty()){
-                    saveBoxes[num].save(names, score, gameMode, round);
+                    saveBoxes[num].save(nameStrings, score, gameMode, round);
                     saved = true;
                 }
             });
@@ -757,9 +798,7 @@ public class GameView extends StackPane{
             
             ToggleButton passButton = new Design.Button(WIDTH / 10, HEIGHT / 15);
             passButton.setText("Pass");
-            passButton.setOnMouseClicked(e -> {
-                player.pass();
-            });
+            passButton.addEventHandler(ActionEvent.ACTION, e -> player.pass());
             
             passBox = new VBox(passButton);
             passBox.setPadding(new Insets(WIDTH / 100));

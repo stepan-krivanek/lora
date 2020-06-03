@@ -42,7 +42,8 @@ public enum ServerMessage {
     GAME_MODE,
 
     /**
-     * Signals that player can now play.
+     * Signals which player can play.
+     * Followed by the id of the player to play.
      */
     PLAY,
 
@@ -53,7 +54,9 @@ public enum ServerMessage {
     ROUND,
 
     /**
-     * Signals that player can not play anymore.
+     * Signals which player can not play anymore.
+     * Followed by the id of the player, who can
+     * not play anymore.
      */
     STOP_PLAYING,
 

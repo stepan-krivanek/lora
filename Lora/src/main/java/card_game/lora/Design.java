@@ -5,12 +5,9 @@
  */
 package card_game.lora;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.InputStream;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -47,6 +44,25 @@ public class Design {
     public static final Paint ORANGE = Color.web(Colour.ORANGE.toString());
     public static final Paint BROWN = Color.web(Colour.BROWN.toString());
     
+    private static final AudioClip click = new AudioClip(
+        Button.class.getResource("/sounds/button_on_click.wav").toExternalForm()
+    );
+    
+    private static final AudioClip card_play = new AudioClip(
+        Button.class.getResource("/sounds/card_drop.wav").toExternalForm()
+    );
+    
+    /**
+     * Plays a sound of a click.
+     */
+    public static void playClick(){
+        click.play();
+    }
+    
+    public static void playCardPlay(){
+        card_play.play();
+    }
+    
     /**
      * Gets the font used in the game.
      * 
@@ -54,20 +70,16 @@ public class Design {
      * @return Font
      */
     public static Font Font(double size){
-        try {
-            File file = new File("src/main/resources/fonts/IMFellEnglish-Regular.ttf");
-            return Font.loadFont(new FileInputStream(file), size);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Design.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return Font.font("Verdana", size);
+        InputStream file = Design.class.getResourceAsStream("/fonts/IMFellEnglish-Regular.ttf");
+        return Font.loadFont(file, size);
     }
     
     /**
      * Predefined buttons for the game.
      */
     public static class Button extends ToggleButton { 
+        
+        
         
         /**
          * Creates the predefined button.
@@ -86,6 +98,9 @@ public class Design {
             this.setFont(Font(height / 2));
    
             this.setStyle("-fx-text-fill: " + Colour.GREY.toString());
+            this.setOnAction(e -> {
+                click.play();
+            });
             this.setOnMouseEntered(e -> {
                 this.setStyle("-fx-text-fill: " + Colour.YELLOW.toString());
             });

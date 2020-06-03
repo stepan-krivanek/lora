@@ -103,11 +103,23 @@ public class MpPlayer extends MpBot{
                 break;
                 
             case PLAY:
-                play();
+                Platform.runLater(() -> {
+                    gameView.showPlayingOne(data[1]);
+                });
+                
+                if (data[1] == getId()){
+                    play();
+                }
                 break;
                 
             case STOP_PLAYING:
-                stopPlaying();
+                Platform.runLater(() -> {
+                    gameView.stopPlayingOne(data[1]);
+                });
+                
+                if (data[1] == getId()){
+                    stopPlaying();
+                }
                 break;
                 
             case CARD_PLAYED:

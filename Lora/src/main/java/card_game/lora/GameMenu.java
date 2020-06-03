@@ -9,6 +9,7 @@ import card_game.lora.game_modes.GameMode;
 import card_game.net.Server;
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -109,13 +110,13 @@ public class GameMenu extends StackPane{
                 nameGridWidth / 5, nameGridHeight / 5
         );
         nextButton.setText("Next");
-        nextButton.setOnAction(e -> {
+        nextButton.addEventHandler(ActionEvent.ACTION, e -> {
             if (isCorrectName(name.getText())){
                 program.setNickname(name.getText());
                 setMainButtons();
             } else {
                 warning.setOpacity(1);
-            }            
+            }  
         });
         
         GridPane nameGrid = new GridPane();
@@ -174,28 +175,22 @@ public class GameMenu extends StackPane{
         //Play
         ToggleButton playButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         playButton.setText("Play");
-        playButton.setOnAction(e -> {
-            chooseGame();
-        });
+        playButton.addEventHandler(ActionEvent.ACTION, e -> chooseGame());
         
         //Saved games
         ToggleButton savesButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         savesButton.setText("Saved games");
-        savesButton.setOnAction(e -> {
-            savedGames();
-        });
+        savesButton.addEventHandler(ActionEvent.ACTION, e -> savedGames());
         
         //Rules
         ToggleButton rulesButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         rulesButton.setText("Rules");
-        rulesButton.setOnAction(e -> {
-            rules();
-        });
+        rulesButton.addEventHandler(ActionEvent.ACTION, e -> rules());
         
         //Exit Button
         ToggleButton exitButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         exitButton.setText("Exit");
-        exitButton.setOnAction(e -> program.close());
+        exitButton.addEventHandler(ActionEvent.ACTION, e -> program.close());
         
         ToggleButton[] buttons = {
             playButton, savesButton, rulesButton, exitButton
@@ -209,6 +204,8 @@ public class GameMenu extends StackPane{
         SavedGames.SaveBox[] saveBoxes = savedGames.getSaveBoxes();
         for (SavedGames.SaveBox b : saveBoxes){
             b.setOnMouseClicked(e -> {
+                Design.playClick();
+                
                 if (!b.isEmpty()){
                     createGame(b.getScore(), b.getMode(), b.getRound(), false);
                 }               
@@ -219,38 +216,33 @@ public class GameMenu extends StackPane{
     }
     
     private void rules(){
-        
+        Rules rules = new Rules(this, WIDTH / 3, HEIGHT * 2 / 3);
+        rules.show(-1);
     }
     
     private void chooseGame(){
         //Training
         ToggleButton trainingButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         trainingButton.setText("Training");
-        trainingButton.setOnAction(e -> {
-            chooseGameMode();
-        });
+        trainingButton.addEventHandler(ActionEvent.ACTION, e -> chooseGameMode());
         
         //Create game
         int[] score = {100, 100, 100, 100};
         ToggleButton serverButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         serverButton.setText("Create game");
-        serverButton.setOnAction(e -> {
-            createGame(score, 0, 0, false);
-        });
+        serverButton.addEventHandler(
+                ActionEvent.ACTION, e -> createGame(score, 0, 0, false)
+        );
         
         //Join game
         ToggleButton clientButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         clientButton.setText("Join game");
-        clientButton.setOnAction(e -> {
-            joinServer();
-        });
+        clientButton.addEventHandler(ActionEvent.ACTION, e -> joinServer());
         
         //Return
         ToggleButton returnButton = new Design.Button(BUTTON_WIDTH, BUTTON_HEIGHT);
         returnButton.setText("Return");
-        returnButton.setOnAction(e -> {
-            setMainButtons();
-        });
+        returnButton.addEventHandler(ActionEvent.ACTION, e -> setMainButtons());
         
         ToggleButton[] buttons = {
             trainingButton, serverButton, clientButton, returnButton
@@ -266,6 +258,7 @@ public class GameMenu extends StackPane{
         for (int i = 0; i < modes.length; i++){
             final int num = i;
             modesBox.getModeBox(modes[i]).setOnMouseClicked(e -> {
+                Design.playClick();
                 createGame(score, num, 0, true);
             });
         }
@@ -313,7 +306,7 @@ public class GameMenu extends StackPane{
             button.setOnMouseExited(e -> {});
             
             final int num = i;
-            button.setOnAction(e -> {
+            button.addEventHandler(ActionEvent.ACTION, e -> {
                 unselectAll(numOfPlayersButtons);
                 button.setStyle(
                         "-fx-text-fill: " + Design.Colour.YELLOW.toString()
@@ -331,7 +324,7 @@ public class GameMenu extends StackPane{
         //Play button
         ToggleButton playButton = new Design.Button(buttonWidth, buttonHeight);
         playButton.setText("Play");
-        playButton.setOnAction(e -> {
+        playButton.addEventHandler(ActionEvent.ACTION, e -> {
             if (numOfPlayers > 0 && numOfPlayers <= 4){
                 startServer(score, gameModeId, round, singleGame);
             } else {
@@ -342,9 +335,7 @@ public class GameMenu extends StackPane{
         //Cancel button
         ToggleButton cancelButton = new Design.Button(buttonWidth, buttonHeight);
         cancelButton.setText("Cancel");
-        cancelButton.setOnAction(e -> {
-            setMainButtons();
-        });
+        cancelButton.addEventHandler(ActionEvent.ACTION, e -> setMainButtons());
         
         HBox buttons = new HBox(playButton, cancelButton);
         buttons.setAlignment(Pos.CENTER);

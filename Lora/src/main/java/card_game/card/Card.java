@@ -65,18 +65,10 @@ public class Card {
         return CardUtils.getBackImage();
     }
 
-    /**
-     *
-     * @return
-     */
     public Suit getSuit() {
         return suit;
     }
 
-    /**
-     *
-     * @return
-     */
     public Rank getRank() {
         return rank;
     }
@@ -85,7 +77,7 @@ public class Card {
      * Compresses the card into a single byte.
      * Card can be then recovered by {@link #Card(byte) Card}.
      * 
-     * @return
+     * @return Card compressed into a byte
      */
     public byte toByte(){
         Integer id = suit.ordinal() * 10 + rank.ordinal();
@@ -98,7 +90,7 @@ public class Card {
      * returns false otherwise.
      * 
      * @param card Card to be compared to
-     * @return If cards are the same
+     * @return True if cards are the same, false otherwise
      */
     public boolean equals(Card card){
         return (card.rank == rank && card.suit == suit);

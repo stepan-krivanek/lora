@@ -143,7 +143,8 @@ public final class Deck extends ArrayList<Card> {
      * Simulates the real shuffle of a deck.
      */
     public void shuffle(){
-        int averageShuffle = this.size() / 8;
+        Collections.shuffle(this);
+        int averageShuffle = 4;
         int numOfRounds = (new Random().nextInt(averageShuffle)) + 3;
         
         while (numOfRounds-- > 0){

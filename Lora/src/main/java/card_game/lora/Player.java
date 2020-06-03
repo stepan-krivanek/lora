@@ -54,7 +54,7 @@ public class Player {
     /**
      * Removes a card from player's hand
      * 
-     * @param card
+     * @param card Card to be removed
      */
     public void playCard(Card card){
         if (card != null){

@@ -274,24 +274,28 @@ public class Server implements Runnable{
     }
     
     /**
-     * Sends to a player that it can play.
+     * Sends which player can now play to everyone.
      * 
      * @param id Id of the player, who is about to play
      */
     public void play(int id){
         GameUtils.wait(waitTime, (Callable) () -> {
-            send(initMessage(ServerMessage.PLAY), id);
+            byte[] data = initMessage(ServerMessage.PLAY);
+            data[1] = (byte)id;
+            broadcast(data);
             return null;
         });
     }
     
     /**
-     * Sends to a player that it can not play anymore.
+     * Sends to everyone which player can not play anymore.
      * 
      * @param id Id of the player who must stop playing 
      */
     public void stopPlaying(int id){
-        send(initMessage(ServerMessage.STOP_PLAYING), id);
+        byte[] data = initMessage(ServerMessage.STOP_PLAYING);
+        data[1] = (byte)id;
+        broadcast(data);
     }
     
     /**

@@ -65,16 +65,16 @@ public class Main extends Application {
     /**
      * Used to set a nickname of a player
      * 
-     * @param nickname Players new nickname
+     * @param nickname Player's new nickname
      */
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
     
     /**
-     * Returns players current nickname
+     * Returns player's current nickname
      * 
-     * @return
+     * @return Nickname of the player
      */
     public String getNickname(){
         return nickname;
@@ -91,26 +91,14 @@ public class Main extends Application {
         stage.close();
     }
     
-    /**
-     * 
-     * @return
-     */
     public Stage getStage(){
         return stage;
     }
     
-    /**
-     *
-     * @return
-     */
     public Scene getScene(){
         return mainScene;
     }
-    
-    /**
-     *
-     * @return
-     */
+
     public StackPane getRoot(){
         return root;
     }
@@ -124,11 +112,6 @@ public class Main extends Application {
         stage.initStyle(StageStyle.UTILITY);
     }
     
-    /**
-     * Main method only launches javafx Application
-     * 
-     * @param args
-     */
     public static void main(String[] args) {
         launch(args);
     }
